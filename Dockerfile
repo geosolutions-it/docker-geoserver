@@ -1,5 +1,6 @@
+ARG BASE_IMAGE_NAME=gs-base
 ARG BASE_IMAGE_TAG=latest
-FROM geosolutionsit/gs-base:${BASE_IMAGE_TAG}
+FROM geosolutionsit/${BASE_IMAGE_NAME}:${BASE_IMAGE_TAG}
 MAINTAINER Alessandro Parma<alessandro.parma@geo-solutions.it>
 
 RUN  export DEBIAN_FRONTEND=noninteractive
