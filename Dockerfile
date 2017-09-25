@@ -1,5 +1,5 @@
-ARG GEOSERVER_BASE_TAG=latest
-FROM geosolutionsit/gs-base:${GEOSERVER_BASE_TAG}
+ARG BASE_IMAGE_TAG=latest
+FROM geosolutionsit/gs-base:${BASE_IMAGE_TAG}
 MAINTAINER Alessandro Parma<alessandro.parma@geo-solutions.it>
 
 RUN  export DEBIAN_FRONTEND=noninteractive
