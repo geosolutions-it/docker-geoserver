@@ -24,4 +24,4 @@ fi
 
 # start Tomcat
 cd "${CATALINA_BASE}/bin"
-catalina.sh start
+catalina.sh run
