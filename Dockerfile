@@ -14,6 +14,9 @@ RUN apt-get -y update
 #------------- Install Utils --------------------------------------------------
 RUN apt-get install -y vim zip unzip net-tools telnet
 
+#------------- Install GDAL- --------------------------------------------------
+RUN apt-get install -y gdal-bin
+
 #------------- Cleanup --------------------------------------------------------
 
 # Delete resources after installation
