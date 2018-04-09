@@ -12,7 +12,7 @@ RUN  dpkg-divert --local --rename --add /sbin/initctl
 RUN apt-get -y update
 
 #------------- Install Utils --------------------------------------------------
-RUN apt-get install -y vim zip unzip net-tools telnet procps
+RUN apt-get install -y vim zip unzip net-tools telnet procps postgresql-client-9.6
 
 #------------- Install GDAL- --------------------------------------------------
 RUN apt-get install -y gdal-bin
