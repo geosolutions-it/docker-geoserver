@@ -2,14 +2,13 @@
 
 
 set -e
-
 TAG=${1}
 readonly GEOSERVER_VERSION=${2}
 readonly GEOSERVER_MASTER_VERSION=${3}
-readonly GEOSERVER_DATA_DIR_REPOSITORY=${4}
-readonly GEOSERVER_DATA_DIR_RELEASE=${5}
-readonly GITHUB_TOKEN=${6}
-readonly GITHUB_REPO_OWNER={7} 
+readonly GITHUB_TOKEN=${4}
+readonly GITHUB_REPO=${5} 
+readonly GITHUB_REPO_OWNER=${6} 
+readonly GEOSERVER_DATA_DIR_RELEASE=${7}
 
 
 
@@ -20,10 +19,14 @@ readonly DATADIR_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-datadir/
 readonly PLUGIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-plugins/
 
 
+function clean_up_directory() {
+	rm -rf ${1}/*
+}
+
 function download_from_url_to_a_filepath {
 	URL=${1}
 	FILE_PATH=${2}
-	FILE_DOWNLOADED=$(basename ${FILE_PATH} )
+	FILE_DOWNLOADED=$(basename "${FILE_PATH}" )
 	if [ ! -f "${FILE_PATH}" ]; then
 		curl -L "${URL}" --output "${FILE_PATH}"
 		echo "* ${FILE_DOWNLOADED} artefact dowloaded *"
@@ -37,18 +40,37 @@ function download_from_url_to_a_filepath {
 #curl -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3.raw"  -s https://api.github.com/repos/$REPO/releases | jq ". | map(select(.tag_name == \"$VERSION\"))[0].tarball_url"
 #curl -L -H "Authorization: token $GITHUB_TOKEN"  https://api.github.com/repos/geosolutions-it/anaximander/tarball/0.1 -o /tmp/pippo
 
-function get_release_artifact_url() {
+
+function get_release_artifact_url_from_github() {
 	REPO=${1}
-
+    OWNER=${2}
+    RELEASE=${3}
+    local TEMP_FILE_PATH=/tmp/${RELEASE}
 	GH_API="https://api.github.com"
-	GH_REPO="$GH_API/repos/$owner/${REPO}"
-    GH_RELEASE="${GH_REPO}/releases"
-    HEADERS="-H \"Authorization: token $GITHUB_TOKEN\" -H \"Accept: application/vnd.github.v3.raw\""
-    ENDPOINT="-s https://api.github.com/repos/${REPO}/releases"
-    ARFIFACT_URL=$(curl ${HEADERS} ${ENDPOINT}| jq ". | map(select(.tag_name == \"$VERSION\"))[0].tarball_url")
-    echo $ARFIFACT_URL
-}
+	GH_REPO="$GH_API/repos/${OWNER}/${REPO}"
+    GH_TARBALL="${GH_REPO}/tarball"
+	declare -a HEADERS=("-H \"Authorization: token ${GITHUB_TOKEN}\"" '-H "Accept: application/vnd.github.v3.raw"')
+    ENDPOINT="${GH_TARBALL}"
 
+    PRE_ARTIFACT_URL="curl -L ${HEADERS[@]} -s ${ENDPOINT} --output ${TEMP_FILE_PATH}"
+    RELEASE_ITEMS=$(eval $PRE_ARTIFACT_URL)
+    tar xzvf "${TEMP_FILE_PATH}" --strip=1 -C "${DATADIR_ARTIFACT_DIRECTORY}"
+
+
+ #    declare -a filter=("| jq \"." "| map(select(.tag_name == $RELEASE))[0].tarball_url\"" )
+ #    echo "${filter[@]}"
+ #    ARTIFACT_URL="echo \"${RELEASE_ITEMS}\" ${filter[@]}"
+ #    echo -e
+	# echo $ARTIFACT_URL
+	# echo -e
+ #   	eval $ARTIFACT_URL
+
+   # echo $ciccio
+   # echo $ciccio | jq ". | map(select(.tag_name == \"$RELEASE\"))[0].tarball_url"
+   #ARFIFACT_URL=$(curl "${HEADERS}" -s "${ENDPOINT}"| jq ". | map(select(.tag_name == \"${RELEASE}\"))[0].tarball_url") 
+
+}
+ 
 
 
 # function get_datadir() {
@@ -80,7 +102,7 @@ function download_geoserver() {
 	local VERSION=${1}
 	local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
 	local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}
-	download_from_url_to_a_filepath  "${ARTEFACT_URL}" "${GEOSERVER_ARTIFACT_DIRECTORY}${GEOSERVER_FILE_NAME}"
+	download_from_url_to_a_filepath  "${ARTIFACT_URL}" "${GEOSERVER_ARTIFACT_DIRECTORY}${GEOSERVER_FILE_NAME}"
 
 }
 
@@ -92,21 +114,21 @@ function build() {
 	docker build --pull --no-cache \
 		--build-arg BASE_IMAGE_NAME=gs-base \
 		--build-arg BASE_IMAGE_TAG=7.0-jre8 \
-		--build-arg INCLUDE_DATA_DIR=false \
+		--build-arg INCLUDE_DATA_DIR=true \
 		--build-arg INCLUDE_GS_WAR=true \
-		--build-arg INCLUDE_PLUGINS=false \
+		--build-arg INCLUDE_PLUGINS=true \
 		--build-arg GEOSERVER_APP_NAME=geoserver \
-		-t geosolutionsit/geoserver:maps-${TAG} \
+		-t geosolutionsit/geoserver:maps-"${TAG}" \
 		 .
 }
 
 function main {
-
-	download_geoserver ${GEOSERVER_VERSION}
+    clean_up_directory ${DATADIR_ARTIFACT_DIRECTORY}
+	download_geoserver "${GEOSERVER_VERSION}"
 	download_plugin ext feature-pregeneralized 
 	download_plugin ext css
-    get_release_artifact_url 
-#	build ${TAG}
+	get_release_artifact_url_from_github "${GITHUB_REPO}" "${GITHUB_REPO_OWNER}" "${GEOSERVER_DATA_DIR_RELEASE}"
+ 	build ${TAG}
 
 }
 
