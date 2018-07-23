@@ -9,6 +9,7 @@ readonly GITHUB_TOKEN=${4}
 readonly GITHUB_REPO=${5} 
 readonly GITHUB_REPO_OWNER=${6} 
 readonly GEOSERVER_DATA_DIR_RELEASE=${7}
+readonly PULL=${8}
 
 
 
@@ -129,8 +130,13 @@ function build_with_data_dir() {
 function build_without_data_dir() {
 
 	local TAG=${1}
-
-	docker build --no-cache \
+	local PULL_ENABLED=${2}
+	if [[ "${PULL_ENABLED}" == "pull" ]]; then
+		DOCKER_BUILD_COMMAND="docker build --pull"
+	else
+		DOCKER_BUILD_COMMAND="docker build"
+	fi;	
+	${DOCKER_BUILD_COMMAND} --no-cache \
 		--build-arg BASE_IMAGE_NAME=gs-base \
 		--build-arg BASE_IMAGE_TAG=7.0-jre8 \
 		--build-arg INCLUDE_DATA_DIR=false \
@@ -150,12 +156,12 @@ function main {
 	download_plugin ext feature-pregeneralized 
 	download_plugin ext css
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "dev" ]]; then
-   	    build_without_data_dir "${TAG}"
-   else
+   	    build_without_data_dir "${TAG}" "${PULL}"
+   	else
    		clean_up_directory ${DATADIR_ARTIFACT_DIRECTORY}
 		get_release_artifact_url_from_github "${GITHUB_REPO}" "${GITHUB_REPO_OWNER}" "${GEOSERVER_DATA_DIR_RELEASE}"
- 		build_with_data_dir "${TAG}"
-   fi
+ 		build_with_data_dir "${TAG}" "${PULL}"
+   	fi
 }
 
 main
