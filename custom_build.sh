@@ -87,18 +87,23 @@ function get_release_artifact_url_from_github() {
 function download_plugin()  {
 	TYPE=${1}
 	PLUGIN_NAME=${2}
-	if  [ -z "${GEOSERVER_MASTER_VERSION}" ]; then
-		PLUGIN_FULL_NAME=geoserver-${VERSION}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip		
+
+	clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
+	if  [[ "${GEOSERVER_VERSION}" == "master" ]]; then
+		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_MASTER_VERSION}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
+		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
+ 
 	else
-		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_MASTER_VERSION}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip 
+		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION::-2}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
+		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
+
 	fi
 
-	local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
     download_from_url_to_a_filepath "${PLUGIN_ARTIFACT_URL}" "${PLUGIN_ARTIFACT_DIRECTORY}${PLUGIN_FULL_NAME}"
 }
 
 function download_geoserver() {
-
+	clean_up_directory ${GEOSERVER_ARTIFACT_DIRECTORY}
 	local VERSION=${1}
 	local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
 	local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}
