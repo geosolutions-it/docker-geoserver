@@ -1,0 +1,27 @@
+
+* {
+    font-family: 'Noto Sans';
+    font-fill: #222;
+    label-anchor: 0.5 0.5;
+    halo-radius: 1.5;
+    halo-opacity: 0.7;
+    halo-color: white;
+    sort-by: POP_MAX;
+    -gt-label-priority: [POP_MAX];
+    -gt-label-padding: 3;
+    -gt-label-auto-wrap: 80;
+}
+
+[FEATURECLA = 'Admin-0 capital']
+[ADM0_A3 not in ('BEL')]
+[@scale < 50000000] {
+	[@scale > 3000000] {
+		mark: url('./symbols/place/place-capital-6.svg');
+    	mark-size: 8;
+    	mark-mime: 'image/svg+xml';
+    	label-anchor: 0.5 1;
+    	label-offset: 0 -12;
+  	};
+  	label: [NAMEASCII];
+  	font-size: [interpolate(env('wms_scale_denominator', 50000000), 400000, 12, 100000000, 10)];
+}

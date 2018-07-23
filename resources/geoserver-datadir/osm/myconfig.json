@@ -1,0 +1,4 @@
+{
+    "mapping": "mapping.yml",
+    "connection": "postgis://postgres:postgres@localhost/osm"
+}

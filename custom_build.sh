@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+set -x
 set -e
 TAG=${1}
 readonly GEOSERVER_VERSION=${2}
@@ -102,12 +102,12 @@ function download_geoserver() {
 	local VERSION=${1}
 	local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
 	local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}
-	download_from_url_to_a_filepath  "${ARTIFACT_URL}" "${GEOSERVER_ARTIFACT_DIRECTORY}${GEOSERVER_FILE_NAME}"
+	download_from_url_to_a_filepath  "${GEOSERVER_ARTIFACT_URL}" "${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war"
 
 }
 
 
-function build() {
+function build_with_data_dir() {
 
 	local TAG=${1}
 
@@ -122,14 +122,35 @@ function build() {
 		 .
 }
 
+function build_without_data_dir() {
+
+	local TAG=${1}
+
+	docker build --pull --no-cache \
+		--build-arg BASE_IMAGE_NAME=gs-base \
+		--build-arg BASE_IMAGE_TAG=7.0-jre8 \
+		--build-arg INCLUDE_DATA_DIR=false \
+		--build-arg INCLUDE_GS_WAR=true \
+		--build-arg INCLUDE_PLUGINS=true \
+		--build-arg GEOSERVER_APP_NAME=geoserver \
+		-t geosolutionsit/geoserver:maps-"${TAG}"-dev \
+		 .
+}
+
+
+
 function main {
-    clean_up_directory ${DATADIR_ARTIFACT_DIRECTORY}
+    
 	download_geoserver "${GEOSERVER_VERSION}"
 	download_plugin ext feature-pregeneralized 
 	download_plugin ext css
-	get_release_artifact_url_from_github "${GITHUB_REPO}" "${GITHUB_REPO_OWNER}" "${GEOSERVER_DATA_DIR_RELEASE}"
- 	build ${TAG}
-
+	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "dev" ]]; then
+   	    build_without_data_dir "${TAG}"
+   else
+   		clean_up_directory ${DATADIR_ARTIFACT_DIRECTORY}
+		get_release_artifact_url_from_github "${GITHUB_REPO}" "${GITHUB_REPO_OWNER}" "${GEOSERVER_DATA_DIR_RELEASE}"
+ 		build_with_data_dir "${TAG}"
+   fi
 }
 
 main

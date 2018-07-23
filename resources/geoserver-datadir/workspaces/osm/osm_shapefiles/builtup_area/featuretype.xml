@@ -1,0 +1,37 @@
+<featureType>
+  <id>FeatureTypeInfoImpl-7c55092f:164b291b05d:586b</id>
+  <name>builtup_area</name>
+  <nativeName>builtup_area</nativeName>
+  <namespace>
+    <id>NamespaceInfoImpl-41697926:164a2136a44:-7fe3</id>
+  </namespace>
+  <title>builtup_area</title>
+  <keywords>
+    <string>features</string>
+    <string>builtup_area</string>
+  </keywords>
+  <srs>EPSG:3857</srs>
+  <nativeBoundingBox>
+    <minx>-2.0139642E7</minx>
+    <maxx>2.0063238E7</maxx>
+    <miny>-4082913.0</miny>
+    <maxy>1.1436164E7</maxy>
+  </nativeBoundingBox>
+  <latLonBoundingBox>
+    <minx>-180.9174822529545</minx>
+    <maxx>180.2311334432758</maxx>
+    <miny>-34.402026818806924</miny>
+    <maxy>71.09887240579131</maxy>
+    <crs>EPSG:4326</crs>
+  </latLonBoundingBox>
+  <projectionPolicy>FORCE_DECLARED</projectionPolicy>
+  <enabled>true</enabled>
+  <store class="dataStore">
+    <id>DataStoreInfoImpl-7c55092f:164b291b05d:586a</id>
+  </store>
+  <maxFeatures>0</maxFeatures>
+  <numDecimals>0</numDecimals>
+  <overridingServiceSRS>false</overridingServiceSRS>
+  <skipNumberMatched>false</skipNumberMatched>
+  <circularArcPresent>false</circularArcPresent>
+</featureType>

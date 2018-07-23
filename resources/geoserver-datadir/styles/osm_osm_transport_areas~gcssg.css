@@ -1,0 +1,47 @@
+/*NAMETransport AreasNAME*//*TEMPLATE[type = 'apron'][@sd < 800k] {
+	fill: #e9d1ff;
+}
+
+[type = 'platform'][@sd < 15k] {
+	fill: #bbbbbb;
+  	stroke: #808080;
+  	stroke-width: 0.5;
+}
+
+/$
+[type = 'station'][@sd < 15k] {
+	fill: #bbbbbb;
+}
+
+[type = 'terminal'][@sd < 15k] {
+	fill: #bbbbbb;
+}
+
+
+[type = 'helipad'][@sd < 15k] {
+	fill: #bbbbbb;
+}
+$/TEMPLATE*/[type = 'apron'][@sd < 800k] {
+	fill: #e9d1ff;
+}
+
+[type = 'platform'][@sd < 15k] {
+	fill: #bbbbbb;
+  	stroke: #808080;
+  	stroke-width: 0.5;
+}
+
+/*
+[type = 'station'][@sd < 15k] {
+	fill: #bbbbbb;
+}
+
+[type = 'terminal'][@sd < 15k] {
+	fill: #bbbbbb;
+}
+
+
+[type = 'helipad'][@sd < 15k] {
+	fill: #bbbbbb;
+}
+*/

@@ -1,0 +1,5 @@
+/*NAMEIcesheetNAME*//*TEMPLATE[@sd < 12500000][@sd > 250k] {
+    fill: #ddecec;
+}TEMPLATE*/[@sd < 12500000][@sd > 250k] {
+    fill: #ddecec;
+}

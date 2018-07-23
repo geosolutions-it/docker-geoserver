@@ -1,0 +1,35 @@
+/*NAMEWaterareasNAME*//*TEMPLATE/$ @title Glacier $/
+[type = 'glacier'][@sd < 12.5M] {
+    fill: #ddecec;
+    stroke: #9cf;
+    [@scale < 800000] {
+        stroke-dasharray: 4 2;
+        stroke-width: 1.5;
+    };
+}
+
+/$ @title Docks, canals, basin, water, reservoir $/
+[type in ('dock', 'canal')][@sd < 1.5M],
+[type = 'basin'][@sd < 6000000],
+[type in ('water', 'reservoir', 'riverbank')][@sd < 12.5M] {
+    fill: #b5d0d0;
+    stroke: #b5d0d0; /$ compensating for lack of gamma control here$/
+    stroke-width: 0.5;
+}TEMPLATE*//* @title Glacier */
+[type = 'glacier'][@sd < 12.5M] {
+    fill: #ddecec;
+    stroke: #9cf;
+    [@scale < 800000] {
+        stroke-dasharray: 4 2;
+        stroke-width: 1.5;
+    };
+}
+
+/* @title Docks, canals, basin, water, reservoir */
+[type in ('dock', 'canal')][@sd < 1.5M],
+[type = 'basin'][@sd < 6000000],
+[type in ('water', 'reservoir', 'riverbank')][@sd < 12.5M] {
+    fill: #b5d0d0;
+    stroke: #b5d0d0; /* compensating for lack of gamma control here*/
+    stroke-width: 0.5;
+}
