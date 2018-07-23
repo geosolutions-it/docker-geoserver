@@ -88,9 +88,8 @@ function download_plugin()  {
 	TYPE=${1}
 	PLUGIN_NAME=${2}
 
-	clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
 	if  [[ "${GEOSERVER_VERSION}" == "master" ]]; then
-		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_MASTER_VERSION}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
+		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_MASTER_VERSION::-2}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
 		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
  
 	else
@@ -107,8 +106,8 @@ function download_geoserver() {
 	local VERSION=${1}
 	local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
 	local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}
-	download_from_url_to_a_filepath  "${GEOSERVER_ARTIFACT_URL}" "${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war"
-
+	download_from_url_to_a_filepath  "${GEOSERVER_ARTIFACT_URL}" "/tmp/geoserver.war.zip"
+    unzip -p /tmp/geoserver.war.zip geoserver.war > ${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war
 }
 
 
@@ -116,7 +115,7 @@ function build_with_data_dir() {
 
 	local TAG=${1}
 
-	docker build --pull --no-cache \
+	docker build --no-cache \
 		--build-arg BASE_IMAGE_NAME=gs-base \
 		--build-arg BASE_IMAGE_TAG=7.0-jre8 \
 		--build-arg INCLUDE_DATA_DIR=true \
@@ -131,7 +130,7 @@ function build_without_data_dir() {
 
 	local TAG=${1}
 
-	docker build --pull --no-cache \
+	docker build --no-cache \
 		--build-arg BASE_IMAGE_NAME=gs-base \
 		--build-arg BASE_IMAGE_TAG=7.0-jre8 \
 		--build-arg INCLUDE_DATA_DIR=false \
@@ -147,6 +146,7 @@ function build_without_data_dir() {
 function main {
     
 	download_geoserver "${GEOSERVER_VERSION}"
+	clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
 	download_plugin ext feature-pregeneralized 
 	download_plugin ext css
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "dev" ]]; then
