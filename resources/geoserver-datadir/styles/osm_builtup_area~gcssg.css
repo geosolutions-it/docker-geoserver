@@ -1,7 +1,0 @@
-/*NAMEBuilt Up AreasNAME*//*TEMPLATE/$ @title Built up $/
-[@scale < 3000000][@scale > 800000] {
-	fill: #ddd;
-}TEMPLATE*//* @title Built up */
-[@scale < 3000000][@scale > 800000] {
-	fill: #ddd;
-}
