@@ -28,7 +28,9 @@ function download_from_url_to_a_filepath {
 	URL=${1}
 	FILE_PATH=${2}
 	FILE_DOWNLOADED=$(basename "${FILE_PATH}" )
-	rm -f "${FILE_PATH}"
+	if [ -f "${FILE_PATH}" ]; then
+		rm -f "${FILE_PATH}"
+	fi	
 	if [ ! -f "${FILE_PATH}" ]; then
 		curl -L "${URL}" --output "${FILE_PATH}"
 		echo "* ${FILE_DOWNLOADED} artefact dowloaded *"
@@ -75,7 +77,9 @@ function download_geoserver() {
 	local VERSION=${1}
 	local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
 	local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}
-	rm /tmp/geoserver.war.zip
+	if [ -f /tmp/geoserver.war.zip ]; then
+		rm /tmp/geoserver.war.zip
+	fi
 	download_from_url_to_a_filepath  "${GEOSERVER_ARTIFACT_URL}" "/tmp/geoserver.war.zip"
     unzip -p /tmp/geoserver.war.zip geoserver.war > ${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war
 }
@@ -124,6 +128,8 @@ function main {
 	clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
 	download_plugin ext feature-pregeneralized 
 	download_plugin ext css
+	download_plugin community status-monitoring
+	download_plugin ext monitor
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "dev" ]]; then
    	    build_without_data_dir "${TAG}" "${PULL}"
    	else
