@@ -30,7 +30,7 @@ function help(){
 		echo "[github token]:               token to access the Github API"; 
 		echo "[github repository]:          Github repository name";     
 		echo "[github repository owner]:    Github repository owner ";
-		echo "[datadir release number]:     Github release number ";
+		echo "[datadir release number]:     Github release number; if this parameter is equal to dev the datadir is not burned in the docker images ";
 		echo "[pull|no pull]:               docker build use always a remote image or a local image";
 		exit 1;	
 	fi		
