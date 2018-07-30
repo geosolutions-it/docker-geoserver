@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+#set -x
 set -e
 TAG=${1}
 readonly GEOSERVER_VERSION=${2}
@@ -10,7 +10,7 @@ readonly GITHUB_REPO=${5}
 readonly GITHUB_REPO_OWNER=${6} 
 readonly GEOSERVER_DATA_DIR_RELEASE=${7}
 readonly PULL=${8}
-
+readonly ALL_PARAMETERS=$* 
 
 
 readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver/"
@@ -18,6 +18,24 @@ readonly ARTIFACT_DIRECTORY=./resources
 readonly GEOSERVER_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver/
 readonly DATADIR_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-datadir/
 readonly PLUGIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-plugins/
+
+function help(){
+	if [ "$#" -ne 8 ] ; then
+		echo "Usage: $0 [docker image tag] [geoserver version] [geoserver master version] [github token] [github repository] [github repository owner] [datadir release number] [pull|no pull];"
+		echo "";
+		echo "[docker image tag] :          the tag to be used for the docker iamge ";
+		echo "[geoserver version] :         the release version of geoserver to be used; you can set it to master if you want the last release";
+		echo "[geoserver master version] :  if you use the master version for geoserver you need to set it to the numerical value for the next release;"
+		echo "                              if you use a released version you need to put it to the release number";
+		echo "[github token]:               token to access the Github API"; 
+		echo "[github repository]:          Github repository name";     
+		echo "[github repository owner]:    Github repository owner ";
+		echo "[datadir release number]:     Github release number ";
+		echo "[pull|no pull]:               docker build use always a remote image or a local image";
+		exit 1;	
+	fi		
+}
+
 
 
 function clean_up_directory() {
@@ -123,7 +141,7 @@ function build_without_data_dir() {
 
 
 function main {
-    
+    help ${ALL_PARAMETERS}
 	download_geoserver "${GEOSERVER_VERSION}"
 	clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
 	download_plugin ext feature-pregeneralized 
