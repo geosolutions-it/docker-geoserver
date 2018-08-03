@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 set -e
 TAG=${1}
 readonly GEOSERVER_VERSION=${2}
@@ -58,7 +57,7 @@ function download_from_url_to_a_filepath {
 }
 
 function get_release_artifact_url_from_github() {
-	REPO=${1}
+    REPO=${1}
     OWNER=${2}
     RELEASE=${3}
     local TEMP_FILE_PATH=/tmp/${RELEASE}
@@ -106,8 +105,13 @@ function download_geoserver() {
 function build_with_data_dir() {
 
 	local TAG=${1}
-
-	docker build --no-cache \
+        local PULL_ENABLED=${2}
+        if [[ "${PULL_ENABLED}" == "pull" ]]; then
+                DOCKER_BUILD_COMMAND="docker build --pull"
+        else
+                DOCKER_BUILD_COMMAND="docker build"
+        fi;
+	${DOCKER_BUILD_COMMAND} --no-cache \
 		--build-arg BASE_IMAGE_NAME=gs-base \
 		--build-arg BASE_IMAGE_TAG=7.0-jre8 \
 		--build-arg INCLUDE_DATA_DIR=true \
