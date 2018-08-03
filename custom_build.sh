@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+
 set -e
 TAG=${1}
 readonly GEOSERVER_VERSION=${2}
@@ -10,7 +10,7 @@ readonly GITHUB_REPO=${5}
 readonly GITHUB_REPO_OWNER=${6} 
 readonly GEOSERVER_DATA_DIR_RELEASE=${7}
 readonly PULL=${8}
-
+readonly ALL_PARAMETERS=$* 
 
 
 readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver/"
@@ -18,6 +18,24 @@ readonly ARTIFACT_DIRECTORY=./resources
 readonly GEOSERVER_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver/
 readonly DATADIR_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-datadir/
 readonly PLUGIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-plugins/
+
+function help(){
+	if [ "$#" -ne 8 ] ; then
+		echo "Usage: $0 [docker image tag] [geoserver version] [geoserver master version] [github token] [github repository] [github repository owner] [datadir release number] [pull|no pull];"
+		echo "";
+		echo "[docker image tag] :          the tag to be used for the docker iamge ";
+		echo "[geoserver version] :         the release version of geoserver to be used; you can set it to master if you want the last release";
+		echo "[geoserver master version] :  if you use the master version for geoserver you need to set it to the numerical value for the next release;"
+		echo "                              if you use a released version you need to put it to the release number";
+		echo "[github token]:               token to access the Github API"; 
+		echo "[github repository]:          Github repository name";     
+		echo "[github repository owner]:    Github repository owner ";
+		echo "[datadir release number]:     Github release number; if this parameter is equal to dev the datadir is not burned in the docker images ";
+		echo "[pull|no pull]:               docker build use always a remote image or a local image";
+		exit 1;	
+	fi		
+}
+
 
 
 function clean_up_directory() {
@@ -28,6 +46,9 @@ function download_from_url_to_a_filepath {
 	URL=${1}
 	FILE_PATH=${2}
 	FILE_DOWNLOADED=$(basename "${FILE_PATH}" )
+	if [ -f "${FILE_PATH}" ]; then
+		rm -f "${FILE_PATH}"
+	fi	
 	if [ ! -f "${FILE_PATH}" ]; then
 		curl -L "${URL}" --output "${FILE_PATH}"
 		echo "* ${FILE_DOWNLOADED} artefact dowloaded *"
@@ -74,6 +95,9 @@ function download_geoserver() {
 	local VERSION=${1}
 	local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
 	local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}
+	if [ -f /tmp/geoserver.war.zip ]; then
+		rm /tmp/geoserver.war.zip
+	fi
 	download_from_url_to_a_filepath  "${GEOSERVER_ARTIFACT_URL}" "/tmp/geoserver.war.zip"
     unzip -p /tmp/geoserver.war.zip geoserver.war > ${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war
 }
@@ -117,11 +141,13 @@ function build_without_data_dir() {
 
 
 function main {
-    
+    help ${ALL_PARAMETERS}
 	download_geoserver "${GEOSERVER_VERSION}"
 	clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
 	download_plugin ext feature-pregeneralized 
 	download_plugin ext css
+	download_plugin community status-monitoring
+	download_plugin ext monitor
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "dev" ]]; then
    	    build_without_data_dir "${TAG}" "${PULL}"
    	else
