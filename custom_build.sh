@@ -150,8 +150,10 @@ function main {
 	clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
 	download_plugin ext feature-pregeneralized 
 	download_plugin ext css
-	download_plugin community status-monitoring
 	download_plugin ext monitor
+	download_plugin ext control-flow
+	download_plugin community status-monitoring
+	download_plugin community qos
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "dev" ]]; then
    	    build_without_data_dir "${TAG}" "${PULL}"
    	else
