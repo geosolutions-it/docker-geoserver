@@ -94,7 +94,6 @@ function download_plugin()  {
 }
 
 function download_fonts()  {
-    EXTRA_FONTS_URL=${1}
     download_from_url_to_a_filepath "${EXTRA_FONTS_URL}" "${FONTS_ARTIFACT_DIRECTORY}/fonts.tar.gz"
 }
 
@@ -141,6 +140,7 @@ function build_with_data_dir() {
 		--build-arg INCLUDE_GS_WAR=true \
 		--build-arg INCLUDE_PLUGINS=true \
 		--build-arg ADD_MARLIN_RENDERER=true \
+		--build-arg ADD_EXTRA_FONTS=true \
 		--build-arg GEOSERVER_APP_NAME=geoserver \
 		-t geosolutionsit/geoserver:maps-"${TAG}" \
 		 .
@@ -162,6 +162,7 @@ function build_without_data_dir() {
 		--build-arg INCLUDE_GS_WAR=true \
 		--build-arg INCLUDE_PLUGINS=true \
 		--build-arg ADD_MARLIN_RENDERER=true \
+		--build-arg ADD_EXTRA_FONTS=true \
 		--build-arg GEOSERVER_APP_NAME=geoserver \
 		-t geosolutionsit/geoserver:maps-"${TAG}"-dev \
 		 .
@@ -180,6 +181,7 @@ function main {
     download_plugin community status-monitoring
     download_plugin community qos
     download_marlin
+    download_fonts
 
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "dev" ]]; then
    	    build_without_data_dir "${TAG}" "${PULL}"
