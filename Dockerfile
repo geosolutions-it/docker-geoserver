@@ -14,6 +14,12 @@ RUN apt-get -y update
 #------------- Install Utils --------------------------------------------------
 RUN apt-get install -y vim zip unzip net-tools telnet procps
 
+#------------- Install JPEG Turbo ---------------------------------------------
+ENV jpeg_turbo_version 1.5.3
+RUN wget https://kent.dl.sourceforge.net/project/libjpeg-turbo/${jpeg_turbo_version}/libjpeg-turbo-official_${jpeg_turbo_version}_amd64.deb \
+ && dpkg -i ./libjpeg*.deb \
+ && apt-get -f install
+
 #------------- Cleanup --------------------------------------------------------
 
 # Delete resources after installation
