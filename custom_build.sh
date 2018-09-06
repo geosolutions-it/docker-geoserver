@@ -118,7 +118,7 @@ function build_with_data_dir() {
 		--build-arg INCLUDE_GS_WAR=true \
 		--build-arg INCLUDE_PLUGINS=true \
 		--build-arg GEOSERVER_APP_NAME=geoserver \
-		-t geosolutionsit/geoserver:maps-"${TAG}" \
+		-t geosolutionsit/geoserver:"${TAG}" \
 		 .
 }
 
@@ -138,7 +138,7 @@ function build_without_data_dir() {
 		--build-arg INCLUDE_GS_WAR=true \
 		--build-arg INCLUDE_PLUGINS=true \
 		--build-arg GEOSERVER_APP_NAME=geoserver \
-		-t geosolutionsit/geoserver:maps-"${TAG}"-dev \
+		-t geosolutionsit/geoserver:"${TAG}"-dev \
 		 .
 }
 
