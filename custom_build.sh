@@ -142,7 +142,7 @@ function build_with_data_dir() {
 		--build-arg ADD_MARLIN_RENDERER=true \
 		--build-arg ADD_EXTRA_FONTS=true \
 		--build-arg GEOSERVER_APP_NAME=geoserver \
-		-t geosolutionsit/geoserver:maps-"${TAG}" \
+		-t geosolutionsit/geoserver:"${TAG}" \
 		 .
 }
 
@@ -164,7 +164,7 @@ function build_without_data_dir() {
 		--build-arg ADD_MARLIN_RENDERER=true \
 		--build-arg ADD_EXTRA_FONTS=true \
 		--build-arg GEOSERVER_APP_NAME=geoserver \
-		-t geosolutionsit/geoserver:maps-"${TAG}"-dev \
+		-t geosolutionsit/geoserver:"${TAG}"-dev \
 		 .
 }
 
