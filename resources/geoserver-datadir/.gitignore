@@ -112,7 +112,6 @@ venv.bak/
 # secrets 
 secrets.sls
 
->>>>>>> maps
 # GeoServer
 legendsamples/
 tmp/
