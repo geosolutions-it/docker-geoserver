@@ -13,10 +13,14 @@ readonly ALL_PARAMETERS=$*
 
 
 readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver/"
+readonly EXTRA_FONTS_URL="https://www.dropbox.com/s/hs5743lwf1rktws/fonts.tar.gz?dl=1"
+readonly MARLIN_VERSION=0.9.2
 readonly ARTIFACT_DIRECTORY=./resources
 readonly GEOSERVER_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver/
 readonly DATADIR_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-datadir/
 readonly PLUGIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-plugins/
+readonly FONTS_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/fonts/
+readonly MARLIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/marlin/
 
 function help(){
 	if [ "$#" -ne 8 ] ; then
@@ -86,18 +90,50 @@ function download_plugin()  {
 
 	fi
 
+    if [ ! -e "${PLUGIN_ARTIFACT_URL}" ]; then
+        mkdir -p "${PLUGIN_ARTIFACT_URL}"
+    fi
+
     download_from_url_to_a_filepath "${PLUGIN_ARTIFACT_URL}" "${PLUGIN_ARTIFACT_DIRECTORY}${PLUGIN_FULL_NAME}"
 }
 
+function download_fonts()  {
+    if [ ! -e "${FONTS_ARTIFACT_DIRECTORY}" ]; then
+        mkdir -p "${FONTS_ARTIFACT_DIRECTORY}"
+    fi
+    download_from_url_to_a_filepath "${EXTRA_FONTS_URL}" "${FONTS_ARTIFACT_DIRECTORY}/fonts.tar.gz"
+}
+
+function download_marlin()  {
+    IFS='.' read -r -a marlin_v_arr <<< "$MARLIN_VERSION"
+    unset IFS
+
+    marlin_major=${marlin_v_arr[0]}
+    marlin_minor=${marlin_v_arr[1]}
+    marlin_patch=${marlin_v_arr[2]}
+
+    if [ ! -e "${MARLIN_ARTIFACT_DIRECTORY}" ]; then
+        mkdir -p "${MARLIN_ARTIFACT_DIRECTORY}"
+    fi
+
+    marlin_url_1="https://github.com/bourgesl/marlin-renderer/releases/download/v${marlin_major}_${marlin_minor}_${marlin_patch}/marlin-${marlin_major}.${marlin_minor}.${marlin_patch}-Unsafe.jar"
+    marlin_url_2="https://github.com/bourgesl/marlin-renderer/releases/download/v${marlin_major}_${marlin_minor}_${marlin_patch}/marlin-${marlin_major}.${marlin_minor}.${marlin_patch}-Unsafe-sun-java2d.jar"
+    download_from_url_to_a_filepath "${marlin_url_1}" "${MARLIN_ARTIFACT_DIRECTORY}/marlin-${marlin_major}.${marlin_minor}.${marlin_patch}-Unsafe.jar"
+    download_from_url_to_a_filepath "${marlin_url_2}" "${MARLIN_ARTIFACT_DIRECTORY}/marlin-${marlin_major}.${marlin_minor}.${marlin_patch}-Unsafe-sun-java2d.jar"
+}
+
 function download_geoserver() {
-	clean_up_directory ${GEOSERVER_ARTIFACT_DIRECTORY}
-	local VERSION=${1}
-	local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
-	local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}
-	if [ -f /tmp/geoserver.war.zip ]; then
-		rm /tmp/geoserver.war.zip
-	fi
-	download_from_url_to_a_filepath  "${GEOSERVER_ARTIFACT_URL}" "/tmp/geoserver.war.zip"
+    clean_up_directory ${GEOSERVER_ARTIFACT_DIRECTORY}
+    local VERSION=${1}
+    local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
+    local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}
+    if [ -f /tmp/geoserver.war.zip ]; then
+        rm /tmp/geoserver.war.zip
+    fi
+    if [ ! -e "${GEOSERVER_ARTIFACT_DIRECTORY}" ]; then
+        mkdir -p "${GEOSERVER_ARTIFACT_DIRECTORY}"
+    fi
+    download_from_url_to_a_filepath  "${GEOSERVER_ARTIFACT_URL}" "/tmp/geoserver.war.zip"
     unzip -p /tmp/geoserver.war.zip geoserver.war > ${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war
 }
 
@@ -117,6 +153,8 @@ function build_with_data_dir() {
 		--build-arg INCLUDE_DATA_DIR=true \
 		--build-arg INCLUDE_GS_WAR=true \
 		--build-arg INCLUDE_PLUGINS=true \
+		--build-arg ADD_MARLIN_RENDERER=true \
+		--build-arg ADD_EXTRA_FONTS=true \
 		--build-arg GEOSERVER_APP_NAME=geoserver \
 		-t geosolutionsit/geoserver:"${TAG}" \
 		 .
@@ -137,6 +175,8 @@ function build_without_data_dir() {
 		--build-arg INCLUDE_DATA_DIR=false \
 		--build-arg INCLUDE_GS_WAR=true \
 		--build-arg INCLUDE_PLUGINS=true \
+		--build-arg ADD_MARLIN_RENDERER=true \
+		--build-arg ADD_EXTRA_FONTS=true \
 		--build-arg GEOSERVER_APP_NAME=geoserver \
 		-t geosolutionsit/geoserver:"${TAG}"-dev \
 		 .
@@ -146,14 +186,21 @@ function build_without_data_dir() {
 
 function main {
     help ${ALL_PARAMETERS}
-	download_geoserver "${GEOSERVER_VERSION}"
-	clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
-	download_plugin ext feature-pregeneralized 
-	download_plugin ext css
-	download_plugin ext monitor
-	download_plugin ext control-flow
-	download_plugin community status-monitoring
-	download_plugin community qos
+    download_geoserver "${GEOSERVER_VERSION}"
+    clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
+    download_plugin ext feature-pregeneralized 
+    download_plugin ext css
+    download_plugin ext monitor
+    download_plugin ext control-flow
+    download_plugin ext libjpeg-turbo
+    download_plugin ext vectortiles
+    download_plugin ext wps
+    download_plugin community status-monitoring
+    download_plugin community qos
+    download_plugin community wfs3
+    download_marlin
+    download_fonts
+
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "dev" ]]; then
    	    build_without_data_dir "${TAG}" "${PULL}"
    	else
