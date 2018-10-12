@@ -20,6 +20,9 @@ RUN wget https://kent.dl.sourceforge.net/project/libjpeg-turbo/${jpeg_turbo_vers
  && dpkg -i ./libjpeg*.deb \
  && apt-get -f install
 
+#------------- Install PostgreSQL client --------------------------------------
+RUN apt-get install -y  postgresql-client
+
 #------------- Cleanup --------------------------------------------------------
 
 # Delete resources after installation
