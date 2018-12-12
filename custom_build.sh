@@ -188,13 +188,14 @@ function main {
     help ${ALL_PARAMETERS}
     download_geoserver "${GEOSERVER_VERSION}"
     clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
-    download_plugin ext feature-pregeneralized 
-    download_plugin ext css
     download_plugin ext monitor
     download_plugin ext control-flow
     download_plugin ext libjpeg-turbo
+    download_plugin ext querylayer
+    download_plugin ext wps
+    download_plugin community authkey
     download_plugin community status-monitoring
-    download_plugin community qos
+    download_plugin community wmts-multi-dimensional
     download_marlin
     download_fonts
 
