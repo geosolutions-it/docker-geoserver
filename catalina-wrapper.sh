@@ -10,12 +10,12 @@ if [ -z "$GEOSERVER_APP_NAME" ]; then
   exit 1
 fi
 
-# update sld files modification date to speed up GS startup
-touch ${GEOSERVER_DATA_DIR}/styles/*sld
-
 webapp_path="${CATALINA_BASE}/webapps/${GEOSERVER_APP_NAME}"
 
 # not deployed? first run? unpack GeoServer WAR
+if [ ! -d "${CATALINA_BASE}/webapps/geoserver" ]; then
+    mv "${CATALINA_BASE}/webapps/geoserver" "$webapp_path"
+
 if [ ! -d "$webapp_path" ]; then
     echo "GeoServer web application not found, unpacking WAR"
     if [ -f "${webapp_path}.war" ];then
