@@ -13,7 +13,7 @@ fi
 webapp_path="${CATALINA_BASE}/webapps/${GEOSERVER_APP_NAME}"
 
 # not deployed? first run? unpack GeoServer WAR
-if [ ! -d "${CATALINA_BASE}/webapps/geoserver" ]; then
+if [ -d "${CATALINA_BASE}/webapps/geoserver" ]; then
     mv "${CATALINA_BASE}/webapps/geoserver" "$webapp_path"
 fi
 
