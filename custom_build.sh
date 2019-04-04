@@ -192,12 +192,12 @@ function main {
     download_plugin ext control-flow
     download_plugin ext libjpeg-turbo
     download_plugin ext querylayer
+    download_plugin ext geofence-server
     download_plugin ext wps
     download_plugin community authkey
     download_plugin community status-monitoring
     download_plugin community wmts-multi-dimensional
     download_marlin
-    download_fonts
 
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "dev" ]]; then
    	    build_without_data_dir "${TAG}" "${PULL}"
