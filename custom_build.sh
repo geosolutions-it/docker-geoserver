@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+
 TAG=${1}
 readonly GEOSERVER_VERSION=${2}
 readonly GEOSERVER_MASTER_VERSION=${3}
@@ -38,8 +39,6 @@ function help(){
 		exit 1;	
 	fi		
 }
-
-
 
 function clean_up_directory() {
 	rm -rf ${1}/*
@@ -81,12 +80,14 @@ function download_plugin()  {
 	PLUGIN_NAME=${2}
 
 	if  [[ "${GEOSERVER_VERSION}" == "master" ]]; then
-		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_MASTER_VERSION::-2}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
+		PLUGIN_VERSION=${GEOSERVER_MASTER_VERSION%??}
+		PLUGIN_FULL_NAME=geoserver-${PLUGIN_VERSION}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
 		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
  
 	else
-		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION::-2}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
-		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
+		PLUGIN_VERSION=${GEOSERVER_VERSION%??}
+		PLUGIN_FULL_NAME=geoserver-${PLUGIN_VERSION}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
+		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_MASTER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
 
 	fi
 
@@ -124,28 +125,37 @@ function download_marlin()  {
 
 function download_geoserver() {
     clean_up_directory ${GEOSERVER_ARTIFACT_DIRECTORY}
-    local VERSION=${1}
-    local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
-    local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}
-    if [ -f /tmp/geoserver.war.zip ]; then
-        rm /tmp/geoserver.war.zip
+
+	if  [[ "${GEOSERVER_VERSION}" == "master" ]]; then
+		local VERSION=${1}
+		local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
+		local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}${VERSION}/${GEOSERVER_FILE_NAME}
+ 
+	else
+		local VERSION=${1}
+		local GEOSERVER_FILE_NAME="geoserver-${VERSION}-war.zip"
+		local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}release/${VERSION}/${GEOSERVER_FILE_NAME}
+
+	fi
+
+    if [ -f /tmp/gs-stable-geoserver.war.zip ]; then
+        rm /tmp/gs-stable-geoserver.war.zip
     fi
     if [ ! -e "${GEOSERVER_ARTIFACT_DIRECTORY}" ]; then
         mkdir -p "${GEOSERVER_ARTIFACT_DIRECTORY}"
     fi
-    download_from_url_to_a_filepath  "${GEOSERVER_ARTIFACT_URL}" "/tmp/geoserver.war.zip"
-    unzip -p /tmp/geoserver.war.zip geoserver.war > ${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war
+    download_from_url_to_a_filepath  "${GEOSERVER_ARTIFACT_URL}" "/tmp/gs-stable-geoserver.war.zip"
+    unzip -p /tmp/gs-stable-geoserver.war.zip geoserver.war > ${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war
 }
-
 
 function build_with_data_dir() {
 
 	local TAG=${1}
         local PULL_ENABLED=${2}
         if [[ "${PULL_ENABLED}" == "pull" ]]; then
-                DOCKER_BUILD_COMMAND="docker build --pull"
+            DOCKER_BUILD_COMMAND="docker build --pull"
         else
-                DOCKER_BUILD_COMMAND="docker build"
+            DOCKER_BUILD_COMMAND="docker build"
         fi;
 	${DOCKER_BUILD_COMMAND} --no-cache \
 		--build-arg BASE_IMAGE_NAME=gs-base \
@@ -154,7 +164,7 @@ function build_with_data_dir() {
 		--build-arg INCLUDE_GS_WAR=true \
 		--build-arg INCLUDE_PLUGINS=true \
 		--build-arg ADD_MARLIN_RENDERER=true \
-		--build-arg ADD_EXTRA_FONTS=true \
+		--build-arg ADD_EXTRA_FONTS=false \
 		--build-arg GEOSERVER_APP_NAME=geoserver \
 		-t geosolutionsit/geoserver:"${TAG}" \
 		 .
@@ -176,23 +186,22 @@ function build_without_data_dir() {
 		--build-arg INCLUDE_GS_WAR=true \
 		--build-arg INCLUDE_PLUGINS=true \
 		--build-arg ADD_MARLIN_RENDERER=true \
-		--build-arg ADD_EXTRA_FONTS=true \
+		--build-arg ADD_EXTRA_FONTS=false \
 		--build-arg GEOSERVER_APP_NAME=geoserver \
 		-t geosolutionsit/geoserver:"${TAG}"     \
 		 .
 }
 
-
-
 function main {
     help ${ALL_PARAMETERS}
     download_geoserver "${GEOSERVER_VERSION}"
     clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
-    download_plugin ext monitor
     download_plugin ext control-flow
-    download_plugin ext libjpeg-turbo
-    download_plugin ext querylayer
+    download_plugin ext geofence
     download_plugin ext geofence-server
+    download_plugin ext libjpeg-turbo
+    download_plugin ext monitor
+    download_plugin ext querylayer
     download_plugin ext wps
     download_plugin community authkey
     download_plugin community status-monitoring
