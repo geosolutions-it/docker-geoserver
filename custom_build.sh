@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+
 TAG=${1}
 readonly GEOSERVER_VERSION=${2}
 readonly GEOSERVER_MASTER_VERSION=${3}
@@ -9,7 +10,7 @@ readonly GITHUB_REPO=${5}
 readonly GITHUB_REPO_OWNER=${6} 
 readonly GEOSERVER_DATA_DIR_RELEASE=${7}
 readonly PULL=${8}
-readonly ALL_PARAMETERS=$* 
+readonly ALL_PARAMETERS=$*
 
 
 readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver/"
@@ -21,25 +22,30 @@ readonly DATADIR_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-datadir/
 readonly PLUGIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-plugins/
 readonly FONTS_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/fonts/
 readonly MARLIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/marlin/
+readonly GS_WAR_NAME="geoserver.war"
 
-function help(){
+export DATADIR_ARTIFACT_DIRECTORY
+export GEOSERVER_DATA_DIR_RELEASE
+export GITHUB_TOKEN
+export GITHUB_REPO
+export GITHUB_REPO_OWNER
+
+function help() {
 	if [ "$#" -ne 8 ] ; then
-		echo "Usage: $0 [docker image tag] [geoserver version] [geoserver master version] [github token] [github repository] [github repository owner] [datadir release number] [pull|no pull];"
+		echo "Usage: $0 [docker image tag] [geoserver version] [geoserver master version] [github token] [github repository] [github repository owner] [datadir release number] [pull|no pull]";
 		echo "";
 		echo "[docker image tag] :          the tag to be used for the docker iamge ";
-		echo "[geoserver version] :         the release version of geoserver to be used; you can set it to master if you want the last release";
-		echo "[geoserver master version] :  if you use the master version for geoserver you need to set it to the numerical value for the next release;"
-		echo "                              if you use a released version you need to put it to the release number";
+		echo "[geoserver version] :         the release version of geoserver to be used ( f.e. 2.15.0 ) or last snaphost version ( f.e. 2.15.x ); also you can set it to 'master' if you want the last release";
+		echo "[geoserver master version] :  if you use the master version for geoserver you need to set it to the numerical value for the next release ( f.e. 2.16.x )";
+		echo "                              if you use a released version you need to put it to the release number ( f.e. 2.15.x )";
 		echo "[github token]:               token to access the Github API"; 
 		echo "[github repository]:          Github repository name";     
 		echo "[github repository owner]:    Github repository owner ";
-		echo "[datadir release number]:     Github release number; if this parameter is equal to dev the datadir is not burned in the docker images ";
+		echo "[datadir release number]:     Github release number; if this parameter is equal to 'dev' the datadir is not burned in the docker images; if this parameter is equal to 'war' then files packed into .war package";
 		echo "[pull|no pull]:               docker build use always a remote image or a local image";
 		exit 1;	
 	fi		
 }
-
-
 
 function clean_up_directory() {
 	rm -rf ${1}/*
@@ -60,33 +66,32 @@ function download_from_url_to_a_filepath {
 	fi
 }
 
-function get_release_artifact_url_from_github() {
-    REPO=${1}
-    OWNER=${2}
-    RELEASE=${3}
-    local TEMP_FILE_PATH=/tmp/${RELEASE}
-	GH_API="https://api.github.com"
-	GH_REPO="$GH_API/repos/${OWNER}/${REPO}"
-    GH_TARBALL="${GH_REPO}/tarball"
-	declare -a HEADERS=("-H \"Authorization: token ${GITHUB_TOKEN}\"" '-H "Accept: application/vnd.github.v3.raw"')
-    ENDPOINT="${GH_TARBALL}"
-
-    PRE_ARTIFACT_URL="curl -L ${HEADERS[@]} -s ${ENDPOINT} --output ${TEMP_FILE_PATH}"
-    RELEASE_ITEMS=$(eval $PRE_ARTIFACT_URL)
-    tar xzvf "${TEMP_FILE_PATH}" --strip=1 -C "${DATADIR_ARTIFACT_DIRECTORY}"
+function extract_versions()  {
+	IFS='.'
+	SEMANTIC_VERSION=(${1})
+	IFS=' '
+	GEOSERVER_VERSION_MAJOR=${SEMANTIC_VERSION[0]}.${SEMANTIC_VERSION[1]}
+	GEOSERVER_VERSION_MINOR=${SEMANTIC_VERSION[2]}
 }
- 
+
 function download_plugin()  {
 	TYPE=${1}
 	PLUGIN_NAME=${2}
 
+	extract_versions ${GEOSERVER_VERSION}
+
 	if  [[ "${GEOSERVER_VERSION}" == "master" ]]; then
-		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_MASTER_VERSION::-2}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
+		extract_versions ${GEOSERVER_MASTER_VERSION}
+		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION_MAJOR}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
 		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
- 
+
+	elif [ "${GEOSERVER_VERSION_MINOR}" == "x" ]; then
+		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION_MAJOR}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
+		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
+		
 	else
-		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION::-2}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
-		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
+		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION_MAJOR}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
+		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_MASTER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
 
 	fi
 
@@ -124,9 +129,25 @@ function download_marlin()  {
 
 function download_geoserver() {
     clean_up_directory ${GEOSERVER_ARTIFACT_DIRECTORY}
-    local VERSION=${1}
-    local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
-    local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}
+	extract_versions ${1}
+
+	if  [[ "${GEOSERVER_VERSION}" == "master" ]]; then
+		local VERSION=${1}
+		local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
+		local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}${VERSION}/${GEOSERVER_FILE_NAME}
+ 
+	elif [ "${GEOSERVER_VERSION_MINOR}" == "x" ]; then
+		local VERSION=${1}
+		local GEOSERVER_FILE_NAME="geoserver-${GEOSERVER_VERSION_MAJOR}.${GEOSERVER_VERSION_MINOR}-latest-war.zip"
+		local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}${GEOSERVER_VERSION_MAJOR}.${GEOSERVER_VERSION_MINOR}/${GEOSERVER_FILE_NAME}	
+
+	else
+		local VERSION=${1}
+		local GEOSERVER_FILE_NAME="geoserver-${VERSION}-war.zip"
+		local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}release/${VERSION}/${GEOSERVER_FILE_NAME}
+
+	fi
+
     if [ -f /tmp/geoserver.war.zip ]; then
         rm /tmp/geoserver.war.zip
     fi
@@ -137,74 +158,45 @@ function download_geoserver() {
     unzip -p /tmp/geoserver.war.zip geoserver.war > ${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war
 }
 
+function build_war_file() {
+	unzip -q -o ${GEOSERVER_ARTIFACT_DIRECTORY}geoserver.war  -d ${ARTIFACT_DIRECTORY}/tmp
+	
+	for f in ${PLUGIN_ARTIFACT_DIRECTORY}*; do
+		unzip -q -o ${f} -d ${ARTIFACT_DIRECTORY}/tmp/WEB-INF/lib/
+	done
 
-function build_with_data_dir() {
+	zip -r ${ARTIFACT_DIRECTORY}/build/${GS_WAR_NAME} ${ARTIFACT_DIRECTORY}/tmp/*
 
-	local TAG=${1}
-        local PULL_ENABLED=${2}
-        if [[ "${PULL_ENABLED}" == "pull" ]]; then
-                DOCKER_BUILD_COMMAND="docker build --pull"
-        else
-                DOCKER_BUILD_COMMAND="docker build"
-        fi;
-	${DOCKER_BUILD_COMMAND} --no-cache \
-		--build-arg BASE_IMAGE_NAME=gs-base \
-		--build-arg BASE_IMAGE_TAG=7.0-jre8 \
-		--build-arg INCLUDE_DATA_DIR=true \
-		--build-arg INCLUDE_GS_WAR=true \
-		--build-arg INCLUDE_PLUGINS=true \
-		--build-arg ADD_MARLIN_RENDERER=true \
-		--build-arg ADD_EXTRA_FONTS=true \
-		--build-arg GEOSERVER_APP_NAME=geoserver \
-		-t geosolutionsit/geoserver:"${TAG}" \
-		 .
+	echo "Packed GeoServer .war file located in ./build folder"
 }
-
-function build_without_data_dir() {
-
-	local TAG=${1}
-	local PULL_ENABLED=${2}
-	if [[ "${PULL_ENABLED}" == "pull" ]]; then
-		DOCKER_BUILD_COMMAND="docker build --pull"
-	else
-		DOCKER_BUILD_COMMAND="docker build"
-	fi;	
-	${DOCKER_BUILD_COMMAND} --no-cache \
-		--build-arg BASE_IMAGE_NAME=gs-base \
-		--build-arg BASE_IMAGE_TAG=7.0-jre8 \
-		--build-arg INCLUDE_DATA_DIR=false \
-		--build-arg INCLUDE_GS_WAR=true \
-		--build-arg INCLUDE_PLUGINS=true \
-		--build-arg ADD_MARLIN_RENDERER=true \
-		--build-arg ADD_EXTRA_FONTS=true \
-		--build-arg GEOSERVER_APP_NAME=geoserver \
-		-t geosolutionsit/geoserver:"${TAG}"     \
-		 .
-}
-
-
 
 function main {
     help ${ALL_PARAMETERS}
+	clean_up_directory ${GEOSERVER_ARTIFACT_DIRECTORY}
     download_geoserver "${GEOSERVER_VERSION}"
     clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
-    download_plugin ext monitor
     download_plugin ext control-flow
-    download_plugin ext libjpeg-turbo
-    download_plugin ext querylayer
+    download_plugin ext geofence
     download_plugin ext geofence-server
+    download_plugin ext libjpeg-turbo
+    download_plugin ext monitor
+    download_plugin ext querylayer
     download_plugin ext wps
     download_plugin community authkey
     download_plugin community status-monitoring
     download_plugin community wmts-multi-dimensional
     download_marlin
 
-	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "dev" ]]; then
-   	    build_without_data_dir "${TAG}" "${PULL}"
+	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "war" ]]; then
+		clean_up_directory ${ARTIFACT_DIRECTORY}/tmp
+		clean_up_directory ${ARTIFACT_DIRECTORY}/build
+		build_war_file
+
+	elif  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "dev" ]]; then
+   	    ./docker_build.sh "build_without_data_dir" "${TAG}" "${PULL}"
    	else
-   		clean_up_directory ${DATADIR_ARTIFACT_DIRECTORY}
-		get_release_artifact_url_from_github "${GITHUB_REPO}" "${GITHUB_REPO_OWNER}" "${GEOSERVER_DATA_DIR_RELEASE}"
- 		build_with_data_dir "${TAG}" "${PULL}"
+		clean_up_directory ${DATADIR_ARTIFACT_DIRECTORY}
+		./docker_build.sh "build_with_data_dir" "${TAG}" "${PULL}"
    	fi
 }
 
