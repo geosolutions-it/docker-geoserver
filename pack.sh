@@ -132,7 +132,7 @@ function build_artifact() {
 
     clean_up_directory ${ARTIFACT_DIRECTORY_GEOSERVER}
     cd ${ARTIFACT_DIRECTORY_GEOSERVER} && ARTIFACT_DIRECTORY_PATH=`pwd -P` && cd - > /dev/null 2>&1
-	cd ${ARTIFACT_DIRECTORY_TMP} && zip -r ${ARTIFACT_DIRECTORY_PATH}/${ARTIFACT_FILENAME} ./* > /dev/null 2>&1 && cd - > /dev/null 2>&1
+	cd ${ARTIFACT_DIRECTORY_TMP} && zip -r "${ARTIFACT_DIRECTORY_PATH}"/${ARTIFACT_FILENAME} ./* > /dev/null 2>&1 && cd - > /dev/null 2>&1
 
     echo ""
 	echo "Packed GeoServer .war file located in ${ARTIFACT_DIRECTORY_GEOSERVER} folder"
