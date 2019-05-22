@@ -7,7 +7,7 @@ readonly ALL_PARAMETERS=$*
 readonly GEOSERVER_BUILD_TYPE=${1}
 readonly GEOSERVER_VERSION=${2}
 
-readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver"
+readonly BASE_BUILD_URL="http://build.geoserver.org/geoserver"
 
 readonly ARTIFACT_DIRECTORY=./resources
 readonly ARTIFACT_DIRECTORY_GEOSERVER=${ARTIFACT_DIRECTORY}/geoserver
@@ -156,7 +156,7 @@ function main {
     download_plugin ext monitor
     download_plugin ext querylayer
     download_plugin ext wps
-    download_plugin ext css
+#    download_plugin ext css
     download_plugin community authkey
     download_plugin community status-monitoring
     download_plugin community wmts-multi-dimensional
