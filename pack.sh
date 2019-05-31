@@ -19,7 +19,7 @@ function help() {
 	if [ "$#" -ne 2 ] ; then
 		echo "Usage: $0 [geoserver version] [geoserver master version]";
 		echo "";
-		echo "[geoserver build type] :         use 'master' for the last version, 'release' for stable released version ( f.e. 2.14.3 or 2.15.0 ) or 'snaphost' for last snaphost version ( f.e. 2.15.x )";
+		echo "[geoserver build type] :         use 'master' for the last version, 'release' for stable released version ( f.e. 2.14.3 or 2.15.0 ) or 'snapshot' for last snaphost version ( f.e. 2.15.x )";
 		echo "[geoserver version]    :         geoserver version ( f.e. 2.14.3, 2.15.0, 2.15.x, 2.16.x ),";
         echo "                                 if geoserver build type set to 'master' then geoserver version should be set to the next release numerical value ( f.e. 2.16.x if there is no 2.16.0 yet )";
 		exit 1;	
