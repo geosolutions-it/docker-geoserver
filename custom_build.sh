@@ -193,7 +193,7 @@ function main {
     download_plugin ext monitor
     download_plugin ext control-flow
     download_plugin ext libjpeg-turbo
-    download_plugin community status-monitoring
+#    download_plugin community status-monitoring
     download_plugin community qos
     download_marlin
     download_fonts
