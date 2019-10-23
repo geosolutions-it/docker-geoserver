@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -e
 TAG=${1}
 readonly GEOSERVER_VERSION=${2}
 readonly GEOSERVER_MASTER_VERSION=${3}
@@ -79,7 +78,6 @@ function get_release_artifact_url_from_github() {
 function download_plugin()  {
 	TYPE=${1}
 	PLUGIN_NAME=${2}
-
 	if  [[ "${GEOSERVER_VERSION}" == "master" ]]; then
 		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_MASTER_VERSION::-2}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
 		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
@@ -195,9 +193,11 @@ function main {
     download_plugin ext libjpeg-turbo
     download_plugin ext vectortiles
     download_plugin ext wps
-    download_plugin community status-monitoring
+    download_plugin community ogcapi
     download_plugin community qos
     download_plugin community wfs3
+    download_plugin community mbstyle
+    download_plugin community wmts-styles
     download_marlin
     download_fonts
 
