@@ -186,18 +186,28 @@ function main {
     help ${ALL_PARAMETERS}
     download_geoserver "${GEOSERVER_VERSION}"
     clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
-    download_plugin ext feature-pregeneralized 
-    download_plugin ext css
+    download_plugin ext netcdf
+    download_plugin ext netcdf-out
     download_plugin ext monitor
+    download_plugin ext grib
+    download_plugin ext printing
+    download_plugin ext jp2k
     download_plugin ext control-flow
-    download_plugin ext libjpeg-turbo
-    download_plugin ext vectortiles
     download_plugin ext wps
-    download_plugin community ogcapi
-    download_plugin community qos
+    download_plugin ext csw
+    download_plugin ext importer
+    download_plugin ext feature-pregeneralized 
+
     download_plugin community wfs3
-    download_plugin community mbstyle
-    download_plugin community wmts-styles
+    download_plugin community ncwms
+    download_plugin community wmts-multi-dimensional
+    download_plugin community params-extractor
+    download_plugin community authkey-plugin
+    download_plugin community opensearch-eo
+    download_plugin community nsg-wfs-profile
+    download_plugin community nsg-wmts-profile
+    download_plugin community sec-oauth2-openid-connect
+    download_plugin community qos-plugin
     download_marlin
     download_fonts
 
