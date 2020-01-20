@@ -193,7 +193,7 @@ function main {
     download_plugin ext libjpeg-turbo
     download_plugin ext vectortiles
     download_plugin ext wps
-	download_plugin community flatgeobuf
+    download_plugin community flatgeobuf
     download_plugin community ogcapi
     download_plugin community qos
     download_plugin community wfs3
