@@ -18,7 +18,7 @@ RUN apt-get install -y vim zip unzip net-tools telnet procps postgresql-client-9
 RUN apt-get install -y gdal-bin
 
 #------------- Install JPEG Turbo ---------------------------------------------
-RUN wget https://kent.dl.sourceforge.net/project/libjpeg-turbo/1.5.3/libjpeg-turbo-official_1.5.3_amd64.deb \
+RUN wget https://downloads.sourceforge.net/project/libjpeg-turbo/${jpeg_turbo_version}/libjpeg-turbo-official_${jpeg_turbo_version}_amd64.deb \
  && dpkg -i ./libjpeg*.deb \
  && apt-get -f install
 
