@@ -192,10 +192,10 @@ function main {
     download_plugin ext control-flow
     download_plugin ext libjpeg-turbo
     download_plugin ext vectortiles
+    download_plugin ext mbstyle
     download_plugin ext wps
     download_plugin community flatgeobuf
     download_plugin community ogcapi
-    download_plugin community mbstyle
     download_marlin
     download_fonts
 
