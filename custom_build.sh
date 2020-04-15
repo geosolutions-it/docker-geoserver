@@ -12,7 +12,7 @@ readonly ALL_PARAMETERS=$*
 
 
 readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver/"
-readonly EXTRA_FONTS_URL="https://www.dropbox.com/s/hs5743lwf1rktws/fonts.tar.gz?dl=1"
+readonly EXTRA_FONTS_URL="https://www.dropbox.com/s/wojc5ktydm5o0sm/fonts-1.1.tar.gz?dl=1"
 readonly MARLIN_VERSION=0.9.2
 readonly ARTIFACT_DIRECTORY=./resources
 readonly GEOSERVER_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver/
