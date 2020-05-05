@@ -193,11 +193,12 @@ function main {
     download_plugin ext libjpeg-turbo
     download_plugin ext vectortiles
     download_plugin ext wps
-    download_plugin community ogcapi
-    download_plugin community qos
-    download_plugin community wfs3
-    download_plugin community mbstyle
-    download_plugin community wmts-styles
+    download_plugin ext mbstyle
+    #download_plugin community ogcapi
+    #download_plugin community qos
+    #download_plugin community wfs3
+    #download_plugin community mbstyle
+    #download_plugin community wmts-styles
     download_marlin
     download_fonts
 
