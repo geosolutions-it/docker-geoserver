@@ -186,16 +186,10 @@ function main {
     help ${ALL_PARAMETERS}
     download_geoserver "${GEOSERVER_VERSION}"
     clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
-    download_plugin ext feature-pregeneralized 
-    download_plugin ext css
     download_plugin ext monitor
     download_plugin ext control-flow
-    download_plugin ext libjpeg-turbo
-    download_plugin ext vectortiles
-    download_plugin ext mbstyle
     download_plugin ext wps
-    download_plugin community flatgeobuf
-    download_plugin community ogcapi
+    download_plugin community geopkg
     download_marlin
     download_fonts
 
