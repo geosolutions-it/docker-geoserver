@@ -190,6 +190,7 @@ function main {
     download_plugin ext control-flow
     download_plugin ext wps
     download_plugin community geopkg
+    download_plugin community ogcapi
     download_marlin
     download_fonts
 
