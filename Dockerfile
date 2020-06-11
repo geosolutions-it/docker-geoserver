@@ -17,8 +17,16 @@ RUN apt-get install -y vim zip unzip net-tools telnet procps
 #------------- Install JPEG Turbo ---------------------------------------------
 ENV jpeg_turbo_version 1.5.3
 RUN wget https://downloads.sourceforge.net/project/libjpeg-turbo/${jpeg_turbo_version}/libjpeg-turbo-official_${jpeg_turbo_version}_amd64.deb \
- && dpkg -i ./libjpeg*.deb \
- && apt-get -f install
+    && dpkg -i ./libjpeg*.deb \
+    && apt-get -f install
+
+
+#-------------  Microsoft Fonts ---------------------------------------------
+
+RUN echo "deb http://httpredir.debian.org/debian stretch contrib" >> /etc/apt/sources.list
+RUN apt-get update  \
+    && apt-get install -yq ttf-mscorefonts-installer 
+
 
 #------------- Cleanup --------------------------------------------------------
 
