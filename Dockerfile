@@ -24,7 +24,8 @@ RUN wget https://downloads.sourceforge.net/project/libjpeg-turbo/${jpeg_turbo_ve
 #-------------  Microsoft Fonts ---------------------------------------------
 
 RUN echo "deb http://httpredir.debian.org/debian stretch contrib" >> /etc/apt/sources.list
-RUN apt-get install -yq ttf-mscorefonts-installer 
+RUN apt-get update  \
+    && aapt-get install -yq ttf-mscorefonts-installer 
 
 
 #------------- Cleanup --------------------------------------------------------
