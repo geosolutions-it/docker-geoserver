@@ -52,6 +52,7 @@ function download_from_url_to_a_filepath {
 		rm -f "${FILE_PATH}"
 	fi	
 	if [ ! -f "${FILE_PATH}" ]; then
+                echo "Downloaing from ${URL}"
 		curl -L "${URL}" --output "${FILE_PATH}"
 		echo "* ${FILE_DOWNLOADED} artefact dowloaded *"
 	else
