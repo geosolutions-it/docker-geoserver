@@ -27,6 +27,10 @@ RUN echo "deb http://httpredir.debian.org/debian stretch contrib" >> /etc/apt/so
 RUN apt-get update  \
     && apt-get install -yq ttf-mscorefonts-installer 
 
+#------------- Install Python3 and rHEALPixDGGS -------------------------------
+RUN apt-get install -y python3 python3-pip \
+ && pip3 install -U pip \
+ && pip3 install -U rHEALPixDGGS
 
 #------------- Cleanup --------------------------------------------------------
 
