@@ -1,5 +1,3 @@
-[![Build Status](http://build.geo-solutions.it/jenkins/buildStatus/icon?job=Docker-GeoServer)](http://build.geo-solutions.it/jenkins/view/Docker/job/Docker-GeoServer/)
-
 # docker-geoserver
 Dockerfile to build a Docker image for [GeoServer](http://geoserver.org/). Built image available on [Docker Hub](https://hub.docker.com/r/geosolutionsit/geoserver/)
 
