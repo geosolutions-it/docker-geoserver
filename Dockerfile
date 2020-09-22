@@ -33,7 +33,7 @@ RUN apt-get install -y python3 python3-pip \
  && pip3 install -U rHEALPixDGGS \
  && pip3 install -U jep
 
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/jre
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
 #------------- Cleanup --------------------------------------------------------
 
