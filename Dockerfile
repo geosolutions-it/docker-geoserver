@@ -28,12 +28,12 @@ RUN apt-get update  \
     && apt-get install -yq ttf-mscorefonts-installer 
 
 #------------- Install Python3 and rHEALPixDGGS -------------------------------
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+
 RUN apt-get install -y python3 python3-pip \
  && pip3 install -U pip \
  && pip3 install -U rHEALPixDGGS \
  && pip3 install -U jep
-
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
 #------------- Cleanup --------------------------------------------------------
 
