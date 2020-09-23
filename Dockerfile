@@ -35,6 +35,8 @@ RUN apt-get install -y python3 python3-pip \
  && pip3 install -U rHEALPixDGGS \
  && pip3 install -U jep
 
+RUN LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/lib/python3.5/dist-packages/jep/
+
 #------------- Cleanup --------------------------------------------------------
 
 # Delete resources after installation
