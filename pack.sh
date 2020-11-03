@@ -162,6 +162,7 @@ function main {
 #    download_plugin ext css
 #    download_plugin community status-monitoring
     download_plugin community wmts-multi-dimensional
+    download_plugin community wps-download
 
     build_artifact
 }
