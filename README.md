@@ -42,5 +42,4 @@ There are a number of [**build arguments**](https://docs.docker.com/engine/refer
 - `INCLUDE_GS_WAR` Include GeoServer war from `./resources/geoserver` in the image?
 - `PLUGINS_DIR` Path to GeoServer plugins to include in the build
 - `INCLUDE_DATA_DIR`Include GeoServer data directory from `./resources/geoserver-datadir` in the image?
-- `TOMCAT_EXTRAS` Delete default Tomcat applications from webapps directory (manager, examples, etc ...) ?
 - `GEOSERVER_APP_NAME` Name of the GeoServer war copied into the image (defaults to `geoserver`)
