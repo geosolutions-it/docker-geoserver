@@ -1,5 +1,9 @@
 #!/bin/bash
 
+pushd ${CATALINA_BASE}/webapps/
+rm -rfv ./ROOT ./docs ./examples ./host-manager ./manager
+popd
+
 if [ -z "$GEOSERVER_APP_NAME" ]; then
   echo "ERROR: $GEOSERVER_APP_NAME not defined or empty!"
   exit 1
