@@ -69,7 +69,7 @@ ENV JAVA_OPTS="-Xms${INITIAL_MEMORY} -Xmx${MAXIMUM_MEMORY} \
   -XX:MaxGCPauseMillis=200 -XX:ParallelGCThreads=20 -XX:ConcGCThreads=5 \
   ${GEOSERVER_OPTS}"
 
-COPY --from=mother "${GEOSERVER_DATA_DIR_SRC}" "${GEOSERVER_DATA_DIR_SRC}"
+COPY --from=mother "${GEOSERVER_DATA_DIR}" "${GEOSERVER_DATA_DIR}"
 COPY --from=mother "${CATALINA_BASE}/webapps" "${CATALINA_BASE}/webapps"
 
 WORKDIR "$CATALINA_BASE"
