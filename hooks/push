@@ -1,5 +1,3 @@
 #!/bin/bash
 
-echo pushing to geosolutionsit/"${DOCKER_REPO}:${IMAGE_TAG}"
-
-docker push geosolutionsit/"${DOCKER_REPO}:${IMAGE_TAG}"
+docker push "${DOCKER_REPO}:test"
