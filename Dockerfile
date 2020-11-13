@@ -5,7 +5,6 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV CATALINA_BASE "$CATALINA_HOME"
 ENV GEOSERVER_HOME="/var/geoserver"
 
-ENV GEOSERVER_DATA_DIR="${GEOSERVER_HOME}/datadir"
 # local dir, tar or remore URLs
 ARG GEOSERVER_DATA_DIR_SRC="./.placeholder"
 ENV GEOSERVER_DATA_DIR_SRC="${GEOSERVER_DATA_DIR_SRC}"
@@ -45,7 +44,6 @@ COPY --from=mother "${CATALINA_BASE}/webapps" "${CATALINA_BASE}/webapps"
 
 # create externalized dirs
 RUN mkdir -p \
-    "${GEOSERVER_DATA_DIR}" \
     "${GEOSERVER_LOG_DIR}"  \
     "${GEOWEBCACHE_CONFIG_DIR}" \
     "${GEOWEBCACHE_CACHE_DIR}" \
