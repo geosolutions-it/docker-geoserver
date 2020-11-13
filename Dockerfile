@@ -71,7 +71,5 @@ ENV JAVA_OPTS="-Xms${INITIAL_MEMORY} -Xmx${MAXIMUM_MEMORY} \
 
 WORKDIR "$CATALINA_BASE"
 
-ADD run_tests.sh /run_tests.sh
-
 ENV TERM xterm
 EXPOSE 8080/tcp
