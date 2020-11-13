@@ -1,0 +1,5 @@
+version: "3.8"
+services:
+  sut:
+    build: .
+    command: run_tests.sh
