@@ -4,6 +4,7 @@ LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
 ENV DEBIAN_FRONTEND noninteractive
 ENV CATALINA_BASE "$CATALINA_HOME"
 ENV GEOSERVER_HOME="/var/geoserver"
+ENV GEOSERVER_DATA_DIR="${GEOSERVER_HOME}/datadir"
 
 # local dir, tar or remore URLs
 ARG GEOSERVER_DATA_DIR_SRC="./.placeholder"
@@ -38,17 +39,19 @@ ENV GEOWEBCACHE_CACHE_DIR="${GEOSERVER_HOME}/gwc_cache_dir"
 ENV NETCDF_DATA_DIR="${GEOSERVER_HOME}/netcdf_data_dir"
 ENV GRIB_CACHE_DIR="${GEOSERVER_HOME}/grib_cache_dir"
 
-# copy from mother
-COPY --from=mother "${GEOSERVER_DATA_DIR}" "${GEOSERVER_DATA_DIR}"
-COPY --from=mother "${CATALINA_BASE}/webapps" "${CATALINA_BASE}/webapps"
 
 # create externalized dirs
 RUN mkdir -p \
+    "${GEOSERVER_DATA_DIR}" \
     "${GEOSERVER_LOG_DIR}"  \
     "${GEOWEBCACHE_CONFIG_DIR}" \
     "${GEOWEBCACHE_CACHE_DIR}" \
     "${NETCDF_DATA_DIR}" \
     "${GRIB_CACHE_DIR}"
+
+# copy from mother
+COPY --from=mother "${GEOSERVER_DATA_DIR}" "${GEOSERVER_DATA_DIR}"
+COPY --from=mother "${CATALINA_BASE}/webapps" "${CATALINA_BASE}/webapps"
 
 # override at run time as needed JAVA_OPTS
 ENV INITIAL_MEMORY="2G" 
