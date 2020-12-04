@@ -6,17 +6,17 @@ ENV CATALINA_BASE "$CATALINA_HOME"
 ENV GEOSERVER_HOME="/var/geoserver"
 ENV GEOSERVER_DATA_DIR="${GEOSERVER_HOME}/datadir"
 
-# local dir, tar or remore URLs
+# local dir, tar or remote URLs  (data_dir)
 ARG GEOSERVER_DATA_DIR_SRC="./.placeholder"
 ENV GEOSERVER_DATA_DIR_SRC="${GEOSERVER_DATA_DIR_SRC}"
 ADD "${GEOSERVER_DATA_DIR_SRC}" "${GEOSERVER_DATA_DIR}"
 
-# accepts local files and URLs. Tar(s) are automatically extracted
+# accepts local files and URLs  (webapp)
 ARG GEOSERVER_WEBAPP_SRC="./.placeholder"
 ENV GEOSERVER_WEBAPP_SRC="${GEOSERVER_WEBAPP_SRC}"
 ADD "${GEOSERVER_WEBAPP_SRC}" "${CATALINA_BASE}/webapps/"
 
-# zip files require explicit extracion
+# zip files require explicit extraction
 RUN \
     cd "${CATALINA_BASE}/webapps/"; \
     if [ "${GEOSERVER_WEBAPP_SRC##*.}" = "zip" ]; then \
@@ -38,7 +38,9 @@ ENV GEOWEBCACHE_CONFIG_DIR="${GEOSERVER_DATA_DIR}/gwc"
 ENV GEOWEBCACHE_CACHE_DIR="${GEOSERVER_HOME}/gwc_cache_dir"
 ENV NETCDF_DATA_DIR="${GEOSERVER_HOME}/netcdf_data_dir"
 ENV GRIB_CACHE_DIR="${GEOSERVER_HOME}/grib_cache_dir"
-
+ 
+# fix for https://github.com/docker-library/openjdk/issues/333
+RUN apt-get update && apt-get install -y fontconfig libfreetype6
 
 # create externalized dirs
 RUN mkdir -p \
@@ -75,7 +77,6 @@ ENV JAVA_OPTS="-Xms${INITIAL_MEMORY} -Xmx${MAXIMUM_MEMORY} \
   -XX:SoftRefLRUPolicyMSPerMB=36000 -XX:+UseG1GC \
   -XX:MaxGCPauseMillis=200 -XX:ParallelGCThreads=20 -XX:ConcGCThreads=5 \
   ${GEOSERVER_OPTS}"
-
 
 WORKDIR "$CATALINA_BASE"
 
