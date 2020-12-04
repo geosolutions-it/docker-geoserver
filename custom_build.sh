@@ -11,7 +11,6 @@ readonly GEOSERVER_DATA_DIR_RELEASE=${7}
 readonly PULL=${8}
 readonly ALL_PARAMETERS=$* 
 
-
 readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver/"
 readonly EXTRA_FONTS_URL="https://www.dropbox.com/s/hs5743lwf1rktws/fonts.tar.gz?dl=1"
 readonly MARLIN_VERSION=0.9.2
@@ -21,9 +20,7 @@ readonly DATADIR_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-datadir/
 readonly PLUGIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-plugins/
 readonly FONTS_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/fonts/
 readonly MARLIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/marlin/
-
 readonly DIST_DIRECTORY=./dist/
-
 
 function help(){
 	if [ "$#" -ne 8 ] ; then
@@ -201,8 +198,8 @@ function build_distribution() {
 	rm -f *.zip
 	rm -f *.md
 	cd ../../../../
-	# copy marlin jar files into WEB-INF/lib
-	# check for fonts
+	# TODO copy marlin jar files into WEB-INF/lib  (for release 2.18.x is not necessary)
+	# TODO check for fonts
 }
 
 function build_docker_image() {
@@ -214,7 +211,6 @@ function build_docker_image() {
  		build_with_data_dir "${TAG}" "${PULL}"
    fi
 }
-
 
 function main {
     help ${ALL_PARAMETERS}
