@@ -1,4 +1,4 @@
-version: '3'
+version: '2.2'
 services:
 
   geoserver:
@@ -9,12 +9,12 @@ services:
     environment:
       - JAVA_OPTS=-Xms${MEM} -Xmx${MEM} -XX:+UseParallelGC -XX:+UseParallelOldGC -DGEOWEBCACHE_CONFIG_DIR=$${GEOSERVER_DATA_DIR}/gwc -DGEOSERVER_LOG_LOCATION=$${GEOSERVER_HOME}/logs/$${HOSTNAME}-slave.log -DGEOSERVER_NODE_OPTS=id:slave-$${HOSTNAME} -DGEOSERVER_AUDIT_PATH=/var/geoserver/audits/geoserver-${DOCKER_HOSTNAME}-slave-$${HOSTNAME}
     volumes:
-      - geoserver-slaves-datadir:/var/geoserver/datadir
-      - geoserver-slaves-gwccachedir:/var/geoserver/gwc_cache_dir
-      - shared-data:/var/geoserver/data
-      - shared-logs:/var/geoserver/logs
-      - shared-audits:/var/geoserver/audits
-      - ./config/context.xml:/usr/local/tomcat/conf/context.xml
+      - geoserver_slaves_datadir:/var/geoserver/datadir:rw
+      - geoserver_slaves_gwccachedir:/var/geoserver/gwc_cache_dir:rw
+      - shared_data:/var/geoserver/data:rw
+      - shared_logs:/var/geoserver/logs:rw
+      - shared_audits:/var/geoserver/audits:rw
+      - ./config/context.xml:/usr/local/tomcat/conf/context.xml:ro
 
   geoserver-master:
     image: geosolutionsit/geoserver:gs-${DOCKER_IMAGE_VERSION}
@@ -24,18 +24,32 @@ services:
     environment:
       - JAVA_OPTS=-Xms${MEM} -Xmx${MEM} -XX:+UseParallelGC -XX:+UseParallelOldGC -DGEOWEBCACHE_CONFIG_DIR=$${GEOSERVER_DATA_DIR}/gwc -DGEOSERVER_LOG_LOCATION=$${GEOSERVER_HOME}/logs/$${HOSTNAME}-master.log -DGEOSERVER_NODE_OPTS=id:master-$${HOSTNAME} -DGEOSERVER_AUDIT_PATH=/var/geoserver/audits/geoserver-${DOCKER_HOSTNAME}-master-$${HOSTNAME}
     volumes:
-      - geoserver-master-datadir:/var/geoserver/datadir
-      - geoserver-master-gwccachedir:/var/geoserver/gwc_cache_dir
-      - shared-data:/var/geoserver/data
-      - shared-logs:/var/geoserver/logs
-      - shared-audits:/var/geoserver/audits
-      - ./config/context.xml:/usr/local/tomcat/conf/context.xml
+      - geoserver_master_datadir:/var/geoserver/datadir:rw
+      - geoserver_master_gwccachedir:/var/geoserver/gwc_cache_dir:rw
+      - shared_data:/var/geoserver/data:rw
+      - shared_logs:/var/geoserver/logs:rw
+      - shared_audits:/var/geoserver/audits:rw
+      - ./config/context.xml:/usr/local/tomcat/conf/context.xml:ro
 
 volumes:
-  geoserver-slaves-datadir:
-  geoserver-slaves-gwccachedir:
-  geoserver-master-datadir:
-  geoserver-master-gwccachedir:
-  shared-data:
-  shared-logs:
-  shared-audits:
+  geoserver_slaves_datadir:
+    external: true
+    name: geoserver_slaves_datadir
+  geoserver_slaves_gwccachedir:
+    external: true
+    name: geoserver_slaves_gwccachedir
+  geoserver_master_datadir:
+    external: true
+    name: geoserver_master_datadir
+  geoserver_master_gwccachedir:
+    external: true
+    name: geoserver_master_gwccachedir
+  shared_data:
+    external: true
+    name: shared_data
+  shared_logs:
+    external: true
+    name: shared_logs
+  shared_audits:
+    external: true
+    name: shared_audits
