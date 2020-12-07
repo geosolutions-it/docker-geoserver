@@ -11,7 +11,6 @@ readonly GEOSERVER_DATA_DIR_RELEASE=${7}
 readonly PULL=${8}
 readonly ALL_PARAMETERS=$* 
 
-
 readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver/"
 readonly EXTRA_FONTS_URL="https://www.dropbox.com/s/hs5743lwf1rktws/fonts.tar.gz?dl=1"
 readonly MARLIN_VERSION=0.9.2
@@ -21,12 +20,13 @@ readonly DATADIR_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-datadir/
 readonly PLUGIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-plugins/
 readonly FONTS_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/fonts/
 readonly MARLIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/marlin/
+readonly DIST_DIRECTORY=./dist/
 
 function help(){
 	if [ "$#" -ne 8 ] ; then
 		echo "Usage: $0 [docker image tag] [geoserver version] [geoserver master version] [github token] [github repository] [github repository owner] [datadir release number] [pull|no pull];"
 		echo "";
-		echo "[docker image tag] :          the tag to be used for the docker iamge ";
+		echo "[docker image tag] :          the tag to be used for the docker image ";
 		echo "[geoserver version] :         the release version of geoserver to be used; you can set it to master if you want the last release";
 		echo "[geoserver master version] :  if you use the master version for geoserver you need to set it to the numerical value for the next release;"
 		echo "                              if you use a released version you need to put it to the release number";
@@ -38,8 +38,6 @@ function help(){
 		exit 1;	
 	fi		
 }
-
-
 
 function clean_up_directory() {
 	rm -rf ${1}/*
@@ -83,15 +81,14 @@ function download_plugin()  {
 	if  [[ "${GEOSERVER_VERSION}" == "master" ]]; then
 		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_MASTER_VERSION::-2}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
 		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
- 
-	else
+ 	else
 		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION::-2}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
 		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
 
 	fi
 
-    if [ ! -e "${PLUGIN_ARTIFACT_URL}" ]; then
-        mkdir -p "${PLUGIN_ARTIFACT_URL}"
+    if [ ! -e "${PLUGIN_ARTIFACT_DIRECTORY}" ]; then
+        mkdir -p "${PLUGIN_ARTIFACT_DIRECTORY}"
     fi
 
     download_from_url_to_a_filepath "${PLUGIN_ARTIFACT_URL}" "${PLUGIN_ARTIFACT_DIRECTORY}${PLUGIN_FULL_NAME}"
@@ -139,7 +136,6 @@ function download_geoserver() {
 
 
 function build_with_data_dir() {
-
 	local TAG=${1}
         local PULL_ENABLED=${2}
         if [[ "${PULL_ENABLED}" == "pull" ]]; then
@@ -156,12 +152,13 @@ function build_with_data_dir() {
 		--build-arg ADD_MARLIN_RENDERER=true \
 		--build-arg ADD_EXTRA_FONTS=false \
 		--build-arg GEOSERVER_APP_NAME=geoserver \
+		--build-arg GEOSERVER_DATA_DIR_SRC= ${DATADIR_ARTIFACT_DIRECTORY} \
+		--build-arg GEOSERVER_WEBAPP_SRC=${DIST_DIRECTORY} \
 		-t geosolutionsit/geoserver:"${TAG}" \
 		 .
 }
 
 function build_without_data_dir() {
-
 	local TAG=${1}
 	local PULL_ENABLED=${2}
 	if [[ "${PULL_ENABLED}" == "pull" ]]; then
@@ -178,11 +175,42 @@ function build_without_data_dir() {
 		--build-arg ADD_MARLIN_RENDERER=true \
 		--build-arg ADD_EXTRA_FONTS=false \
 		--build-arg GEOSERVER_APP_NAME=geoserver \
+		--build-arg GEOSERVER_WEBAPP_SRC="${DIST_DIRECTORY}" \
 		-t geosolutionsit/geoserver:"${TAG}"-dev \
 		 .
 }
 
+function build_distribution() {
+	clean_up_directory ${DIST_DIRECTORY}
+	if [ ! -e "${DIST_DIRECTORY}/geoserver" ]; then
+        mkdir -p "${DIST_DIRECTORY}/geoserver"
+    fi
+	# explode the war file
+	cp ${GEOSERVER_ARTIFACT_DIRECTORY}geoserver.war ${DIST_DIRECTORY}/geoserver
+	cd ${DIST_DIRECTORY}/geoserver
+	jar -xvf geoserver.war
+	rm geoserver.war
+	cd ../../
+	# unzip all plugins and copy jar files into WEB-INF/lib
+	cp ${PLUGIN_ARTIFACT_DIRECTORY}*.zip ${DIST_DIRECTORY}/geoserver/WEB-INF/lib
+	cd ${DIST_DIRECTORY}/geoserver/WEB-INF/lib/
+	unzip -o "./*.zip"
+	rm -f *.zip
+	rm -f *.md
+	cd ../../../../
+	# TODO copy marlin jar files into WEB-INF/lib  (for release 2.18.x is not necessary)
+	# TODO check for fonts
+}
 
+function build_docker_image() {
+	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "dev" ]]; then
+  	    build_without_data_dir "${TAG}" "${PULL}"
+  	else
+  		clean_up_directory ${DATADIR_ARTIFACT_DIRECTORY}
+		get_release_artifact_url_from_github "${GITHUB_REPO}" "${GITHUB_REPO_OWNER}" "${GEOSERVER_DATA_DIR_RELEASE}"
+ 		build_with_data_dir "${TAG}" "${PULL}"
+   fi
+}
 
 function main {
     help ${ALL_PARAMETERS}
@@ -190,17 +218,11 @@ function main {
     clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
     download_plugin ext monitor
     download_plugin ext control-flow
-    download_plugin ext libjpeg-turbo
-    download_plugin community status-monitoring
-    download_marlin
-
-	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "dev" ]]; then
-   	    build_without_data_dir "${TAG}" "${PULL}"
-   	else
-   		clean_up_directory ${DATADIR_ARTIFACT_DIRECTORY}
-		get_release_artifact_url_from_github "${GITHUB_REPO}" "${GITHUB_REPO_OWNER}" "${GEOSERVER_DATA_DIR_RELEASE}"
- 		build_with_data_dir "${TAG}" "${PULL}"
-   	fi
+    #download_plugin ext libjpeg-turbo
+    #download_plugin community status-monitoring
+    #download_marlin   #marlin is default in 2.18.1
+	build_distribution
+	build_docker_image
 }
 
 main
