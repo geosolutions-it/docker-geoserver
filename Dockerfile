@@ -14,7 +14,8 @@ ADD "${GEOSERVER_DATA_DIR_SRC}" "${GEOSERVER_DATA_DIR}"
 # accepts local files and URLs. Tar(s) are automatically extracted
 ARG GEOSERVER_WEBAPP_SRC="./.placeholder"
 ENV GEOSERVER_WEBAPP_SRC="${GEOSERVER_WEBAPP_SRC}"
-ADD "${GEOSERVER_WEBAPP_SRC}" "${CATALINA_BASE}/webapps/"
+ADD "${GEOSERVER_WEBAPP_SRC}" "${CATALINA_BASE}/webapps"
+
 
 # zip files require explicit extracion
 RUN \
@@ -25,6 +26,10 @@ RUN \
         unzip "./*zip"; \
         rm ./*zip; \
     fi
+
+ARG GEOSERVER_PLUGINS_SRC="./.placeholder"
+ENV GEOSERVER_PLUGINS_SRC=${GEOSERVER_PLUGINS_SRC}
+ADD "${GEOSERVER_PLUGINS_SRC}" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/"
 
 FROM tomcat:9-jdk11-openjdk-slim
 
@@ -39,7 +44,6 @@ ENV GEOWEBCACHE_CACHE_DIR="${GEOSERVER_HOME}/gwc_cache_dir"
 ENV NETCDF_DATA_DIR="${GEOSERVER_HOME}/netcdf_data_dir"
 ENV GRIB_CACHE_DIR="${GEOSERVER_HOME}/grib_cache_dir"
 
-
 # create externalized dirs
 RUN mkdir -p \
     "${GEOSERVER_DATA_DIR}" \
@@ -49,16 +53,21 @@ RUN mkdir -p \
     "${NETCDF_DATA_DIR}" \
     "${GRIB_CACHE_DIR}"
 
+
 # copy from mother
 COPY --from=mother "${GEOSERVER_DATA_DIR}" "${GEOSERVER_DATA_DIR}"
 COPY --from=mother "${CATALINA_BASE}/webapps" "${CATALINA_BASE}/webapps"
 
+#install needed packages
+RUN apt-get update && apt-get install --yes gdal-bin pgcli fontconfig libfreetype6
+
 # override at run time as needed JAVA_OPTS
 ENV INITIAL_MEMORY="2G" 
 ENV MAXIMUM_MEMORY="4G"
-
+ENV JAIEXT_ENABLED="true"
+ENV LD_LIBRARY_PATH="/opt/libjpeg-turbo/lib64"
 ENV GEOSERVER_OPTS=" \
-  -DJAIEXT_ENABLED=true \
+  -Dorg.geotools.coverage.jaiext.enabled=${JAIEXT_ENABLED} \
   -Duser.timezone=GMT \
   -Dorg.geotools.shapefile.datetime=true \
   -DGEOSERVER_LOG_LOCATION=${GEOSERVER_LOG_LOCATION} \
