@@ -1,11 +1,14 @@
 version: '2.2'
 services:
-
   geoserver:
-    image: geosolutionsit/geoserver:gs-${DOCKER_IMAGE_VERSION}
+    image: gs_unavco:latest
+    build:
+      context: .
+      args:
+        GEOSERVER_WEBAPP_SRC: geoserver.war
     restart: always
     ports:
-      - '8001:8080'
+      - '8081:8080'
     environment:
       - JAVA_OPTS=-Xms${MEM} -Xmx${MEM} -XX:+UseParallelGC -XX:+UseParallelOldGC -DGEOWEBCACHE_CONFIG_DIR=$${GEOSERVER_DATA_DIR}/gwc -DGEOSERVER_LOG_LOCATION=$${GEOSERVER_HOME}/logs/$${HOSTNAME}-slave.log -DGEOSERVER_NODE_OPTS=id:slave-$${HOSTNAME} -DGEOSERVER_AUDIT_PATH=/var/geoserver/audits/geoserver-${DOCKER_HOSTNAME}-slave-$${HOSTNAME}
     volumes:
@@ -17,11 +20,12 @@ services:
       - ./config/context.xml:/usr/local/tomcat/conf/context.xml:ro
 
   geoserver-master:
-    image: geosolutionsit/geoserver:gs-${DOCKER_IMAGE_VERSION}
+    image: gs_unavco:latest
     restart: always
     ports:
-      - '8000:8080'
+      - '8080:8080'
     environment:
+      - GEOSERVER_APP_NAME=master
       - JAVA_OPTS=-Xms${MEM} -Xmx${MEM} -XX:+UseParallelGC -XX:+UseParallelOldGC -DGEOWEBCACHE_CONFIG_DIR=$${GEOSERVER_DATA_DIR}/gwc -DGEOSERVER_LOG_LOCATION=$${GEOSERVER_HOME}/logs/$${HOSTNAME}-master.log -DGEOSERVER_NODE_OPTS=id:master-$${HOSTNAME} -DGEOSERVER_AUDIT_PATH=/var/geoserver/audits/geoserver-${DOCKER_HOSTNAME}-master-$${HOSTNAME}
     volumes:
       - geoserver_master_datadir:/var/geoserver/datadir:rw

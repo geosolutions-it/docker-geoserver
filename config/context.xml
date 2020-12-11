@@ -33,13 +33,13 @@
     -->
 
     <Resource
-      name="jdbc/postgres"
+      name="jdbc/gwc"
       auth="Container"
       type="javax.sql.DataSource"
       driverClassName="org.postgresql.Driver"
-      url="jdbc:postgresql://postgresql:5432/gis"
-      username="docker"
-      password="docker"
+      url="jdbc:postgresql://database-0.int.unavco.org:5432/gwc"
+      username="gwc"
+      password="yourpassword"
       initialSize="5"
       minActive="5"
       maxActive="30"
