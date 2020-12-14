@@ -38,9 +38,14 @@ ENV GEOWEBCACHE_CONFIG_DIR="${GEOSERVER_DATA_DIR}/gwc"
 ENV GEOWEBCACHE_CACHE_DIR="${GEOSERVER_HOME}/gwc_cache_dir"
 ENV NETCDF_DATA_DIR="${GEOSERVER_HOME}/netcdf_data_dir"
 ENV GRIB_CACHE_DIR="${GEOSERVER_HOME}/grib_cache_dir"
+
+# default geoserver app name
+ARG GEOSERVER_APP_NAME="geoserver"
+ENV GEOSERVER_APP_NAME="${GEOSERVER_APP_NAME}"
  
 # fix for https://github.com/docker-library/openjdk/issues/333
-RUN apt-get update && apt-get install -y fontconfig libfreetype6
+# install unzip for wrapper
+RUN apt-get update && apt-get install -y fontconfig libfreetype6 unzip
 
 # create externalized dirs
 RUN mkdir -p \
@@ -54,6 +59,9 @@ RUN mkdir -p \
 # copy from mother
 COPY --from=mother "${GEOSERVER_DATA_DIR}" "${GEOSERVER_DATA_DIR}"
 COPY --from=mother "${CATALINA_BASE}/webapps" "${CATALINA_BASE}/webapps"
+
+# add wrapper
+ADD ./catalina-wrapper.sh "${CATALINA_BASE}/bin"
 
 # override at run time as needed JAVA_OPTS
 ENV INITIAL_MEMORY="2G" 
@@ -82,3 +90,5 @@ WORKDIR "$CATALINA_BASE"
 
 ENV TERM xterm
 EXPOSE 8080/tcp
+
+ENTRYPOINT ["./bin/catalina-wrapper.sh"]
