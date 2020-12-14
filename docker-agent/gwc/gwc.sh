@@ -33,7 +33,11 @@ CURL_ARGS=" -s "
 ##############################################################################
 ### VARIABLES,CONFIGURATION,DEFAULT VALUES
 ##############################################################################
-URL="http://localhost:8080/master/gwc/rest"
+
+URL="http://172.17.0.1:80/geoserver/gwc/rest"
+# For hitting geoserver slaves GWC cache, use:
+# URL="http://geoserver1.int.unavco.org:80/geoserver/gwc/rest"
+
 user="admin"
 password="geoserver"
 format="image/png8"
@@ -56,7 +60,7 @@ usage: $0 masstruncate <layerName> [options]
  - type :The Operation Type. One of "seed"," reseed","truncate"," masstruncate"
  - layerName :The name of the layer
  - gridsetName: the name of the gridSet (mandatory,except for masstruncate type)
- e.g. $0 seed layer epsg:4326
+ e.g. $0 seed layer EPSG:4326
 This script launch seeding and truncate tasks for GeoWebCache
 
 OPTIONS:

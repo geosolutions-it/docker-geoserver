@@ -27,7 +27,9 @@ USER="admin"
 PASSWORD="geoserver"
 
 # Array of geoserver instances
-GEOSERVER_INSTANCES=("http://localhost:8080/master/gwc/rest/" "http://localhost:80/geoserver/gwc/rest/")
+GEOSERVER_INSTANCES=("http://172.17.0.1:8080/master/gwc/rest/" "http://172.17.0.1:80/geoserver/gwc/rest/")
+# For UNAVCO uncomment following line
+# GEOSERVER_INSTANCES=("http://geoserver1.int.unavco.org:8080/master/gwc/rest/ http://geoserver1.int.unavco.org:80/geoserver/gwc/rest/")
 
 # Use the rest URL of the first instance is the default one
 GWCRESTURL=${GEOSERVER_INSTANCES[0]};
@@ -43,7 +45,7 @@ CTYPE="Content-type: text/xml, application/x-www-form-urlencoded"
 H_ACCEPT="Accept: text/xml"
 
 #LAYER LIST SERVICE 
-GWCLISTURL="${GWCRESTURL}layers/"
+GWCLISTURL="${GWCRESTURL}layers.xml"
 progname="$0"
 echo "*************************************************************************"
 echo "**** GEOWEBCACHE CLEAN TOOL *********************************************"
