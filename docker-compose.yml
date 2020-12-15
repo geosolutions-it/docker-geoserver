@@ -1,16 +1,16 @@
 version: '2.2'
 services:
-  geoserver:
+  geoserver-slave:
     image: gs_unavco:latest
     build:
       context: .
       args:
         GEOSERVER_WEBAPP_SRC: geoserver.war
     restart: always
-    ports:
-      - '8081:8080'
     environment:
       - JAVA_OPTS=-Xms${MEM} -Xmx${MEM} -XX:+UseParallelGC -XX:+UseParallelOldGC -DGEOWEBCACHE_CONFIG_DIR=$${GEOSERVER_DATA_DIR}/gwc -DGEOSERVER_LOG_LOCATION=$${GEOSERVER_HOME}/logs/$${HOSTNAME}-slave.log -DGEOSERVER_NODE_OPTS=id:slave-$${HOSTNAME} -DGEOSERVER_AUDIT_PATH=/var/geoserver/audits/geoserver-${DOCKER_HOSTNAME}-slave-$${HOSTNAME}
+      # uncomment next line if you want to enable sticky session (so it's possible to access geoserver admin panel on each slave)
+      # - COOKIE=JSESSIONID prefix
     volumes:
       - geoserver_slaves_datadir:/var/geoserver/datadir:rw
       - geoserver_slaves_gwccachedir:/var/geoserver/gwc_cache_dir:rw
@@ -34,6 +34,24 @@ services:
       - shared_logs:/var/geoserver/logs:rw
       - shared_audits:/var/geoserver/audits:rw
       - ./config/context.xml:/usr/local/tomcat/conf/context.xml:ro
+
+  #haproxy:
+  #  image: dockercloud/haproxy
+  #  container_name: haproxy
+  #  depends_on:
+  #    - geoserver-slave
+  #  links:
+  #    - geoserver-slave
+  #  ports:
+  #    # geoserver instances are behind haproxy (which is mapped on host at port 80)
+  #    - '80:80'
+  #    # uncomment next line if you want to see haproxy admin panel (allows to list proxied geoserver slave instances)
+  #    #- '1936:1936'
+  #  volumes:
+  #    - '/var/run/docker.sock:/var/run/docker.sock'
+  #  # uncomment this enviroment section if you want to access haproxy admin panel (with credentials admin:admin)
+  #  #environment:
+  #  #  - 'STATS_AUTH="admin:admin"'
 
 volumes:
   geoserver_slaves_datadir:
