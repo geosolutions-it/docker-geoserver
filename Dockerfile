@@ -59,7 +59,7 @@ COPY --from=mother "${GEOSERVER_DATA_DIR}" "${GEOSERVER_DATA_DIR}"
 COPY --from=mother "${CATALINA_BASE}/webapps" "${CATALINA_BASE}/webapps"
 
 #install needed packages
-RUN apt-get update && apt-get install --yes gdal-bin pgcli fontconfig libfreetype6
+RUN apt-get update && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 curl vim
 
 # override at run time as needed JAVA_OPTS
 ENV INITIAL_MEMORY="2G" 
