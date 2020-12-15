@@ -35,23 +35,23 @@ services:
       - shared_audits:/var/geoserver/audits:rw
       - ./config/context.xml:/usr/local/tomcat/conf/context.xml:ro
 
-  haproxy:
-    image: dockercloud/haproxy
-    container_name: haproxy
-    depends_on:
-      - geoserver-slave
-    links:
-      - geoserver-slave
-    ports:
-      # geoserver instances are behind haproxy (which is mapped on host at port 80)
-      - '80:80'
-      # uncomment next line if you want to see haproxy admin panel (allows to list proxied geoserver slave instances)
-      #- '1936:1936'
-    volumes:
-      - '/var/run/docker.sock:/var/run/docker.sock'
-    # uncomment this enviroment section if you want to access haproxy admin panel (with credentials admin:admin)
-    #environment:
-    #  - 'STATS_AUTH="admin:admin"'
+  #haproxy:
+  #  image: dockercloud/haproxy
+  #  container_name: haproxy
+  #  depends_on:
+  #    - geoserver-slave
+  #  links:
+  #    - geoserver-slave
+  #  ports:
+  #    # geoserver instances are behind haproxy (which is mapped on host at port 80)
+  #    - '80:80'
+  #    # uncomment next line if you want to see haproxy admin panel (allows to list proxied geoserver slave instances)
+  #    #- '1936:1936'
+  #  volumes:
+  #    - '/var/run/docker.sock:/var/run/docker.sock'
+  #  # uncomment this enviroment section if you want to access haproxy admin panel (with credentials admin:admin)
+  #  #environment:
+  #  #  - 'STATS_AUTH="admin:admin"'
 
 volumes:
   geoserver_slaves_datadir:
