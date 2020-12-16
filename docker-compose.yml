@@ -13,10 +13,7 @@ services:
       - JAVA_OPTS=-Xms${MEM} -Xmx${MEM} -XX:+UseParallelGC -XX:+UseParallelOldGC -DGEOWEBCACHE_CONFIG_DIR=$${GEOSERVER_DATA_DIR}/gwc -DGEOSERVER_LOG_LOCATION=$${GEOSERVER_HOME}/logs/$${HOSTNAME}-slave.log -DGEOSERVER_NODE_OPTS=id:slave-$${HOSTNAME} -DGEOSERVER_AUDIT_PATH=/var/geoserver/audits/geoserver-${DOCKER_HOSTNAME}-slave-$${HOSTNAME}
       # note: it's required to use right VIRTUAL_HOST definition.
       #       nginx-proxy is not going to work with IPs.
-      #       adding letsencypt allows to handle HTTPS proxy
       - VIRTUAL_HOST=geocluster.unavco.local
-      - LETSENCRYPT_HOST=geocluster.unavco.local
-      - LETSENCRYPT_EMAIL=jose.macchi@gmail.com
     volumes:
       - geoserver_slaves_datadir:/var/geoserver/datadir:rw
       - geoserver_slaves_gwccachedir:/var/geoserver/gwc_cache_dir:rw
@@ -46,23 +43,8 @@ services:
     restart: always
     ports:
       - '80:80'
-      - '443:443'
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
-      - certs:/etc/nginx/certs:ro
-      - vhostd:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-    labels:
-      - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
-
-  letsencrypt:
-    image: jrcs/letsencrypt-nginx-proxy-companion
-    restart: always
-    environment:
-      - NGINX_PROXY_CONTAINER=nginx-proxy
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - certs:/etc/nginx/certs:rw
       - vhostd:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
   
