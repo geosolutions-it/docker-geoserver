@@ -1,6 +1,18 @@
 #!/bin/bash
 
-docker build \
-  --build-arg GEOSERVER_WEBAPP_SRC=$GEOSERVER_WEBAPP_SRC \
-  -f $DOCKERFILE_PATH \
-  -t "${DOCKER_REPO}:${SOURCE_BRANCH}" .
+for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_MAINT_VERSION; do
+  NIGHTLY_URL="https://build.geoserver.org/geoserver/$NIGHTLY_VERSION/geoserver-$NIGHTLY_VERSION-latest-war.zip"
+  docker build \
+    --build-arg GEOSERVER_WEBAPP_SRC=$NIGHTLY_URL \
+    -f $DOCKERFILE_PATH \
+    -t "${DOCKER_REPO}:test-$NIGHTLY_VERSION" .
+done
+
+for VERSION in $STABLE_VERSION $MAINT_VERSION; do 
+  URL="http://sourceforge.net/projects/geoserver/files/GeoServer/$VERSION/geoserver-$VERSION-war.zip"
+  docker build \
+    --build-arg GEOSERVER_WEBAPP_SRC=$URL \
+    -f $DOCKERFILE_PATH \
+    -t "${DOCKER_REPO}:test-$VERSION" .
+done
+
