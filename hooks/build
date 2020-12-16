@@ -9,7 +9,7 @@ for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_
 done
 
 for VERSION in $STABLE_VERSION $MAINT_VERSION; do 
-  URL="http://sourceforge.net/projects/geoserver/files/GeoServer/$VERSION/geoserver-$VERSION-war.zip"
+  URL="https://netcologne.dl.sourceforge.net/project/geoserver/GeoServer/$VERSION/geoserver-$VERSION-war.zip"
   docker build \
     --build-arg GEOSERVER_WEBAPP_SRC=$URL \
     -f $DOCKERFILE_PATH \
