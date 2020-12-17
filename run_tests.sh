@@ -5,4 +5,5 @@ catalina.sh run &
 printenv
 sleep 15
 ls -la webapps/geoserver/
+cat $GEOSERVER_LOG_DIR/geoserver.log
 $CURL --retry-delay 1 --retry 60 -X GET http://$HOSTNAME:8080/geoserver/rest/about/manifest -H  "accept: application/json" -H  "content-type: application/json"
