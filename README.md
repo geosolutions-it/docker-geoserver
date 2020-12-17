@@ -9,7 +9,8 @@ And run it
 
 `docker run --name gs -p 8080:8080 geosolutionsit/geoserver`
 
-Open your browser and point it to `http://localhost:8080/geoserver` . GeoServer web interface will show up
+Open your browser and point it to `http://localhost:8080/geoserver` . 
+GeoServer web interface will show up, you can now log in with user admin and password `geoserver`.
 
 There are some [**environment variables**](https://docs.docker.com/engine/reference/run/) you can use at run time:
 - `JAVA_OPTS` to customize JAVA_OPTS for the container
