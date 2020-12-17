@@ -1,4 +1,3 @@
-shot/0315edb
 FROM openjdk:11-jdk-buster as mother
 LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
 
