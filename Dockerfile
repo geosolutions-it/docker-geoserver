@@ -1,37 +1,27 @@
-FROM tomcat:9-jdk11-openjdk as mother
+shot/0315edb
+FROM openjdk:11-jdk-buster as mother
 LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV CATALINA_BASE "$CATALINA_HOME"
-ENV GEOSERVER_HOME="/var/geoserver"
-ENV GEOSERVER_DATA_DIR="${GEOSERVER_HOME}/datadir"
-
-# local dir, tar or remore URLs
-ARG GEOSERVER_DATA_DIR_SRC="./.placeholder"
-ENV GEOSERVER_DATA_DIR_SRC="${GEOSERVER_DATA_DIR_SRC}"
-ADD "${GEOSERVER_DATA_DIR_SRC}" "${GEOSERVER_DATA_DIR}"
+RUN apt update && apt install -y unzip
 
 # accepts local files and URLs. Tar(s) are automatically extracted
-ARG GEOSERVER_WEBAPP_SRC="./.placeholder"
-ENV GEOSERVER_WEBAPP_SRC="${GEOSERVER_WEBAPP_SRC}"
-ADD "${GEOSERVER_WEBAPP_SRC}" "${CATALINA_BASE}/webapps"
+WORKDIR /output/datadir
+ARG GEOSERVER_DATA_DIR_SRC="./.placeholder"
+ADD "${GEOSERVER_DATA_DIR_SRC}" "./"
 
+# accepts local files and URLs. Tar(s) are automatically extracted
+WORKDIR /output/webapp
+ARG GEOSERVER_WEBAPP_SRC="./.placeholder"
+ADD "${GEOSERVER_WEBAPP_SRC}" "./"
 
 # zip files require explicit extracion
 RUN \
-    cd "${CATALINA_BASE}/webapps/"; \
     if [ "${GEOSERVER_WEBAPP_SRC##*.}" = "zip" ]; then \
-        apt-get update -y \
-        apt-get install -y unzip \
         unzip "./*zip"; \
         rm ./*zip; \
     fi
 
-#ARG GEOSERVER_PLUGINS_SRC="./.placeholder"
-#ENV GEOSERVER_PLUGINS_SRC=${GEOSERVER_PLUGINS_SRC}
-#ADD "${GEOSERVER_PLUGINS_SRC}" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/"
-
-FROM tomcat:9-jdk11-openjdk-buster
+FROM tomcat:9-jdk11-openjdk
 
 ENV CATALINA_BASE "$CATALINA_HOME"
 # set externalizations
@@ -43,7 +33,7 @@ ENV GEOWEBCACHE_CONFIG_DIR="${GEOSERVER_DATA_DIR}/gwc"
 ENV GEOWEBCACHE_CACHE_DIR="${GEOSERVER_HOME}/gwc_cache_dir"
 ENV NETCDF_DATA_DIR="${GEOSERVER_HOME}/netcdf_data_dir"
 ENV GRIB_CACHE_DIR="${GEOSERVER_HOME}/grib_cache_dir"
-ENV EXTRA_OPTS=""
+
 # create externalized dirs
 RUN mkdir -p \
     "${GEOSERVER_DATA_DIR}" \
@@ -53,31 +43,23 @@ RUN mkdir -p \
     "${NETCDF_DATA_DIR}" \
     "${GRIB_CACHE_DIR}"
 
-
 # copy from mother
-COPY --from=mother "${GEOSERVER_DATA_DIR}" "${GEOSERVER_DATA_DIR}"
-COPY --from=mother "${CATALINA_BASE}/webapps" "${CATALINA_BASE}/webapps"
-
-#install needed packages
-RUN apt-get update && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 curl vim \
-&& apt-get clean && apt-get autoclean && apt-get autoremove \
-&& rm -rf /var/lib/apt/lists/* && rm -rf /usr/share/man/* && rm -rf /usr/share/doc/*
+COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
+COPY --from=mother "/output/webapp" "${CATALINA_BASE}/webapps/"
 
 # override at run time as needed JAVA_OPTS
 ENV INITIAL_MEMORY="2G" 
 ENV MAXIMUM_MEMORY="4G"
-ENV JAIEXT_ENABLED="true"
 
 ENV GEOSERVER_OPTS=" \
-  -Dorg.geotools.coverage.jaiext.enabled=${JAIEXT_ENABLED} \
+  -DJAIEXT_ENABLED=true \
   -Duser.timezone=GMT \
   -Dorg.geotools.shapefile.datetime=true \
   -DGEOSERVER_LOG_LOCATION=${GEOSERVER_LOG_LOCATION} \
   -DGEOWEBCACHE_CONFIG_DIR=${GEOWEBCACHE_CONFIG_DIR} \
   -DGEOWEBCACHE_CACHE_DIR=${GEOWEBCACHE_CACHE_DIR} \
   -DNETCDF_DATA_DIR=${NETCDF_DATA_DIR} \
-  -DGRIB_CACHE_DIR=${GRIB_CACHE_DIR} \
-  ${EXTRA_OPTS}"
+  -DGRIB_CACHE_DIR=${GRIB_CACHE_DIR}"
 
 ENV JAVA_OPTS="-Xms${INITIAL_MEMORY} -Xmx${MAXIMUM_MEMORY} \
   -Djava.awt.headless=true -server \
@@ -88,9 +70,9 @@ ENV JAVA_OPTS="-Xms${INITIAL_MEMORY} -Xmx${MAXIMUM_MEMORY} \
   -XX:MaxGCPauseMillis=200 -XX:ParallelGCThreads=20 -XX:ConcGCThreads=5 \
   ${GEOSERVER_OPTS}"
 
+WORKDIR "$CATALINA_BASE"
 ADD run_tests.sh /docker/tests/run_tests.sh
 
-WORKDIR "$CATALINA_BASE"
 
 ENV TERM xterm
 EXPOSE 8080/tcp
