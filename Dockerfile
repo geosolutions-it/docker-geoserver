@@ -60,6 +60,7 @@ COPY --from=mother "${CATALINA_BASE}/webapps" "${CATALINA_BASE}/webapps"
 
 #install needed packages
 RUN apt-get update && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 curl vim \
+&& apt-get install net-tools \
 && apt-get clean && apt-get autoclean && apt-get autoremove \
 && rm -rf /var/lib/apt/lists/* && rm -rf /usr/share/man/* && rm -rf /usr/share/doc/*
 
