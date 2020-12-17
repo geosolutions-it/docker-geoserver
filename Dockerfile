@@ -1,7 +1,7 @@
 FROM openjdk:11-jdk-buster as mother
 LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
 
-RUN apt update && apt install -y unzip
+RUN apt-get update && apt-get install -y unzip
 
 # accepts local files and URLs. Tar(s) are automatically extracted
 WORKDIR /output/datadir
@@ -49,6 +49,8 @@ COPY --from=mother "/output/webapp" "${CATALINA_BASE}/webapps/"
 # override at run time as needed JAVA_OPTS
 ENV INITIAL_MEMORY="2G" 
 ENV MAXIMUM_MEMORY="4G"
+
+
 
 ENV GEOSERVER_OPTS=" \
   -DJAIEXT_ENABLED=true \
