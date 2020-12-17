@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+touch /tmp/failed_versions
 
 for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_MAINT_VERSION; do
   if [ "$(grep $NIGHTLY_VERSION /tmp/failed_versions)" == "" ]; then
