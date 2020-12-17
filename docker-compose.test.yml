@@ -1,8 +1,8 @@
 version: "3.8"
 services:
   sut:
-    build: .
-    #image: geosolutionsit/geoserver:test-$VERSION
+    #build: .
+    image: geosolutionsit/geoserver:test-$VERSION
     command: /docker/tests/run_tests.sh
     environment:
      - SOURCE_BRANCH
