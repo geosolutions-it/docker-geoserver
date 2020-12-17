@@ -60,7 +60,8 @@ COPY --from=mother "${CATALINA_BASE}/webapps" "${CATALINA_BASE}/webapps"
 
 #install needed packages
 RUN apt-get update && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 curl vim \
-&& rm -rf /var/lib/apt/lists/*
+&& apt-get clean && apt-get autoclean && apt-get autoremove \
+&& rm -rf /var/lib/apt/lists/* && rm -rf /usr/share/man/* && rm -rf /usr/share/doc/*
 
 # override at run time as needed JAVA_OPTS
 ENV INITIAL_MEMORY="2G" 
