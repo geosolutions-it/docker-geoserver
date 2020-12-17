@@ -68,7 +68,9 @@ ENV JAVA_OPTS="-Xms${INITIAL_MEMORY} -Xmx${MAXIMUM_MEMORY} \
   -XX:SoftRefLRUPolicyMSPerMB=36000 -XX:+UseG1GC \
   -XX:MaxGCPauseMillis=200 -XX:ParallelGCThreads=20 -XX:ConcGCThreads=5 \
   ${GEOSERVER_OPTS}"
-ADD run_tests.sh "$CATALINA_BASE"
+
+ADD run_tests.sh /docker/tests/run_tests.sh
+
 WORKDIR "$CATALINA_BASE"
 
 ENV TERM xterm
