@@ -3,10 +3,14 @@
 
 
 for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_MAINT_VERSION; do
-  docker push "${DOCKER_REPO}:test-$NIGHTLY_VERSION"
+  if [ "$(grep $NIGHTLY_VERSION /tmp/failed_versions)" == "" ]; then
+    docker push "${DOCKER_REPO}:test-$NIGHTLY_VERSION"
+  fi
 done
 
 for VERSION in $STABLE_VERSION $MAINT_VERSION; do 
-  docker push "${DOCKER_REPO}:test-$VERSION"
+  if [ "$(grep $VERSION /tmp/failed_versions)" == "" ]; then
+    docker push "${DOCKER_REPO}:test-$VERSION"
+  fi
 done
 
