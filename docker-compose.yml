@@ -11,9 +11,7 @@ services:
       - '8080'
     environment:
       - JAVA_OPTS=-Xms${MEM} -Xmx${MEM} -XX:+UseParallelGC -XX:+UseParallelOldGC -DGEOWEBCACHE_CONFIG_DIR=$${GEOSERVER_DATA_DIR}/gwc -DGEOSERVER_LOG_LOCATION=$${GEOSERVER_HOME}/logs/$${HOSTNAME}-slave.log -DGEOSERVER_NODE_OPTS=id:slave-$${HOSTNAME} -DGEOSERVER_AUDIT_PATH=/var/geoserver/audits/geoserver-${DOCKER_HOSTNAME}-slave-$${HOSTNAME}
-      # note: it's required to use right VIRTUAL_HOST definition.
-      #       nginx-proxy is not going to work with IPs.
-      - VIRTUAL_HOST=geocluster.unavco.local
+      - PROXY_BASE_URL=$${X-Forwarded-Proto}://$${X-Forwarded-Host}/geoserver/
     volumes:
       - geoserver_slaves_datadir:/var/geoserver/datadir:rw
       - geoserver_slaves_gwccachedir:/var/geoserver/gwc_cache_dir:rw
@@ -25,11 +23,14 @@ services:
   geoserver-master:
     image: gs_unavco:latest
     restart: always
-    ports:
-      - '8080:8080'
+    #ports:
+    #  - '8080:8080'
+    expose: 
+      - '8080'
     environment:
       - GEOSERVER_APP_NAME=master
       - JAVA_OPTS=-Xms${MEM} -Xmx${MEM} -XX:+UseParallelGC -XX:+UseParallelOldGC -DGEOWEBCACHE_CONFIG_DIR=$${GEOSERVER_DATA_DIR}/gwc -DGEOSERVER_LOG_LOCATION=$${GEOSERVER_HOME}/logs/$${HOSTNAME}-master.log -DGEOSERVER_NODE_OPTS=id:master-$${HOSTNAME} -DGEOSERVER_AUDIT_PATH=/var/geoserver/audits/geoserver-${DOCKER_HOSTNAME}-master-$${HOSTNAME}
+      - PROXY_BASE_URL=$${X-Forwarded-Proto}://$${X-Forwarded-Host}/geoserver/
     volumes:
       - geoserver_master_datadir:/var/geoserver/datadir:rw
       - geoserver_master_gwccachedir:/var/geoserver/gwc_cache_dir:rw
@@ -39,19 +40,14 @@ services:
       - ./config/context.xml:/usr/local/tomcat/conf/context.xml:ro
 
   nginx-proxy:
-    image: jwilder/nginx-proxy
+    image: nginx:stable-alpine
     restart: always
     ports:
       - '80:80'
     volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - vhostd:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
+      - ./main.conf:/etc/nginx/conf.d/default.conf:rw
   
 volumes:
-  certs:
-  html:
-  vhostd:
   geoserver_slaves_datadir:
     external: true
     name: geoserver_slaves_datadir
