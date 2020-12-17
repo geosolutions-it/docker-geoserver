@@ -1,3 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-exit 0
+for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_MAINT_VERSION; do
+  export VERSION=$NIGHTLY_VERSION
+  timeout 10m docker-compose run --rm sut
+done
+
+for VERSION in $STABLE_VERSION $MAINT_VERSION; do 
+  #export VERSION=$VERSION
+  timeout 10m docker-compose run --rm sut
+done
+
