@@ -1,5 +1,7 @@
- sut:
-   image: geosolutions-it/test-$VERSION
-   command: ./run_tests.sh
-   environment:
-    - SOURCE_BRANCH
+version: "3.8"
+services:
+  sut:
+    image: geosolutions-it/test-$VERSION
+    command: ./run_tests.sh
+    environment:
+     - SOURCE_BRANCH
