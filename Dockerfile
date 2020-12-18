@@ -17,9 +17,10 @@ ADD "${GEOSERVER_WEBAPP_SRC}" "./"
 WORKDIR /output/plugins
 ARG PLUG_IN_URLS="${PLUG_IN_URLS}"
 RUN for URL in "$PLUG_IN_URLS"; do \
-    if [ "${URL##*.}" = "zip" ]; then \
-      wget -O - $URL | unzip "./*zip"; \
-    fi
+      if [ "${URL##*.}" = "zip" ]; then \
+        wget -O - $URL | unzip "./*zip"; \
+      fi \
+    done
 # zip files require explicit extracion
 RUN \
     if [ "${GEOSERVER_WEBAPP_SRC##*.}" = "zip" ]; then \
