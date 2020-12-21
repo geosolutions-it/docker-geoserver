@@ -18,19 +18,24 @@ RUN \
     if [ "${GEOSERVER_WEBAPP_SRC##*.}" = "zip" ]; then \
         unzip "./*zip"; \
         rm ./*zip; \
-    fi
+    fi \
+    && mkdir ./geoserver && unzip ./geoserver.war -d ./geoserver && rm ./geoserver.war
 
 RUN apt-get update; apt-get upgrade --yes; apt-get install wget --yes
 RUN wget https://downloads.sourceforge.net/project/libjpeg-turbo/1.5.3/libjpeg-turbo-official_1.5.3_amd64.deb && dpkg -i ./libjpeg*.deb && apt-get -f install 
 
 WORKDIR /output/plugins
 ARG PLUG_IN_URLS="./.placeholder"
-RUN [[ "${PLUG_IN_URLS}" == *"http"* ]] &&  for URL in "${PLUG_IN_URLS}"; do wget $URL;done; unzip -o "./*zip"; rm -f ./*zip
+RUN for URL in "${PLUG_IN_URLS}"; do wget $URL;done; unzip -o "./*zip"; rm -f ./*zip
 
 
 WORKDIR /output/webapp
 ARG APP_LOCATION="geoserver"
-RUN if [ "${APP_LOCATION}" != "geoserver" ]; then mv /output/webapp/geoserver /output/webapp/${APP_LOCATION}; fi
+RUN \
+    if [ "${APP_LOCATION}" != "geoserver" ]; then \
+      mv /output/webapp/geoserver /output/webapp/${APP_LOCATION}; \
+    fi
+
 
 FROM tomcat:9-jdk11-openjdk
    
@@ -93,8 +98,8 @@ RUN apt-get update \
 
 COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
 COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
-COPY --from=mother "/output/webapp" "${CATALINA_BASE}/webapps/"
-COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/${APP_LOCATION}/WEB-INF/lib"
+COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
+COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"
 
 
 
