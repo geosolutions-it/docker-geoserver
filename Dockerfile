@@ -46,37 +46,11 @@ ENV GEOWEBCACHE_CONFIG_DIR="${GEOSERVER_DATA_DIR}/gwc"
 ENV GEOWEBCACHE_CACHE_DIR="${GEOSERVER_HOME}/gwc_cache_dir"
 ENV NETCDF_DATA_DIR="${GEOSERVER_HOME}/netcdf_data_dir"
 ENV GRIB_CACHE_DIR="${GEOSERVER_HOME}/grib_cache_dir"
-
-# create externalized dirs
-RUN apt-get update \
-    && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 \
-    && apt-get clean \
-    && apt-get autoclean \
-    && apt-get autoremove \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /usr/share/man/* \
-    && rm -rf /usr/share/doc/* \
-    mkdir -p \
-    "${GEOSERVER_DATA_DIR}" \
-    "${GEOSERVER_LOG_DIR}"  \
-    "${GEOWEBCACHE_CONFIG_DIR}" \
-    "${GEOWEBCACHE_CACHE_DIR}" \
-    "${NETCDF_DATA_DIR}" \
-    "${GRIB_CACHE_DIR}"
-
-# copy from mother
-COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
-COPY --from=mother "/output/webapp" "${CATALINA_BASE}/webapps/"
-COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
-COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/${APP_LOCATION}/WEB-INF/lib"
-
-
 # override at run time as needed JAVA_OPTS
 ENV INITIAL_MEMORY="2G" 
 ENV MAXIMUM_MEMORY="4G"
 ENV LD_LIBRARY_PATH="/opt/libjpeg-turbo/lib64"
 ENV JAIEXT_ENABLED="true"
-ADD run_tests.sh /docker/tests/run_tests.sh
 
 ENV GEOSERVER_OPTS=" \
   -DJAIEXT_ENABLED=true \
@@ -96,6 +70,34 @@ ENV JAVA_OPTS="-Xms${INITIAL_MEMORY} -Xmx${MAXIMUM_MEMORY} \
   -XX:SoftRefLRUPolicyMSPerMB=36000 -XX:+UseG1GC \
   -XX:MaxGCPauseMillis=200 -XX:ParallelGCThreads=20 -XX:ConcGCThreads=5 \
   ${GEOSERVER_OPTS}"
+
+ADD run_tests.sh /docker/tests/run_tests.sh
+
+# create externalized dirs
+RUN apt-get update \
+    && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 \
+    && apt-get clean \
+    && apt-get autoclean \
+    && apt-get autoremove \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /usr/share/man/* \
+    && rm -rf /usr/share/doc/* \
+    && mkdir -p \
+    "${GEOSERVER_DATA_DIR}" \
+    "${GEOSERVER_LOG_DIR}"  \
+    "${GEOWEBCACHE_CONFIG_DIR}" \
+    "${GEOWEBCACHE_CACHE_DIR}" \
+    "${NETCDF_DATA_DIR}" \
+    "${GRIB_CACHE_DIR}"
+
+# copy from mother
+
+COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
+COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
+COPY --from=mother "/output/webapp" "${CATALINA_BASE}/webapps/"
+COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/${APP_LOCATION}/WEB-INF/lib"
+
+
 
 WORKDIR "$CATALINA_BASE"
 
