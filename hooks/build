@@ -32,13 +32,16 @@ done
 
 for VERSION in "$STABLE_VERSION $MAINT_VERSION"; do 
   URL="https://netcologne.dl.sourceforge.net/project/geoserver/GeoServer/$VERSION/geoserver-$VERSION-war.zip"
-  for PLUG_IN_NAME in "$PLUG_IN_LIST"; do
+  for PLUG_IN_NAME in $PLUG_IN_LIST; do
+    echo $PLUG_IN_NAME
+    echo $VERSION
     PLUG_IN_URLS+=(https://netcologne.dl.sourceforge.net/project/geoserver/GeoServer/$VERSION/ext-latest/geoserver-${VERSION}-${PLUG_IN_NAME}-plugin.zip)
   done
   echo "${PLUG_IN_URLS=[@]}" 
+  PLUGIN_URL_STRING="${PLUG_IN_URLS=[@]}"
   docker build \
     --build-arg GEOSERVER_WEBAPP_SRC=$URL \
-    --build-arg PLUG_IN_URLS=${PLUG_IN_URLS=[@]} \
+    --build-arg PLUG_IN_URLS="$PLUGIN_URL_STRING" \
     -f $DOCKERFILE_PATH \
     -t "${DOCKER_REPO}:test-$VERSION" .
 done
