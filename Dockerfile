@@ -13,12 +13,6 @@ WORKDIR /output/webapp
 ARG GEOSERVER_WEBAPP_SRC="./.placeholder"
 ADD "${GEOSERVER_WEBAPP_SRC}" "./"
 
-
-WORKDIR /output/plugins
-ARG PLUG_IN_URLS="./.placeholder"
-ADD "${PLUG_IN_URLS}" "./"
-RUN unzip "./*zip"
-
 # zip files require explicit extracion
 RUN \
     if [ "${GEOSERVER_WEBAPP_SRC##*.}" = "zip" ]; then \
@@ -29,6 +23,13 @@ RUN \
 RUN apt-get update; apt-get upgrade --yes; apt-get install wget --yes
 RUN wget https://downloads.sourceforge.net/project/libjpeg-turbo/1.5.3/libjpeg-turbo-official_1.5.3_amd64.deb && dpkg -i ./libjpeg*.deb && apt-get -f install 
 
+WORKDIR /output/plugins
+ARG PLUG_IN_URLS="./.placeholder"
+ADD "${PLUG_IN_URLS}" "./"
+RUN unzip "./*zip"
+
+
+WORKDIR /output/webapp
 ARG APP_LOCATION="geoserver"
 RUN if [ "${APP_LOCATION}" != "geoserver" ]; then mv /output/webapp/geoserver /output/webapp/${APP_LOCATION}; fi
 
