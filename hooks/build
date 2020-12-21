@@ -15,7 +15,11 @@ for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_
   [ "$NIGHTLY_VERSION" == *"$NIGHTLY_MAINT_VERSION"* ] && PLUG_IN_VERSION=${NIGHTLY_MAINT_PLUG_IN_VERSION}
   echo ${PLUG_IN_VERSION}
   for PLUG_IN_NAME in $PLUG_IN_LIST; do
-    PLUG_IN_URLS+=(https://build.geoserver.org/geoserver/$NIGHTLY_VERSION/ext-latest/geoserver-${PLUG_IN_VERSION}-${PLUG_IN_NAME}-plugin.zip)
+    echo $PLUG_IN_NAME
+    echo $PLUG_IN_VERSION
+    URL="https://build.geoserver.org/geoserver/$NIGHTLY_VERSION/ext-latest/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip"
+    echo "Plugin $PLUG_IN_NAME URL for version $PLUG_IN_VERSION: $URL"
+    PLUG_IN_URLS+=($URL)
   done
   echo "${PLUG_IN_URLS=[@]}" 
   docker build \
