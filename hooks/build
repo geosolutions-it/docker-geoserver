@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 PLUG_IN_LIST="monitor controlflow"
 NIGHTLY_MASTER_PLUG_IN_VERSION="2.$(expr $MIDDLE_STABLE + 1)-SNAPSHOT"
