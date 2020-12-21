@@ -14,7 +14,7 @@ for NIGHTLY_VERSION in "$NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY
   [ "$NIGHTLY_VERSION" == "$NIGHTLY_STABLE_VERSION" ] && PLUG_IN_VERSION=${NIGHTLY_STABLE_PLUG_IN_VERSION}
   [ "$NIGHTLY_VERSION" == "$NIGHTLY_MAINT_VERSION" ] && PLUG_IN_VERSION=${NIGHTLY_MAINT_PLUG_IN_VERSION}
   echo ${PLUG_IN_VERSION}
-  for PLUG_IN_NAME in $PLUG_IN_LIST; do
+  for PLUG_IN_NAME in "$PLUG_IN_LIST"; do
     PLUG_IN_URLS+=(https://build.geoserver.org/geoserver/$NIGHTLY_VERSION/ext-latest/geoserver-${PLUG_IN_VERSION}-${PLUG_IN_NAME}-plugin.zip)
   done
   echo "${PLUG_IN_URLS=[@]}" 
@@ -25,11 +25,12 @@ for NIGHTLY_VERSION in "$NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY
     -t "${DOCKER_REPO}:test-$NIGHTLY_VERSION" .
 done
 
-for VERSION in $STABLE_VERSION $MAINT_VERSION; do 
+for VERSION in "$STABLE_VERSION $MAINT_VERSION"; do 
   URL="https://netcologne.dl.sourceforge.net/project/geoserver/GeoServer/$VERSION/geoserver-$VERSION-war.zip"
-  for PLUG_IN_NAME in $PLUG_IN_LIST; do
+  for PLUG_IN_NAME in "$PLUG_IN_LIST"; do
     PLUG_IN_URLS+=(https://netcologne.dl.sourceforge.net/project/geoserver/GeoServer/$VERSION/ext-latest/geoserver-${VERSION}-${PLUG_IN_NAME}-plugin.zip)
   done
+  echo "${PLUG_IN_URLS=[@]}" 
   docker build \
     --build-arg GEOSERVER_WEBAPP_SRC=$URL \
     --build-arg PLUG_IN_URLS="${PLUG_IN_URLS=[@]}" \
