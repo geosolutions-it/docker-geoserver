@@ -53,7 +53,7 @@ RUN apt-get update \
     && apt-get clean \
     && apt-get autoclean \
     && apt-get autoremove \
-    && rm /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/* \
     && rm -rf /usr/share/man/* \
     && rm -rf /usr/share/doc/* \
     mkdir -p \

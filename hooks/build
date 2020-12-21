@@ -22,9 +22,10 @@ for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_
     PLUG_IN_URLS+=($URL)
   done
   echo "${PLUG_IN_URLS=[@]}" 
+  PLUGIN_URL_STRING="${PLUG_IN_URLS=[@]}"
   docker build \
     --build-arg GEOSERVER_WEBAPP_SRC=$NIGHTLY_URL \
-    --build-arg PLUG_IN_URLS=${PLUG_IN_URLS=[@]} \
+    --build-arg PLUG_IN_URLS="$PLUGIN_URL_STRING" \
     -f $DOCKERFILE_PATH \
     -t "${DOCKER_REPO}:test-$NIGHTLY_VERSION" .
 done
