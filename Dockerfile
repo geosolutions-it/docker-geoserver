@@ -25,8 +25,7 @@ RUN wget https://downloads.sourceforge.net/project/libjpeg-turbo/1.5.3/libjpeg-t
 
 WORKDIR /output/plugins
 ARG PLUG_IN_URLS="./.placeholder"
-ADD "${PLUG_IN_URLS}" "./"
-RUN unzip "./*zip"
+RUN for URL in "${PLUG_IN_URLS}"; do wget $URL;done; unzip -o "./*zip"; rm -f ./*zip
 
 
 WORKDIR /output/webapp
