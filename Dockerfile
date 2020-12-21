@@ -34,6 +34,7 @@ ARG APP_LOCATION="geoserver"
 RUN if [ "${APP_LOCATION}" != "geoserver" ]; then mv /output/webapp/geoserver /output/webapp/${APP_LOCATION}; fi
 
 FROM tomcat:9-jdk11-openjdk
+   
 
 ENV CATALINA_BASE "$CATALINA_HOME"
 # set externalizations
@@ -47,7 +48,15 @@ ENV NETCDF_DATA_DIR="${GEOSERVER_HOME}/netcdf_data_dir"
 ENV GRIB_CACHE_DIR="${GEOSERVER_HOME}/grib_cache_dir"
 
 # create externalized dirs
-RUN mkdir -p \
+RUN apt-get update \
+    && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 \
+    && apt-get clean \
+    && apt-get autoclean \
+    && apt-get autoremove \
+    && rm /var/lib/apt/lists/* \
+    && rm -rf /usr/share/man/* \
+    && rm -rf /usr/share/doc/* \
+    mkdir -p \
     "${GEOSERVER_DATA_DIR}" \
     "${GEOSERVER_LOG_DIR}"  \
     "${GEOWEBCACHE_CONFIG_DIR}" \
@@ -67,7 +76,6 @@ ENV INITIAL_MEMORY="2G"
 ENV MAXIMUM_MEMORY="4G"
 ENV LD_LIBRARY_PATH="/opt/libjpeg-turbo/lib64"
 ENV JAIEXT_ENABLED="true"
-RUN apt-get update && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 && rm -rf /usr/share/man/* && rm -rf /usr/share/doc && apt-get clean && apt-get autoclean && apt-get autoremove && rm /var/lib/apt/lists/*
 ADD run_tests.sh /docker/tests/run_tests.sh
 
 ENV GEOSERVER_OPTS=" \
