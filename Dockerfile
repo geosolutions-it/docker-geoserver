@@ -19,15 +19,17 @@ RUN \
         unzip "./*zip"; \
         rm ./*zip; \
     fi \
-    && mkdir ./geoserver && unzip ./geoserver.war -d ./geoserver && rm ./geoserver.war
+    && [ -d "./geoserver" ] || (mkdir -p ./geoserver && unzip ./geoserver.war -d ./geoserver && rm ./geoserver.war)
 
 RUN apt-get update; apt-get upgrade --yes; apt-get install wget --yes
 RUN wget https://downloads.sourceforge.net/project/libjpeg-turbo/1.5.3/libjpeg-turbo-official_1.5.3_amd64.deb && dpkg -i ./libjpeg*.deb && apt-get -f install 
 
 WORKDIR /output/plugins
-ARG PLUG_IN_URLS="./.placeholder"
-RUN for URL in "${PLUG_IN_URLS}"; do wget $URL;done; unzip -o "./*zip"; rm -f ./*zip
-
+ARG PLUG_IN_URLS=""
+RUN \
+  if [ "$(echo ${PLUG_IN_URLS}| grep http)" != "" ]; then \
+    for URL in "${PLUG_IN_URLS}"; do wget $URL;done; unzip -o "./*zip"; rm -f ./*zip; \
+  fi 
 
 WORKDIR /output/webapp
 ARG APP_LOCATION="geoserver"
@@ -57,7 +59,7 @@ ENV LD_LIBRARY_PATH="/opt/libjpeg-turbo/lib64"
 ENV JAIEXT_ENABLED="true"
 
 ENV GEOSERVER_OPTS=" \
-  -DJAIEXT_ENABLED=true \
+  -Dorg.geotools.coverage.jaiext.enabled=${JAIEXT_ENABLED} \
   -Duser.timezone=GMT \
   -Dorg.geotools.shapefile.datetime=true \
   -DGEOSERVER_LOG_LOCATION=${GEOSERVER_LOG_LOCATION} \

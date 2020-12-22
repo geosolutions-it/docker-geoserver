@@ -8,4 +8,4 @@ export STABLE_VERSION="2.18.1 2.18.0"
 export DOCKERFILE_PATH="./Dockerfile"
 export DOCKER_REPO="somethingnotreal"
 source hooks/build
-source hooks/test
+#source hooks/test
