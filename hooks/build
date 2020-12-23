@@ -26,7 +26,7 @@ for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_
     --build-arg GEOSERVER_WEBAPP_SRC="$NIGHTLY_URL" \
     --build-arg PLUG_IN_URLS="$var" \
     -f "$DOCKERFILE_PATH" \
-    -t "${DOCKER_REPO}:test-$NIGHTLY_VERSION" .
+    -t "${DOCKER_REPO}:$NIGHTLY_VERSION" .
 done
 
 for VERSION in $STABLE_VERSION $MAINT_VERSION; do 
@@ -44,6 +44,6 @@ for VERSION in $STABLE_VERSION $MAINT_VERSION; do
     --build-arg GEOSERVER_WEBAPP_SRC="$GEOSERVER_URL" \
     --build-arg PLUG_IN_URLS="$var" \
     -f "$DOCKERFILE_PATH" \
-    -t "${DOCKER_REPO}:test-$VERSION" .
+    -t "${DOCKER_REPO}:$VERSION" .
 done
 
