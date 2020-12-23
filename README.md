@@ -1,3 +1,6 @@
+![alt text](docker_hub_deployment.png)
+
+
 # docker-geoserver
 
 ## How to run it
