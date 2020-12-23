@@ -1,4 +1,4 @@
-FROM openjdk:11-jdk-buster as mother
+FROM tomcat:9-jdk11-openjdk as mother
 LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
 
 RUN apt-get update && apt-get install -y unzip
