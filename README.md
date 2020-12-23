@@ -14,15 +14,42 @@ GeoServer web interface will show up, you can now log in with user admin and pas
 
 There are some [**environment variables**](https://docs.docker.com/engine/reference/run/) you can use at run time:
 - `JAVA_OPTS` to customize JAVA_OPTS for the container
-
+- `GEOSERVER_LOG_DIR` to customize log placement
+- `GEOSERVER_DATA_DIR` to put your GeoServer datadir elsewhere
+- `GEOWEBCACHE_CONFIG_DIR` to put your GeoServer cache configuration elsewhere
+- `GEOWEBCACHE_CACHE_DIR` to put your GeoServer cache elsewhere
+- `NETCDF_DATA_DIR` to put your GeoServer NETCDF data dir elsewhere
+- `GRIB_CACHE_DIR`o put your GeoServer GRIB cache dir elsewhere
 
 ## How to build it
 If you want to build the image by yourself just run `docker build` from the root of the repository
 
-` docker build -t geoserver:test .`
+` docker build -t geoserver:test . --build-args GEOSERVER_WEBAPP_SRC="./geoserver.war"`
 
 There are [**build arguments**](https://docs.docker.com/engine/reference/commandline/build/) to customize the image:
-- `GEOSERVER_DATA_DIR_SRC` to add your own custom datadir to the final image. This can be a local tar or directory or remote URL (see [ADD](https://docs.docker.com/engine/reference/builder/#add) instruction Doc)
-- `GEOSERVER_WEBAPP_SRC` to add your own custom web app to the final image. This can be a local tar or directory or remote URL (see [ADD](https://docs.docker.com/engine/reference/builder/#add) instruction Doc)
-
+- `GEOSERVER_DATA_DIR_SRC` to add your own custom datadir to the final image. This can be a local zip or directory or remote URL (see [ADD](https://docs.docker.com/engine/reference/builder/#add) instruction Doc)
+- `GEOSERVER_WEBAPP_SRC` to add your own custom web app to the final image. This can be a local zip or directory or remote URL (see [ADD](https://docs.docker.com/engine/reference/builder/#add) instruction Doc)
 If you want to build or package your own web app you can customize the "mother" stage of Dockerfile accordingly
+
+##Docker Hub build process
+
+Scripts provided that are for docker hub are under `hooks` directory.
+
+Basically the `hooks/build` script takes these environment variables with current version numbers offered for geoserver:
+
+
+```
+export MAINT_VERSION="2.17.3 2.17.2 2.17.1"
+export MIDDLE_STABLE="18"
+export NIGHTLY_MAINT_VERSION="2.17.x"
+export NIGHTLY_MASTER_VERSION="master antani"
+export NIGHTLY_STABLE_VERSION="2.18.x"
+export STABLE_VERSION="2.18.1 2.18.0"
+```
+
+Notes: 
+
+Phantom version `antani` is supposed to always fail as a test and always tried to be built.
+"MIDDLE_STABLE" has just a function for the scripts logic, increase it with latest minor version number for stable.
+
+To test locally build hook you can use the `test_hooks.sh` script provided.
