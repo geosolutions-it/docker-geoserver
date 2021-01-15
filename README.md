@@ -1,4 +1,4 @@
-![alt text](docker_hub_deployment.png)
+![alt text](./docker_hub_deployment.png)
 
 
 # docker-geoserver

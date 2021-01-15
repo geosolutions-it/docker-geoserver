@@ -7,7 +7,8 @@ readonly GEOSERVER_MASTER_VERSION=${3}
 readonly GEOSERVER_DATA_DIR_RELEASE=${4}
 readonly PULL=${5}
 readonly ALL_PARAMETERS=$*
-readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver/"
+readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver"
+readonly BASE_BUILD_URL_STABLE="https://netcologne.dl.sourceforge.net/project/geoserver/GeoServer"
 readonly EXTRA_FONTS_URL="https://www.dropbox.com/s/hs5743lwf1rktws/fonts.tar.gz?dl=1"
 readonly MARLIN_VERSION=0.9.2
 readonly ARTIFACT_DIRECTORY=./resources
@@ -64,11 +65,26 @@ function download_plugin()  {
 
 	fi
 
-    if [ ! -e "${PLUGIN_ARTIFACT_URL}" ]; then
-        mkdir -p "${PLUGIN_ARTIFACT_URL}"
-    fi
+	if [[ "${GEOSERVER_VERSION}" =~ "x" ]]; then
+		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION::-2}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
+		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
+	else
+		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION}-${PLUGIN_NAME}-plugin.zip
+		if [[ "${TYPE}" == "ext" ]]; then
+			TYPE=extensions
+			local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL_STABLE}/${GEOSERVER_VERSION}/${TYPE}/${PLUGIN_FULL_NAME}
+		else
+			VERSION="${GEOSERVER_VERSION::-2}-SNAPSHOT"
+			PLUGIN_FULL_NAME=geoserver-${VERSION}-${PLUGIN_NAME}-plugin.zip
+			local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION::-2}.x/${TYPE}-latest/${PLUGIN_FULL_NAME}
+		fi
+	fi
 
-    download_from_url_to_a_filepath "${PLUGIN_ARTIFACT_URL}" "${PLUGIN_ARTIFACT_DIRECTORY}/${PLUGIN_FULL_NAME}"
+  if [ ! -e "${PLUGIN_ARTIFACT_URL}" ]; then
+      mkdir -p "${PLUGIN_ARTIFACT_URL}"
+  fi
+
+  download_from_url_to_a_filepath "${PLUGIN_ARTIFACT_URL}" "${PLUGIN_ARTIFACT_DIRECTORY}/${PLUGIN_FULL_NAME}"
 }
 
 function download_fonts()  {
@@ -99,8 +115,16 @@ function download_marlin()  {
 function download_geoserver() {
     clean_up_directory ${GEOSERVER_ARTIFACT_DIRECTORY}
     local VERSION=${1}
-    local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
-    local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}
+    local GEOSERVER_FILE_NAME_NIGHTLY="geoserver-${VERSION}-latest-war.zip"
+		local GEOSERVER_FILE_NAME_STABLE="geoserver-${VERSION}-war.zip"
+
+		if [[ "${VERSION}" =~ "x" ]]; then
+			local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}
+		else
+			local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL_STABLE}/${VERSION}/${GEOSERVER_FILE_NAME_STABLE}
+
+		fi
+
     if [ -f /tmp/geoserver.war.zip ]; then
         rm /tmp/geoserver.war.zip
     fi
@@ -125,7 +149,7 @@ function build_with_data_dir() {
 		--build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY \
     --build-arg GEOSERVER_DATA_DIR_SRC=${GEOSERVER_DATA_DIR_DIRECTORY} \
-		-t geosolutionsit/geoserver:"${TAG}" \
+		-t geosolutionsit/geoserver:"${TAG}-${GEOSERVER_VERSION}" \
 		 .
 }
 
@@ -141,7 +165,7 @@ function build_without_data_dir() {
 	${DOCKER_BUILD_COMMAND} --no-cache \
 		--build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY\
-		-t geosolutionsit/geoserver:"${TAG}"-dev \
+		-t geosolutionsit/geoserver:"${TAG}-${GEOSERVER_VERSION}" \
 		 .
 }
 
@@ -151,8 +175,7 @@ function main {
     clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
     download_plugin ext monitor
     download_plugin ext control-flow
-		download_plugin ext libjpeg-turbo
-    download_plugin community status-monitoring
+    #download_plugin community sec-oauth2-geonode
     #download_marlin
 
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "nodatadir" ]]; then
