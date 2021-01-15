@@ -31,11 +31,7 @@ ADD .placeholder ${PLUG_IN_URLS} /output/plugins/
 #   if [ "$(echo ${PLUG_IN_URLS}| grep http)" != "" ]; then \
 #     for URL in "${PLUG_IN_URLS}"; do wget $URL;done; unzip -o "./*zip"; rm -f ./*zip; \
 #   fi
-RUN \
-  if [ "${PLUG_IN_URLS}" = "./resources/geoserver-plugins" ]; then \
-    unzip -o "./*.zip"; \
-    rm -f ./*zip; \
-  fi
+RUN unzip -o "./*.zip";rm -f ./*zip
 
 WORKDIR /output/webapp
 ARG APP_LOCATION="geoserver"

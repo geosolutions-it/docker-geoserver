@@ -19,13 +19,13 @@ readonly MARLIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/marlin/
 
 function help(){
 	if [ "$#" -ne 6 ] ; then
-		echo "Usage: $0 [docker image tag] [geoserver version] [geoserver master version] [datadir| no datadir] [pull|no pull];"
+		echo "Usage: $0 [docker image tag] [geoserver version] [geoserver master version] [datadir| nodatadir] [pull|no pull];"
 		echo "";
 		echo "[docker image tag] :          the tag to be used for the docker iamge ";
 		echo "[geoserver version] :         the release version of geoserver to be used; you can set it to master if you want the last release";
 		echo "[geoserver master version] :  if you use the master version for geoserver you need to set it to the numerical value for the next release;"
 		echo "                              if you use a released version you need to put it to the release number";
-		echo "[datadir release number]:     Github release number; if this parameter is equal to dev the datadir is not burned in the docker images ";
+		echo "[datadir| nodatadir]:         if this parameter is equal to nodatadir the datadir is not burned in the docker images ";
 		echo "[pull|no pull]:               docker build use always a remote image or a local image";
 		exit 1;
 	fi
@@ -155,7 +155,7 @@ function main {
     download_plugin community status-monitoring
     #download_marlin
 
-	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "dev" ]]; then
+	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "nodatadir" ]]; then
    	    build_without_data_dir "${TAG}" "${PULL}"
    	else
    		clean_up_directory ${DATADIR_ARTIFACT_DIRECTORY}
