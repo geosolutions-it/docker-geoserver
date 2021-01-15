@@ -4,6 +4,7 @@
 # docker-geoserver
 
 ## How to run it
+
 Pull the image from [Docker Hub](https://hub.docker.com/r/geosolutionsit/geoserver/)
 
 `docker pull geosolutionsit/geoserver`
@@ -25,6 +26,7 @@ There are some [**environment variables**](https://docs.docker.com/engine/refere
 - `GRIB_CACHE_DIR`o put your GeoServer GRIB cache dir elsewhere
 
 ## How to build the Dockerfile with no helper scrips
+
 If you want to build the image by yourself just run `docker build` from the root of the repository
 
 ` docker build -t geoserver:test . --build-args GEOSERVER_WEBAPP_SRC="./geoserver.war"`
@@ -45,14 +47,14 @@ Basically the `hooks/build` script takes these environment variables with curren
 export MAINT_VERSION="2.17.3 2.17.2 2.17.1"
 export MIDDLE_STABLE="18"
 export NIGHTLY_MAINT_VERSION="2.17.x"
-export NIGHTLY_MASTER_VERSION="master antani"
+export NIGHTLY_MASTER_VERSION="master foobar"
 export NIGHTLY_STABLE_VERSION="2.18.x"
 export STABLE_VERSION="2.18.1 2.18.0"
 ```
 
 Notes:
 
-Phantom version `antani` is supposed to always fail as a test and always tried to be built.
+Phantom version `foobar` is supposed to always fail as a test and always tried to be built.
 "MIDDLE_STABLE" has just a function for the scripts logic, increase it with latest minor version number for stable.
 
 To test locally build hook you can use the `test_hooks.sh` script provided.
