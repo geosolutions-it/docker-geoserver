@@ -22,14 +22,20 @@ RUN \
     && [ -d "./geoserver" ] || (mkdir -p ./geoserver && unzip ./geoserver.war -d ./geoserver && rm ./geoserver.war)
 
 RUN apt-get update; apt-get upgrade --yes; apt-get install wget --yes
-RUN wget https://downloads.sourceforge.net/project/libjpeg-turbo/1.5.3/libjpeg-turbo-official_1.5.3_amd64.deb && dpkg -i ./libjpeg*.deb && apt-get -f install 
+RUN wget https://downloads.sourceforge.net/project/libjpeg-turbo/1.5.3/libjpeg-turbo-official_1.5.3_amd64.deb && dpkg -i ./libjpeg*.deb && apt-get -f install
 
 WORKDIR /output/plugins
 ARG PLUG_IN_URLS=""
+ADD .placeholder ${PLUG_IN_URLS} /output/plugins/
+# RUN \
+#   if [ "$(echo ${PLUG_IN_URLS}| grep http)" != "" ]; then \
+#     for URL in "${PLUG_IN_URLS}"; do wget $URL;done; unzip -o "./*zip"; rm -f ./*zip; \
+#   fi
 RUN \
-  if [ "$(echo ${PLUG_IN_URLS}| grep http)" != "" ]; then \
-    for URL in "${PLUG_IN_URLS}"; do wget $URL;done; unzip -o "./*zip"; rm -f ./*zip; \
-  fi 
+  if [ "${PLUG_IN_URLS}" = "./resources/geoserver-plugins" ]; then \
+    unzip -o "./*.zip"; \
+    rm -f ./*zip; \
+  fi
 
 WORKDIR /output/webapp
 ARG APP_LOCATION="geoserver"
@@ -40,7 +46,7 @@ RUN \
 
 
 FROM tomcat:9-jdk11-openjdk
-   
+
 
 ENV CATALINA_BASE "$CATALINA_HOME"
 # set externalizations
@@ -53,7 +59,7 @@ ENV GEOWEBCACHE_CACHE_DIR="${GEOSERVER_HOME}/gwc_cache_dir"
 ENV NETCDF_DATA_DIR="${GEOSERVER_HOME}/netcdf_data_dir"
 ENV GRIB_CACHE_DIR="${GEOSERVER_HOME}/grib_cache_dir"
 # override at run time as needed JAVA_OPTS
-ENV INITIAL_MEMORY="2G" 
+ENV INITIAL_MEMORY="2G"
 ENV MAXIMUM_MEMORY="4G"
 ENV LD_LIBRARY_PATH="/opt/libjpeg-turbo/lib64"
 ENV JAIEXT_ENABLED="true"
