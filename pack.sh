@@ -152,7 +152,7 @@ function main {
     download_plugin ext control-flow
 #    download_plugin ext geofence
 #    https://github.com/geosolutions-it/DevOps/issues/451
-#    download_plugin ext geofence-server
+    download_plugin ext geofence-server
     download_plugin ext libjpeg-turbo
     download_plugin ext monitor
     download_plugin ext querylayer
