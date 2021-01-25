@@ -22,7 +22,15 @@ RUN \
     && [ -d "./geoserver" ] || (mkdir -p ./geoserver && unzip ./geoserver.war -d ./geoserver && rm ./geoserver.war)
 
 RUN apt-get update; apt-get upgrade --yes; apt-get install wget --yes
-RUN wget https://downloads.sourceforge.net/project/libjpeg-turbo/1.5.3/libjpeg-turbo-official_1.5.3_amd64.deb && dpkg -i ./libjpeg*.deb && apt-get -f install
+
+# download and install libjpeg-2.0.6 from sources.
+RUN wget https://nav.dl.sourceforge.net/project/libjpeg-turbo/2.0.6/libjpeg-turbo-2.0.6.tar.gz \
+    && tar -zxf ./libjpeg-turbo-2.0.6.tar.gz \
+    && cd libjpeg-turbo-2.0.6 && apt-get install cmake -yq && cmake -G"Unix Makefiles" && make deb \
+    && dpkg -i ./libjpeg*.deb && apt-get -f install \
+    && apt-get clean \
+    && apt-get autoclean \
+    && apt-get autoremove
 
 WORKDIR /output/plugins
 ARG PLUG_IN_URLS=""
