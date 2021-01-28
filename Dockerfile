@@ -27,10 +27,6 @@ RUN \
         rm ./*zip; \
     fi
 
-ARG GEOSERVER_PLUGINS_SRC="./.placeholder"
-ENV GEOSERVER_PLUGINS_SRC=${GEOSERVER_PLUGINS_SRC}
-ADD "${GEOSERVER_PLUGINS_SRC}" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/"
-
 FROM tomcat:9-jdk11-openjdk-buster
 
 ENV CATALINA_BASE "$CATALINA_HOME"
