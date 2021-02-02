@@ -1,5 +1,5 @@
 <p align="center">
-![Deployment_Diagram](images/docker_hub_deployment.png)
+![Deployment_Diagram](images/docker_hub_deployment.jpg)
 </p>
 
 # docker-geoserver
