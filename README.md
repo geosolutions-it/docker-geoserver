@@ -1,6 +1,4 @@
-<p align="center">
 ![Deployment_Diagram](images/diag.jpg)
-</p>
 
 # docker-geoserver
 
