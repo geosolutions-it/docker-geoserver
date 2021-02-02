@@ -1,4 +1,4 @@
-![Deployment_Diagram](images/diag.jpg)
+![Deployment_Diagram](images/diag.png)
 
 # docker-geoserver
 
