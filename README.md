@@ -1,5 +1,4 @@
-![alt text](https://github.com/geosolutions-it/docker-geoserver/blob/docker_hub_build/docker_hub_deployment.png?raw=true)
-
+![alt text](./docker_hub_deployment.png?raw=true)
 
 # docker-geoserver
 
