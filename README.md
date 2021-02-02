@@ -1,4 +1,6 @@
+<p align="center">
 ![alt text](./docker_hub_deployment.png?raw=true)
+</p>
 
 # docker-geoserver
 
