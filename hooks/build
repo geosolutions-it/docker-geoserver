@@ -51,5 +51,8 @@ for VERSION in $STABLE_VERSION $MAINT_VERSION; do
     --build-arg PLUG_IN_URLS="./resources/geoserver-plugins" \
     -f "$DOCKERFILE_PATH" \
     -t "${DOCKER_REPO}:$VERSION" .
+  if [ "$VERSION" == "$LATEST_VERSION" ]; then
+    docker tag "${DOCKER_REPO}:$VERSION" "${DOCKER_REPO}:latest"
+  fi
   rm -rf ./resources/geoserver-plugins/*
 done
