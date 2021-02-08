@@ -1,7 +1,7 @@
 version: '2.2'
 services:
   geoserver-slave:
-    image: gs_unavco:latest
+    image: gs_unavco:20210128.1
     build:
       context: .
       args:
@@ -21,7 +21,7 @@ services:
       - ./config/context.xml:/usr/local/tomcat/conf/context.xml:ro
 
   geoserver-master:
-    image: gs_unavco:latest
+    image: gs_unavco:20210128.1
     restart: always
     #ports:
     #  - '8080:8080'
