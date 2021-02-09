@@ -9,6 +9,7 @@ readonly PULL=${5}
 readonly ALL_PARAMETERS=$*
 readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver"
 readonly BASE_BUILD_URL_STABLE="https://netcologne.dl.sourceforge.net/project/geoserver/GeoServer"
+#readonly BASE_BUILD_URL_STABLE="https://build.geoserver.org/geoserver"
 readonly EXTRA_FONTS_URL="https://www.dropbox.com/s/hs5743lwf1rktws/fonts.tar.gz?dl=1"
 readonly MARLIN_VERSION=0.9.2
 readonly ARTIFACT_DIRECTORY=./resources
@@ -35,6 +36,10 @@ function help(){
 function clean_up_directory() {
 	rm -rf ${1}/*
 }
+function create_plugins_folder() {
+  mkdir -p ./resources/geoserver-plugins
+
+}
 
 function download_from_url_to_a_filepath {
 	URL=${1}
@@ -56,13 +61,13 @@ function download_plugin()  {
 	PLUGIN_NAME=${2}
 
 	case ${GEOSERVER_VERSION} in
-		"${GEOSERVER_MASTER_VERSION:0:$#-2}.x")
-		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION:0:$#-2}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
+		"${GEOSERVER_MASTER_VERSION%.*}")
+		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION%.*}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
 		PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
 		;;
 
 		"master")
-		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_MASTER_VERSION:0:$#-2}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
+		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_MASTER_VERSION%.*}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
 		PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
 		;;
 
@@ -72,9 +77,9 @@ function download_plugin()  {
 			NEWTYPE=extensions
 			PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL_STABLE}/${GEOSERVER_VERSION}/${NEWTYPE}/${PLUGIN_FULL_NAME}
 		else
-			VERSION="${GEOSERVER_VERSION:0:$#-2}-SNAPSHOT"
+			VERSION="${GEOSERVER_VERSION%.*}-SNAPSHOT"
 			PLUGIN_FULL_NAME=geoserver-${VERSION}-${PLUGIN_NAME}-plugin.zip
-			PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION:0:$#-2}.x/${TYPE}-latest/${PLUGIN_FULL_NAME}
+			PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION%.*}.x/${TYPE}-latest/${PLUGIN_FULL_NAME}
 		fi
 		;;
 
@@ -143,9 +148,9 @@ function build_with_data_dir() {
 	local TAG=${1}
         local PULL_ENABLED=${2}
         if [[ "${PULL_ENABLED}" == "pull" ]]; then
-                DOCKER_BUILD_COMMAND="docker build --pull"
+                DOCKER_BUILD_COMMAND="docker buildx build --pull"
         else
-                DOCKER_BUILD_COMMAND="docker build"
+                DOCKER_BUILD_COMMAND="docker buildx build"
         fi;
 	${DOCKER_BUILD_COMMAND} --no-cache \
 		--build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
@@ -160,9 +165,9 @@ function build_without_data_dir() {
 	local TAG=${1}
 	local PULL_ENABLED=${2}
 	if [[ "${PULL_ENABLED}" == "pull" ]]; then
-		DOCKER_BUILD_COMMAND="docker build --pull"
+		DOCKER_BUILD_COMMAND="docker buildx build --pull"
 	else
-		DOCKER_BUILD_COMMAND="docker build"
+		DOCKER_BUILD_COMMAND="docker buildx build"
 	fi;
 	${DOCKER_BUILD_COMMAND} --no-cache \
 		--build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
@@ -175,6 +180,7 @@ function main {
     help ${ALL_PARAMETERS}
     download_geoserver "${GEOSERVER_VERSION}"
     clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
+    create_plugins_folder
     download_plugin ext monitor
     download_plugin ext control-flow
     download_plugin community sec-oauth2-geonode
