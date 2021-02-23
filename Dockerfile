@@ -102,9 +102,10 @@ RUN apt-get update \
 
 COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
 COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
-COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
+#COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
+COPY --from=mother "/output/webapp" "${CATALINA_BASE}/webapps"
 COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"
-
+COPY  ./catalina-wrapper.sh ${CATALINA_BASE}/bin/catalina_wrapper.sh
 
 
 WORKDIR "$CATALINA_BASE"
