@@ -1,9 +1,21 @@
 #!/bin/bash
 
+until PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_ENDPOINT" -U "$POSTGRES_USER" -d "$OSM_DB" -c '\q'; do
+  >&2 echo "Postgres is unavailable - sleeping"
+  sleep 1
+done
+
+war_path="${CATALINA_BASE}/webapps/geoserver.war"
+
 if [ -z "$GEOSERVER_APP_NAME" ]; then
   echo "ERROR: $GEOSERVER_APP_NAME not defined or empty!"
   exit 1
+elif [ -f ${war_path} ]; then
+  mv ${CATALINA_BASE}/webapps/geoserver.war ${CATALINA_BASE}/webapps/${GEOSERVER_APP_NAME}.war
 fi
+
+# update sld files modification date to speed up GS startup
+touch ${GEOSERVER_DATA_DIR}/styles/*sld
 
 webapp_path="${CATALINA_BASE}/webapps/${GEOSERVER_APP_NAME}"
 

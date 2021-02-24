@@ -35,6 +35,10 @@ function help(){
 function clean_up_directory() {
 	rm -rf ${1}/*
 }
+function create_plugins_folder() {
+  mkdir -p ./resources/geoserver-plugins
+
+}
 
 function download_from_url_to_a_filepath {
 	URL=${1}
@@ -147,8 +151,7 @@ function build_with_data_dir() {
         else
                 DOCKER_BUILD_COMMAND="docker build"
         fi;
-	${DOCKER_BUILD_COMMAND} --no-cache \
-		--build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
+	${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY \
     --build-arg GEOSERVER_DATA_DIR_SRC=${GEOSERVER_DATA_DIR_DIRECTORY} \
 		-t geosolutionsit/geoserver:"${TAG}-${GEOSERVER_VERSION}" \
@@ -164,8 +167,7 @@ function build_without_data_dir() {
 	else
 		DOCKER_BUILD_COMMAND="docker build"
 	fi;
-	${DOCKER_BUILD_COMMAND} --no-cache \
-		--build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
+	${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY\
 		-t geosolutionsit/geoserver:"${TAG}-${GEOSERVER_VERSION}" \
 		 .
@@ -175,10 +177,13 @@ function main {
     help ${ALL_PARAMETERS}
     download_geoserver "${GEOSERVER_VERSION}"
     clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
+    create_plugins_folder
+    download_plugin ext feature-pregeneralized
+    download_plugin ext css
     download_plugin ext monitor
     download_plugin ext control-flow
-    download_plugin community sec-oauth2-geonode
-    #download_marlin
+    download_plugin ext libjpeg-turbo
+    download_marlin
 
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "nodatadir" ]]; then
    	    build_without_data_dir "${TAG}" "${PULL}"
