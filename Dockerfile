@@ -8,6 +8,18 @@ WORKDIR /output/datadir
 ARG GEOSERVER_DATA_DIR_SRC="./.placeholder"
 ADD "${GEOSERVER_DATA_DIR_SRC}" "./"
 
+# Add extra fonts to JVM
+WORKDIR /code
+COPY ./resources/fonts /code
+ARG ADD_EXTRA_FONTS=true
+ENV ADD_EXTRA_FONTS $ADD_EXTRA_FONTS
+RUN if [ "$ADD_EXTRA_FONTS" = true ]; then \
+	tar -zxvf /code/*; \
+	rm -f /code/fonts.tar.gz; \
+    fi
+
+
+
 # accepts local files and URLs. Tar(s) are automatically extracted
 WORKDIR /output/webapp
 ARG GEOSERVER_WEBAPP_SRC="./.placeholder"
@@ -27,10 +39,7 @@ RUN wget https://downloads.sourceforge.net/project/libjpeg-turbo/1.5.3/libjpeg-t
 WORKDIR /output/plugins
 ARG PLUG_IN_URLS=""
 ADD .placeholder ${PLUG_IN_URLS} /output/plugins/
-# RUN \
-#   if [ "$(echo ${PLUG_IN_URLS}| grep http)" != "" ]; then \
-#     for URL in "${PLUG_IN_URLS}"; do wget $URL;done; unzip -o "./*zip"; rm -f ./*zip; \
-#   fi
+
 RUN unzip -o "./*.zip";rm -f ./*zip
 
 WORKDIR /output/webapp
@@ -102,10 +111,10 @@ RUN apt-get update \
 
 COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
 COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
-#COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
-COPY --from=mother "/output/webapp" "${CATALINA_BASE}/webapps"
+COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
 COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"
 COPY  ./catalina-wrapper.sh ${CATALINA_BASE}/bin/catalina_wrapper.sh
+COPY --from=mother "/code/*" "${JAVA_HOME}/lib/fonts/"
 
 
 WORKDIR "$CATALINA_BASE"

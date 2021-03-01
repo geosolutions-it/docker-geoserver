@@ -178,10 +178,13 @@ function main {
     download_geoserver "${GEOSERVER_VERSION}"
     clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
     create_plugins_folder
+    download_fonts
+    download_plugin ext feature-pregeneralized
+    download_plugin ext css
     download_plugin ext monitor
     download_plugin ext control-flow
-    download_plugin community sec-oauth2-geonode
-    #download_marlin
+    download_plugin ext libjpeg-turbo
+    download_marlin
 
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "nodatadir" ]]; then
    	    build_without_data_dir "${TAG}" "${PULL}"
