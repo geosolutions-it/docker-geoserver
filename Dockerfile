@@ -4,9 +4,10 @@ LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
 RUN apt-get update && apt-get install -y unzip
 
 # accepts local files and URLs. Tar(s) are automatically extracted
-WORKDIR /output/datadir
-ARG GEOSERVER_DATA_DIR_SRC="./.placeholder"
+WORKDIR /output
+ARG GEOSERVER_DATA_DIR_SRC="./datadir.zip"
 ADD "${GEOSERVER_DATA_DIR_SRC}" "./"
+RUN unzip ./datadir.zip && rm datadir.zip
 
 # Add extra fonts to JVM
 WORKDIR /code
@@ -111,7 +112,8 @@ RUN apt-get update \
 
 COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
 COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
-COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
+#COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
+COPY --from=mother "/output/webapp" "${CATALINA_BASE}/webapps"
 COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"
 COPY  ./catalina-wrapper.sh ${CATALINA_BASE}/bin/catalina_wrapper.sh
 COPY --from=mother "/code/*" "${JAVA_HOME}/lib/fonts/"
