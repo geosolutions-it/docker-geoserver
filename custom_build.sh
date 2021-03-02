@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 set -e
 TAG=${1}
@@ -20,21 +20,22 @@ readonly FONTS_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/fonts/
 readonly MARLIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/marlin/
 
 function help(){
-	if [ "$#" -ne 6 ] ; then
-		echo "Usage: $0 [docker image tag] [geoserver version] [geoserver master version] [datadir| nodatadir] [pull|no pull];"
+	if [ "$#" -ne 5 ] ; then
+		echo "Usage: $0 [docker image tag] [geoserver version] [geoserver master version] [datadir|nodatadir] [pull|no_pull];"
 		echo "";
 		echo "[docker image tag] :          the tag to be used for the docker iamge ";
 		echo "[geoserver version] :         the release version of geoserver to be used; you can set it to master if you want the last release";
 		echo "[geoserver master version] :  if you use the master version for geoserver you need to set it to the numerical value for the next release;"
 		echo "                              if you use a released version you need to put it to the release number";
-		echo "[datadir| nodatadir]:         if this parameter is equal to nodatadir the datadir is not burned in the docker images ";
-		echo "[pull|no pull]:               docker build use always a remote image or a local image";
+		echo "[datadir|nodatadir]:          datadir: copies ${DATADIR_ARTIFACT_DIRECTORY} in place into the containerr image, nodatadir: does nothing about any custom datadir";
+		echo "[pull|no_pull]:               docker build use always a remote image or a local image";
 		exit 1;
 	fi
 }
 
 function clean_up_directory() {
-	rm -rf ${1}/*
+  # we shall never clean datadir
+	rm -rf ./resources/geoserver-plugins/* ./reosurces/geoserver/*
 }
 function create_plugins_folder() {
   mkdir -p ./resources/geoserver-plugins
@@ -146,15 +147,29 @@ function download_geoserver() {
 function build_with_data_dir() {
 
 	local TAG=${1}
-        local PULL_ENABLED=${2}
-        if [[ "${PULL_ENABLED}" == "pull" ]]; then
-                DOCKER_BUILD_COMMAND="docker buildx build --pull"
-        else
-                DOCKER_BUILD_COMMAND="docker buildx build"
-        fi;
+  local PULL_ENABLED=${2}
+  DOCKER_VERSION="$(docker --version | grep "Docker version"| awk '{print $3}' | sed 's/,//')"
+  case $DOCKER_VERSION in
+    *"20"*)
+      docker builder prune --all -f
+      if [[ "${PULL_ENABLED}" == "pull" ]]; then        
+        DOCKER_BUILD_COMMAND="docker buildx build --pull"    
+      else
+        DOCKER_BUILD_COMMAND="docker buildx build"
+      fi;
+      ;;
+    *"19"*)
+      if [[ "${PULL_ENABLED}" == "pull" ]]; then        
+        DOCKER_BUILD_COMMAND="docker build --pull --no-cache"    
+      else
+        DOCKER_BUILD_COMMAND="docker build --no-cache"
+      fi;
+      ;;
+  esac
+       
 	${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY \
-    --build-arg GEOSERVER_DATA_DIR_SRC=${GEOSERVER_DATA_DIR_DIRECTORY} \
+    --build-arg GEOSERVER_DATA_DIR_SRC=${DATADIR_ARTIFACT_DIRECTORY} \
 		-t geosolutionsit/geoserver:"${TAG}-${GEOSERVER_VERSION}" \
 		 .
 }
@@ -163,12 +178,25 @@ function build_without_data_dir() {
 
 	local TAG=${1}
 	local PULL_ENABLED=${2}
-	if [[ "${PULL_ENABLED}" == "pull" ]]; then
-		DOCKER_BUILD_COMMAND="docker buildx build --pull"
-	else
-		DOCKER_BUILD_COMMAND="docker buildx build"
-	fi;
-	${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
+  DOCKER_VERSION="$(docker --version | grep "Docker version"| awk '{print $3}' | sed 's/,//')"
+  case $DOCKER_VERSION in
+    *"20"*)
+      docker builder prune --all -f
+      if [[ "${PULL_ENABLED}" == "pull" ]]; then        
+        DOCKER_BUILD_COMMAND="docker buildx build --pull"    
+      else
+        DOCKER_BUILD_COMMAND="docker buildx build"
+      fi;
+      ;;
+    *"19"*)
+      if [[ "${PULL_ENABLED}" == "pull" ]]; then        
+        DOCKER_BUILD_COMMAND="docker build --pull --no-cache"    
+      else
+        DOCKER_BUILD_COMMAND="docker build --no-cache"
+      fi;
+      ;;
+  esac
+	"${DOCKER_BUILD_COMMAND}" --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY\
 		-t geosolutionsit/geoserver:"${TAG}-${GEOSERVER_VERSION}" \
 		 .
@@ -176,19 +204,18 @@ function build_without_data_dir() {
 
 function main {
     help ${ALL_PARAMETERS}
+    clean_up_directory 
     download_geoserver "${GEOSERVER_VERSION}"
-    clean_up_directory ${PLUGIN_ARTIFACT_DIRECTORY}
     create_plugins_folder
-    download_plugin ext monitor
-    download_plugin ext control-flow
-    download_plugin community sec-oauth2-geonode
+#    download_plugin ext monitor
+#    download_plugin ext control-flow
+#    download_plugin community sec-oauth2-geonode
     #download_marlin
 
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "nodatadir" ]]; then
-   	    build_without_data_dir "${TAG}" "${PULL}"
+    build_without_data_dir "${TAG}" "${PULL}"
    	else
-   		clean_up_directory ${DATADIR_ARTIFACT_DIRECTORY}
- 		build_with_data_dir "${TAG}" "${PULL}"
+   		build_with_data_dir "${TAG}" "${PULL}"
    	fi
 }
 

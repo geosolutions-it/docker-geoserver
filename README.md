@@ -82,5 +82,5 @@ It can burn a custom datadir inside the docker image (it will expect data dir in
 ### Example
 
 ```
-./custom_build.sh my-docker-tag 2.18.x 2.18.x dev "no pull"
+./custom_build.sh my-docker-tag 2.18.x 2.18.x nodatadir no_pull
 ```
