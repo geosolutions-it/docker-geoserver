@@ -93,7 +93,7 @@ ADD run_tests.sh /docker/tests/run_tests.sh
 
 # create externalized dirs
 RUN apt-get update \
-    && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 \
+    && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 rsync \
     && apt-get clean \
     && apt-get autoclean \
     && apt-get autoremove \
