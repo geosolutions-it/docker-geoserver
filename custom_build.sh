@@ -87,9 +87,9 @@ function download_plugin()  {
 	esac
 
 
-  if [ ! -e "${PLUGIN_ARTIFACT_URL}" ]; then
-      mkdir -p "${PLUGIN_ARTIFACT_URL}"
-  fi
+#  if [ ! -e "${PLUGIN_ARTIFACT_URL}" ]; then
+#      mkdir -p "${PLUGIN_ARTIFACT_URL}"
+#  fi
 
 
 
