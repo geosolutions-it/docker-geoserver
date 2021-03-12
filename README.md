@@ -10,10 +10,24 @@ And run it
 
 `docker run --name gs -p 8080:8080 geosolutionsit/geoserver`
 
-Or for data persistence (in this example GEOSERVER_DATA_DIR is pointing to `/var/geoserver/datadir`):
+Or for data persistence starting with default geoserver datadir (in this example GEOSERVER_DATA_DIR is pointing to `/var/geoserver/datadir`):
 
-`docker run -v ./datadir:/var/geoserver/datadir --name gs -p 8080:8080 geosolutionsit/geoserver`
+```bash
+docker run --rm --name gs -p 8080:8080 geosolutionsit/geoserver
+```
 
+#save datadir locally to have a starting datador
+
+```bash
+docker cp gs:/var/geoserver/datadir ./datadir
+docker stop gs
+```
+
+start GeoServer with data persistence on save d datadir:
+
+```bash
+docker run -v ./datadir:/var/geoserver/datadir --name gs -p 8080:8080 geosolutionsit/geoserver`
+```
 
 Open your browser and point it to `http://localhost:8080/geoserver` .
 GeoServer web interface will show up, you can now log in with user admin and password `geoserver`.
