@@ -22,6 +22,39 @@ There are some [**environment variables**](https://docs.docker.com/engine/refere
 - `NETCDF_DATA_DIR` to put your GeoServer NETCDF data dir elsewhere
 - `GRIB_CACHE_DIR`o put your GeoServer GRIB cache dir elsewhere
 
+Each of these variables can be associated to an external volume to persist data for example in a docker compose
+configuration it can be done like this:
+
+add an .env file:
+
+```bash
+GEOSERVER_LOG_DIR=/var/geoserver/logs
+GEOSERVER_DATA_DIR=/var/geoserver/datadir
+GEOWEBCACHE_CONFIG_DIR=/var/geoserver/gwc_config
+GEOWEBCACHE_CACHE_DIR=/var/geoserver/gwc
+NETCDF_DATA_DIR=/var/geoserver/netcfd
+GRIB_CACHE_DIR=/var/geoserver/grib_cache
+```
+
+and a docker-compose.yml like this
+
+```yml
+version: "3.8"
+services:
+  geoserver:
+    image: geosolutionsit/geoserver:2.19RC
+    env-file: .env
+    ports:
+     - 8080:8080
+    volumes:
+      - ./logs:${GEOSERVER_LOG_DIR}
+      - ./datadir:${GEOSERVER_DATA_DIR}
+      - ./gwc_config:${GEOWEBCACHE_CONFIG_DIR}
+      - ./gwc:${GEOWEBCACHE_CACHE_DIR}
+      - ./netcfd:${NETCDF_DATA_DIR}
+      - ./grib_cache:${GRIB_CACHE_DIR}
+```
+
 ## How to build the Dockerfile with no helper scrips
 
 If you want to build the image by yourself just run `docker build` from the root of the repository
