@@ -16,14 +16,14 @@ Or for data persistence starting with default geoserver datadir (in this example
 docker run --rm --name gs -p 8080:8080 geosolutionsit/geoserver
 ```
 
-Save datadir locally to have a starting datador
+Save datadir locally to have a starting datadir:
 
 ```bash
 docker cp gs:/var/geoserver/datadir ./datadir
 docker stop gs
 ```
 
-start GeoServer with data persistence on save d datadir:
+start GeoServer with data persistence on saved datadir:
 
 ```bash
 docker run -v ./datadir:/var/geoserver/datadir --name gs -p 8080:8080 geosolutionsit/geoserver`
