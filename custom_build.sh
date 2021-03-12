@@ -94,6 +94,7 @@ function download_plugin()  {
 
 
   download_from_url_to_a_filepath "${PLUGIN_ARTIFACT_URL}" "${PLUGIN_ARTIFACT_DIRECTORY}/${PLUGIN_FULL_NAME}"
+  rm -Rf https:
 }
 
 function download_fonts()  {
