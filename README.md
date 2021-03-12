@@ -16,7 +16,7 @@ Or for data persistence starting with default geoserver datadir (in this example
 docker run --rm --name gs -p 8080:8080 geosolutionsit/geoserver
 ```
 
-#save datadir locally to have a starting datador
+Save datadir locally to have a starting datador
 
 ```bash
 docker cp gs:/var/geoserver/datadir ./datadir
