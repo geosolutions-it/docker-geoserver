@@ -21,11 +21,11 @@ readonly MARLIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/marlin/
 
 function help(){
 	if [ "$#" -ne 5 ] ; then
-		echo "Usage: $0 [docker image tag] [geoserver version] [geoserver master version] [datadir|nodatadir] [pull|no_pull];"
+		echo "Usage: $0 [docker image tag] [geoserver version] [geoserver main version] [datadir|nodatadir] [pull|no_pull];"
 		echo "";
 		echo "[docker image tag] :          the tag to be used for the docker iamge ";
-		echo "[geoserver version] :         the release version of geoserver to be used; you can set it to master if you want the last release";
-		echo "[geoserver master version] :  if you use the master version for geoserver you need to set it to the numerical value for the next release;"
+		echo "[geoserver version] :         the release version of geoserver to be used; you can set it to main if you want the last release";
+		echo "[geoserver main version] :  if you use the main version for geoserver you need to set it to the numerical value for the next release;"
 		echo "                              if you use a released version you need to put it to the release number";
 		echo "[datadir|nodatadir]:          datadir: copies ${DATADIR_ARTIFACT_DIRECTORY} in place into the containerr image, nodatadir: does nothing about any custom datadir";
 		echo "[pull|no_pull]:               docker build use always a remote image or a local image";
@@ -67,7 +67,7 @@ function download_plugin()  {
 		PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
 		;;
 
-		"master")
+		"main")
 		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_MASTER_VERSION%.*}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
 		PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
 		;;
@@ -127,7 +127,7 @@ function download_geoserver() {
     local GEOSERVER_FILE_NAME_NIGHTLY="geoserver-${VERSION}-latest-war.zip"
 		local GEOSERVER_FILE_NAME_STABLE="geoserver-${VERSION}-war.zip"
 
-		if [[ ( "${VERSION}" =~ "x" ) || ( "${VERSION}" == "master" ) ]]; then
+		if [[ ( "${VERSION}" =~ "x" ) || ( "${VERSION}" == "main" ) ]]; then
 			local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME_NIGHTLY}
 		else
 			local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL_STABLE}/${VERSION}/${GEOSERVER_FILE_NAME_STABLE}
