@@ -160,10 +160,10 @@ function main {
     download_plugin ext csw
     download_plugin ext authkey
     download_plugin ext sldservice
-    download_plugin ext wmts-multi-dimensional    
+    download_plugin ext wmts-multi-dimensional
+    download_plugin ext wps-download
 #    download_plugin ext css
 #    download_plugin community status-monitoring
-    download_plugin community wps-download
 
     build_artifact
 }
