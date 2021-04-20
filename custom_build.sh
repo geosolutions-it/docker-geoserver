@@ -208,7 +208,7 @@ function main {
 	if  [ "${GEOSERVER_DATA_DIR_RELEASE}" = "nodatadir" ]; then
     build_without_data_dir "${TAG}" "${PULL}"
   else
-   		build_with_data_dir "${TAG}" "${PULL}"
+   	build_with_data_dir "${TAG}" "${PULL}"
   fi
 }
 
