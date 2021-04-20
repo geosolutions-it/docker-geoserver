@@ -46,9 +46,6 @@ function download_from_url_to_a_filepath {
 	URL=${1}
 	FILE_PATH=${2}
 	FILE_DOWNLOADED=$(basename "${FILE_PATH}" )
-	if [ -f "${FILE_PATH}" ]; then
-		rm -f "${FILE_PATH}"
-	fi
 	if [ ! -f "${FILE_PATH}" ]; then
 		curl -L "${URL}" --output "${FILE_PATH}"
 		echo "* ${FILE_DOWNLOADED} artefact dowloaded *"
@@ -85,13 +82,6 @@ function download_plugin()  {
 		;;
 
 	esac
-
-
-  if [ ! -e "${PLUGIN_ARTIFACT_URL}" ]; then
-      mkdir -p "${PLUGIN_ARTIFACT_URL}"
-  fi
-
-
 
   download_from_url_to_a_filepath "${PLUGIN_ARTIFACT_URL}" "${PLUGIN_ARTIFACT_DIRECTORY}/${PLUGIN_FULL_NAME}"
 }
@@ -139,8 +129,11 @@ function download_geoserver() {
     if [ ! -e "${GEOSERVER_ARTIFACT_DIRECTORY}" ]; then
         mkdir -p "${GEOSERVER_ARTIFACT_DIRECTORY}"
     fi
-    download_from_url_to_a_filepath  "${GEOSERVER_ARTIFACT_URL}" "/tmp/geoserver.war.zip"
-    unzip -p /tmp/geoserver.war.zip geoserver.war > ${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war
+    if [ -f "${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war" ]; then
+      rm "${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war"
+    fi      
+    download_from_url_to_a_filepath  "${GEOSERVER_ARTIFACT_URL}" "${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.${GEOSERVER_VERSION}.war.zip"
+    unzip "${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.${GEOSERVER_VERSION}.war.zip" geoserver.war -d "${GEOSERVER_ARTIFACT_DIRECTORY}"
 }
 
 
@@ -205,16 +198,18 @@ function main {
     clean_up_directory 
     download_geoserver "${GEOSERVER_VERSION}"
     create_plugins_folder
-#    download_plugin ext monitor
-#    download_plugin ext control-flow
-#    download_plugin community sec-oauth2-geonode
+    # download_plugin ext monitor
+    # download_plugin ext control-flow
+    # download_plugin ext geofence-plugin
+    # download_plugin ext geofence-server-plugin
+    # download_plugin community sec-oauth2-geonode
     #download_marlin
 
-	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "nodatadir" ]]; then
+	if  [ "${GEOSERVER_DATA_DIR_RELEASE}" = "nodatadir" ]; then
     build_without_data_dir "${TAG}" "${PULL}"
-   	else
+  else
    		build_with_data_dir "${TAG}" "${PULL}"
-   	fi
+  fi
 }
 
 main
