@@ -1,7 +1,7 @@
 FROM tomcat:9-jdk11-openjdk as mother
 LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
 
-RUN apt-get update && apt-get install -y unzip
+RUN apt-get update && apt-get install -y unzip wget
 
 # accepts local files and URLs. Tar(s) are automatically extracted
 WORKDIR /output/datadir
@@ -13,16 +13,6 @@ WORKDIR /output/webapp
 ARG GEOSERVER_WEBAPP_SRC="./.placeholder"
 ADD "${GEOSERVER_WEBAPP_SRC}" "./"
 
-# zip files require explicit extracion
-RUN \
-    if [ "${GEOSERVER_WEBAPP_SRC##*.}" = "zip" ]; then \
-        unzip "./*zip"; \
-        rm ./*zip; \
-    fi \
-    && [ -d "./geoserver" ] || (mkdir -p ./geoserver && unzip ./geoserver.war -d ./geoserver && rm ./geoserver.war)
-
-RUN apt-get update; apt-get upgrade --yes; apt-get install wget --yes
-
 # download and install libjpeg-2.0.6 from sources.
 RUN wget https://nav.dl.sourceforge.net/project/libjpeg-turbo/2.0.6/libjpeg-turbo-2.0.6.tar.gz \
     && tar -zxf ./libjpeg-turbo-2.0.6.tar.gz \
@@ -32,13 +22,17 @@ RUN wget https://nav.dl.sourceforge.net/project/libjpeg-turbo/2.0.6/libjpeg-turb
     && apt-get autoclean \
     && apt-get autoremove
 
+# zip files require explicit extracion
+RUN \
+    if [ "${GEOSERVER_WEBAPP_SRC##*.}" = "zip" ]; then \
+        unzip "./*zip"; \
+        rm ./*zip; \
+    fi \
+    && [ -d "./geoserver" ] || (mkdir -p ./geoserver && unzip ./geoserver.war -d ./geoserver && rm ./geoserver.war)
+
 WORKDIR /output/plugins
 ARG PLUG_IN_URLS=""
 ADD .placeholder ${PLUG_IN_URLS} /output/plugins/
-# RUN \
-#   if [ "$(echo ${PLUG_IN_URLS}| grep http)" != "" ]; then \
-#     for URL in "${PLUG_IN_URLS}"; do wget $URL;done; unzip -o "./*zip"; rm -f ./*zip; \
-#   fi
 RUN unzip -o "./*.zip";rm -f ./*zip
 
 WORKDIR /output/webapp
