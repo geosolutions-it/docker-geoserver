@@ -22,7 +22,7 @@ RUN \
     fi \
     && [ -d "./geoserver" ] || (mkdir -p ./geoserver && unzip ./geoserver.war -d ./geoserver && rm ./geoserver.war)
 
-RUN apt-get update; apt-get upgrade --yes; apt-get install wget --yes
+RUN apt-get update; apt-get upgrade --yes; apt-get install wget rsync --yes
 RUN wget https://downloads.sourceforge.net/project/libjpeg-turbo/1.5.3/libjpeg-turbo-official_1.5.3_amd64.deb && dpkg -i ./libjpeg*.deb && apt-get -f install
 
 WORKDIR /output/plugins
