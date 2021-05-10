@@ -18,6 +18,9 @@ readonly DATADIR_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-datadir/
 readonly PLUGIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-plugins
 readonly FONTS_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/fonts/
 readonly MARLIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/marlin/
+readonly USERID=1000
+readonly GROUPID=1000
+readonly UNAME=tomcat
 
 function help(){
 	if [ "$#" -ne 5 ] ; then
@@ -161,6 +164,7 @@ function build_with_data_dir() {
 	${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY \
     --build-arg GEOSERVER_DATA_DIR_SRC=${DATADIR_ARTIFACT_DIRECTORY} \
+    --build-arg UID=${USERID} --build-arg GID=${GROUPID} --build-arg UNAME=${UNAME} \
 		-t geosolutionsit/geoserver:"${TAG}-${GEOSERVER_VERSION}" \
 		 .
 }
@@ -188,7 +192,8 @@ function build_without_data_dir() {
       ;;
   esac
 	${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
-    --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY\
+    --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY \
+    --build-arg UID=${USERID} --build-arg GID=${GROUPID} --build-arg UNAME=${UNAME} \
 		-t geosolutionsit/geoserver:"${TAG}-${GEOSERVER_VERSION}" \
 		 .
 }
