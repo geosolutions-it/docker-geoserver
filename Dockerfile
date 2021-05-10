@@ -45,6 +45,9 @@ RUN \
 
 FROM tomcat:9-jdk11-openjdk
 
+ARG UID=1000
+ARG GID=1000
+ARG UNAME=tomcat
 
 ENV CATALINA_BASE "$CATALINA_HOME"
 # set externalizations
@@ -106,11 +109,14 @@ COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
 COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
 COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
 COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"
+RUN groupadd -g $GID $UNAME
+RUN useradd -m -u $UID -g $GID --system $UNAME
+RUN chown -R $UID:$GID $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR $GEOWEBCACHE_CONFIG_DIR $NETCDF_DATA_DIR $GRIB_CACHE_DIR $GEOSERVER_DATA_DIR
 
 RUN if [ ! -f "${GEOSERVER_DATA_DIR}/logging.xml" ]; then cp -a ${CATALINA_BASE}/webapps/geoserver/data/* ${GEOSERVER_DATA_DIR};fi
 
 WORKDIR "$CATALINA_BASE"
-
+USER $UNAME
 
 ENV TERM xterm
 EXPOSE 8080/tcp
