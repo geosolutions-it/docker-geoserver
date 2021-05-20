@@ -160,6 +160,14 @@ function build_with_data_dir() {
         DOCKER_BUILD_COMMAND="docker build --no-cache"
       fi;
       ;;
+    *"18"*)
+      if [[ "${PULL_ENABLED}" == "pull" ]]; then        
+        DOCKER_BUILD_COMMAND="docker build --pull --no-cache"    
+      else
+        DOCKER_BUILD_COMMAND="docker build --no-cache"
+      fi;
+      ;;
+ 
   esac
 	${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY \
@@ -190,6 +198,14 @@ function build_without_data_dir() {
         DOCKER_BUILD_COMMAND="docker build --no-cache"
       fi;
       ;;
+    *"18"*)
+      if [[ "${PULL_ENABLED}" == "pull" ]]; then        
+        DOCKER_BUILD_COMMAND="docker build --pull --no-cache"    
+      else
+        DOCKER_BUILD_COMMAND="docker build --no-cache"
+      fi;
+      ;;
+ 
   esac
 	${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY \
