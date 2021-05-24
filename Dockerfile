@@ -49,6 +49,8 @@ ARG UID=1000
 ARG GID=1000
 ARG UNAME=tomcat
 
+ENV ADMIN_PASSWORD=""
+
 ENV CATALINA_BASE "$CATALINA_HOME"
 # set externalizations
 ENV GEOSERVER_HOME="/var/geoserver"
@@ -88,7 +90,7 @@ ADD run_tests.sh /docker/tests/run_tests.sh
 
 # create externalized dirs
 RUN apt-get update \
-    && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 \
+    && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 jq \
     && apt-get clean \
     && apt-get autoclean \
     && apt-get autoremove \
@@ -109,6 +111,8 @@ COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
 COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
 COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
 COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"
+COPY geoserver-rest-config.sh /usr/local/bin/geoserver-rest-config.sh
+COPY entrypoint.sh /entrypoint.sh
 RUN groupadd -g $GID $UNAME
 RUN useradd -m -u $UID -g $GID --system $UNAME
 RUN chown -R $UID:$GID $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR $GEOWEBCACHE_CONFIG_DIR $NETCDF_DATA_DIR $GRIB_CACHE_DIR $GEOSERVER_DATA_DIR
@@ -120,3 +124,4 @@ USER $UNAME
 
 ENV TERM xterm
 EXPOSE 8080/tcp
+CMD ["/entrypoint.sh"]
