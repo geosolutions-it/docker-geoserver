@@ -67,6 +67,7 @@ ARG GID=1000
 ARG UNAME=tomcat
 #ARG CUSTOM_FONTS=""
 ENV ADMIN_PASSWORD=""
+ENV APP_LOCATION="geoserver"
 
 ENV CATALINA_BASE "$CATALINA_HOME"
 # set externalizations
@@ -83,7 +84,7 @@ ENV INITIAL_MEMORY="2G"
 ENV MAXIMUM_MEMORY="4G"
 ENV LD_LIBRARY_PATH="/opt/libjpeg-turbo/lib64"
 ENV JAIEXT_ENABLED="true"
-
+ENV PLUGIN_DYNAMIC_URLS=""
 ENV GEOSERVER_OPTS=" \
   -Dorg.geotools.coverage.jaiext.enabled=${JAIEXT_ENABLED} \
   -Duser.timezone=UTC \

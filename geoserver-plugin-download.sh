@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-[ "$#" -ne 2 ] && ( echo "no plugin urls passed, exiting" ) && exit 0
+[ "$#" -le "1" ] && ( echo "no plugin urls passed, exiting" ) && exit 0
 
 PLUGIN_INSTALL_PATH=$1
 

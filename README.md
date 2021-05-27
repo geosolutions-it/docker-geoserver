@@ -13,7 +13,7 @@
 |Allow to add custom fonts to the resulting image|:x:|
 |Image Size| to check|
 |Starts up with the default data directory|:heavy_check_mark:|
-|Install extensions dynamically on startup (based on given configuration/env)|:x:|
+|Install extensions dynamically on startup (based on given configuration/env)|:heavy_check_mark:|
 |Allows basic configuration via environment variables (GS Data dir, Memory Size)|:heavy_check_mark:|
 |Change admin password|:heavy_check_mark:|
 
@@ -89,6 +89,13 @@ services:
       - ./gwc:${GEOWEBCACHE_CACHE_DIR}
       - ./netcfd:${NETCDF_DATA_DIR}
       - ./grib_cache:${GRIB_CACHE_DIR}
+```
+
+Example of how to build a docker image with just geoserver war and then add plugins at runtime.
+
+```bash
+docker build -t geoserver:test-2.19.1 --build-arg GEOSERVER_WEBAPP_SRC=https://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/geoserver-2.19.1-war.zip/download  .
+docker run --env PLUGIN_DYNAMIC_URLS="http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-control-flow-plugin.zip http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-libjpeg-turbo-plugin.zip" --rm --name gs -p 8080:8080 geoserver:test-2.19.1
 ```
 
 ## How to build the Dockerfile with no helper scrips
