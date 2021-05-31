@@ -27,7 +27,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
       args:
-        GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/master/geoserver-master-latest-war.zip"
+        GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/main/geoserver-main-latest-war.zip"
     container_name: geoserver
     depends_on:
       postgres:
