@@ -1,7 +1,7 @@
 FROM tomcat:9-jdk11-openjdk as mother
 LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
 
-RUN apt-get update && apt-get install -y unzip
+RUN apt-get update && apt-get install -y unzip wget
 
 # accepts local files and URLs. Tar(s) are automatically extracted
 WORKDIR /output/datadir
@@ -13,16 +13,6 @@ WORKDIR /output/webapp
 ARG GEOSERVER_WEBAPP_SRC="./.placeholder"
 ADD "${GEOSERVER_WEBAPP_SRC}" "./"
 
-# zip files require explicit extracion
-RUN \
-    if [ "${GEOSERVER_WEBAPP_SRC##*.}" = "zip" ]; then \
-        unzip "./*zip"; \
-        rm ./*zip; \
-    fi \
-    && [ -d "./geoserver" ] || (mkdir -p ./geoserver && unzip ./geoserver.war -d ./geoserver && rm ./geoserver.war)
-
-RUN apt-get update; apt-get upgrade --yes; apt-get install wget --yes
-
 # download and install libjpeg-2.0.6 from sources.
 RUN wget https://nav.dl.sourceforge.net/project/libjpeg-turbo/2.0.6/libjpeg-turbo-2.0.6.tar.gz \
     && tar -zxf ./libjpeg-turbo-2.0.6.tar.gz \
@@ -32,13 +22,17 @@ RUN wget https://nav.dl.sourceforge.net/project/libjpeg-turbo/2.0.6/libjpeg-turb
     && apt-get autoclean \
     && apt-get autoremove
 
+# zip files require explicit extracion
+RUN \
+    if [ "${GEOSERVER_WEBAPP_SRC##*.}" = "zip" ]; then \
+        unzip "./*zip"; \
+        rm ./*zip; \
+    fi \
+    && [ -d "./geoserver" ] || (mkdir -p ./geoserver && unzip ./geoserver.war -d ./geoserver && rm ./geoserver.war)
+
 WORKDIR /output/plugins
 ARG PLUG_IN_URLS=""
 ADD .placeholder ${PLUG_IN_URLS} /output/plugins/
-# RUN \
-#   if [ "$(echo ${PLUG_IN_URLS}| grep http)" != "" ]; then \
-#     for URL in "${PLUG_IN_URLS}"; do wget $URL;done; unzip -o "./*zip"; rm -f ./*zip; \
-#   fi
 RUN unzip -o "./*.zip";rm -f ./*zip
 
 WORKDIR /output/webapp
@@ -51,6 +45,11 @@ RUN \
 
 FROM tomcat:9-jdk11-openjdk
 
+ARG UID=1000
+ARG GID=1000
+ARG UNAME=tomcat
+
+ENV ADMIN_PASSWORD=""
 
 ENV CATALINA_BASE "$CATALINA_HOME"
 # set externalizations
@@ -91,7 +90,7 @@ ADD run_tests.sh /docker/tests/run_tests.sh
 
 # create externalized dirs
 RUN apt-get update \
-    && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 \
+    && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 jq \
     && apt-get clean \
     && apt-get autoclean \
     && apt-get autoremove \
@@ -112,11 +111,17 @@ COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
 COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
 COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
 COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"
+COPY geoserver-rest-config.sh /usr/local/bin/geoserver-rest-config.sh
+COPY entrypoint.sh /entrypoint.sh
+RUN groupadd -g $GID $UNAME
+RUN useradd -m -u $UID -g $GID --system $UNAME
+RUN chown -R $UID:$GID $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR $GEOWEBCACHE_CONFIG_DIR $NETCDF_DATA_DIR $GRIB_CACHE_DIR $GEOSERVER_DATA_DIR
 
-
+RUN if [ ! -f "${GEOSERVER_DATA_DIR}/logging.xml" ]; then cp -a ${CATALINA_BASE}/webapps/geoserver/data/* ${GEOSERVER_DATA_DIR};fi
 
 WORKDIR "$CATALINA_BASE"
-
+USER $UNAME
 
 ENV TERM xterm
 EXPOSE 8080/tcp
+CMD ["/entrypoint.sh"]
