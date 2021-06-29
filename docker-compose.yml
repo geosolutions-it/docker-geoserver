@@ -1,6 +1,6 @@
 version: "3"
 networks:
-  intergration-test:
+  geoserver-network:
     driver: bridge
 services:
   postgres:
@@ -20,7 +20,7 @@ services:
       - pg_data:${PGDATA:-/var/lib/postgresql/data}:rw
       - ./postgres/01-init-user.sh:/docker-entrypoint-initdb.d/01-init-user.sh
     networks:
-      - intergration-test
+      - geoserver-network
 
   geoserver:
     build:
@@ -35,7 +35,7 @@ services:
     ports:
       - 8080
     networks:
-      - intergration-test
+      - geoserver-network
 
   proxy:
     image: nginx
@@ -47,7 +47,7 @@ services:
     depends_on:
       - geoserver
     networks:
-      - intergration-test
+      - geoserver-network
 
 volumes:
   pg_data:
