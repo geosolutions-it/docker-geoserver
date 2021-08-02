@@ -78,7 +78,7 @@ services:
 
 If you want to build the image by yourself just run `docker build` from the root of the repository
 
-` docker build -t geoserver:test . --build-args GEOSERVER_WEBAPP_SRC="./geoserver.war"`
+` docker build --build-args GEOSERVER_WEBAPP_SRC="./geoserver.war" -t geoserver:test .`
 
 There are [**build arguments**](https://docs.docker.com/engine/reference/commandline/build/) to customize the image:
 - `GEOSERVER_DATA_DIR_SRC` to add your own custom datadir to the final image. This can be a local zip or directory or remote URL (see [ADD](https://docs.docker.com/engine/reference/builder/#add) instruction Doc)

@@ -14,10 +14,10 @@ ARG GEOSERVER_WEBAPP_SRC="./.placeholder"
 ADD "${GEOSERVER_WEBAPP_SRC}" "./"
 
 # download and install libjpeg-2.0.6 from sources.
-RUN wget https://nav.dl.sourceforge.net/project/libjpeg-turbo/2.0.6/libjpeg-turbo-2.0.6.tar.gz \
-    && tar -zxf ./libjpeg-turbo-2.0.6.tar.gz \
+RUN wget https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/2.0.6.tar.gz \
+    && tar -zxf ./2.0.6.tar.gz \
     && cd libjpeg-turbo-2.0.6 && apt-get install cmake -yq && cmake -G"Unix Makefiles" && make deb \
-    && dpkg -i ./libjpeg*.deb && apt-get -f install \
+    && dpkg -i ./libjpeg*.deb && apt-get -f install -y \
     && apt-get clean \
     && apt-get autoclean \
     && apt-get autoremove
