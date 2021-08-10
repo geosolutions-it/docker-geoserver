@@ -86,10 +86,13 @@ ENV JAVA_OPTS="-Xms${INITIAL_MEMORY} -Xmx${MAXIMUM_MEMORY} \
   -XX:MaxGCPauseMillis=200 -XX:ParallelGCThreads=20 -XX:ConcGCThreads=5 \
   ${GEOSERVER_OPTS}"
 
+ADD https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.3/s6-overlay-amd64-installer /tmp/
 ADD run_tests.sh /docker/tests/run_tests.sh
 
 # create externalized dirs
-RUN apt-get update \
+RUN chmod +x /tmp/s6-overlay-amd64-installer \
+    && /tmp/s6-overlay-amd64-installer / \
+    && apt-get update \
     && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 jq \
     && apt-get clean \
     && apt-get autoclean \
@@ -124,4 +127,5 @@ USER $UNAME
 
 ENV TERM xterm
 EXPOSE 8080/tcp
+ENTRYPOINT ["/init"]
 CMD ["/entrypoint.sh"]
