@@ -5,6 +5,7 @@ export NIGHTLY_MAINT_VERSION="2.18.x"
 export NIGHTLY_MASTER_VERSION="main foobar"
 export NIGHTLY_STABLE_VERSION="2.19.x"
 export STABLE_VERSION="2.19.2"
+export NEWEST_VERSION="2.19.2"
 export DOCKERFILE_PATH="./Dockerfile"
 export DOCKER_REPO="somethingnotreal"
 source hooks/build
