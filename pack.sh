@@ -15,38 +15,73 @@ readonly ARTIFACT_DIRECTORY_PLUGINS=${ARTIFACT_DIRECTORY}/geoserver-plugins
 readonly ARTIFACT_DIRECTORY_TMP=${ARTIFACT_DIRECTORY}/tmp
 readonly ARTIFACT_FILENAME="geoserver.war"
 
+
+
+#######################################
+# Print a string if the ARGUMENTS not matches
+# ARGUMENTS:
+#		ALL_PARAMETERS
+# OUTPUTS:
+#   Write String to stdout
+# RETURN:
+#   0 if print succeeds, else exit.
+#######################################
 function help() {
-	if [ "$#" -ne 2 ] ; then
-		echo "Usage: $0 [geoserver version] [geoserver master version]";
-		echo "";
-		echo "[geoserver build type] :         use 'master' for the last version, 'release' for stable released version ( f.e. 2.14.3 or 2.15.0 ) or 'snapshot' for last snaphost version ( f.e. 2.15.x )";
-		echo "[geoserver version]    :         geoserver version ( f.e. 2.14.3, 2.15.0, 2.15.x, 2.16.x ),";
-        echo "                                 if geoserver build type set to 'master' then geoserver version should be set to the next release numerical value ( f.e. 2.16.x if there is no 2.16.0 yet )";
-		exit 1;	
-	fi		
+		if [ "$#" -ne 2 ] ; then
+			echo "Usage: $0 [geoserver version] [geoserver master version]";
+			echo "";
+			echo "[geoserver build type] :         use 'master' for the last version, 'release' for stable released version ( f.e. 2.14.3 or 2.15.0 ) or 'snapshot' for last snaphost version ( f.e. 2.15.x )";
+			echo "[geoserver version]    :         geoserver version ( f.e. 2.14.3, 2.15.0, 2.15.x, 2.16.x ),";
+	        echo "                                 if geoserver build type set to 'master' then geoserver version should be set to the next release numerical value ( f.e. 2.16.x if there is no 2.16.0 yet )";
+			exit 1;
+		fi
 }
 
+#######################################
+# To clean up a directory
+# ARGUMENTS
+#   directory
+# RETURN:
+#   0 if print succeeds, non-zero on error.
+#######################################
 function clean_up_directory() {
 	rm -rf ${1}/*
 }
 
+#######################################
+#To extract version
+# ARGUMENTS
+#   no argument
+# RETURN:
+#   0 if succeeds, non-zero on error.
+#######################################
 function extract_versions()  {
 	IFS='.' SEMANTIC_VERSION=(${GEOSERVER_VERSION})
 	unset IFS
-    
+
     GEOSERVER_VERSION_MAJOR=${SEMANTIC_VERSION[0]}
-	GEOSERVER_VERSION_MINOR=${SEMANTIC_VERSION[1]}
+  	GEOSERVER_VERSION_MINOR=${SEMANTIC_VERSION[1]}
     GEOSERVER_VERSION_PATCH=${SEMANTIC_VERSION[2]}
     GEOSERVER_VERSION_MAIN=${GEOSERVER_VERSION_MAJOR}.${GEOSERVER_VERSION_MINOR}
 }
 
+#######################################
+#To download GeoServer form url to a directory
+# ARGUMENTS #2
+#   url
+#   directory
+# OUTPUTS:
+#   Write String to stdout download file
+# RETURN:
+#   0 if succeeds, non-zero on error.
+#######################################
 function download_from_url_to_a_filepath {
 	URL=${1}
 	FILE_PATH=${2}
 	FILE_DOWNLOADED=$(basename "${FILE_PATH}" )
 	if [ -f "${FILE_PATH}" ]; then
 		rm -f "${FILE_PATH}"
-	fi	
+	fi
 	if [ ! -f "${FILE_PATH}" ]; then
 		echo "* ${FILE_DOWNLOADED} artefact dowloading... *"
 		curl -# -L -f "${URL}" -o "${FILE_PATH}"
@@ -57,19 +92,26 @@ function download_from_url_to_a_filepath {
 	fi
 }
 
+#######################################
+# extract geoserver version ,download and unzip
+# ARGUMENTS
+# no argument
+# RETURN:
+#   0 if succeeds, non-zero on error.
+#######################################
 function download_geoserver() {
     clean_up_directory ${ARTIFACT_DIRECTORY_GEOSERVER}
-	extract_versions ${GEOSERVER_VERSION}
+	 extract_versions ${GEOSERVER_VERSION}
 
 	if [ "${GEOSERVER_BUILD_TYPE}" == "master" ] && [ "${GEOSERVER_VERSION_PATCH}" == "x" ]; then
 		local VERSION=${GEOSERVER_BUILD_TYPE}
 		local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
 		local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}
- 
+
 	elif [ "${GEOSERVER_BUILD_TYPE}" == "snapshot" ] && [ "${GEOSERVER_VERSION_PATCH}" == "x" ]; then
 		local VERSION=${GEOSERVER_VERSION}
 		local GEOSERVER_FILE_NAME="geoserver-${VERSION}-latest-war.zip"
-		local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}	
+		local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME}
 
 	elif [ "${GEOSERVER_BUILD_TYPE}" == "release" ] && [ "${GEOSERVER_VERSION_PATCH}" != "x" ]; then
 		local VERSION=${GEOSERVER_VERSION}
@@ -92,6 +134,16 @@ function download_geoserver() {
     unzip -p /tmp/geoserver.war.zip ${ARTIFACT_FILENAME} > ${ARTIFACT_DIRECTORY_GEOSERVER}/${ARTIFACT_FILENAME}
 }
 
+#######################################
+#To download GeoServer plugin
+# ARGUMENTS #2
+#   plugin type
+#   plugin name
+# OUTPUTS:
+#   Write String to stdout download file
+# RETURN:
+#   0 if succeeds, non-zero on error.
+#######################################
 function download_plugin()  {
 	local TYPE=${1}
 	local PLUGIN_NAME=${2}
@@ -104,7 +156,7 @@ function download_plugin()  {
 		local GEOSERVER_VERSION_PLUGINS=${GEOSERVER_VERSION}
 		local PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION_MAIN}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
 		local PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION_PLUGINS}/${TYPE}-latest/${PLUGIN_FULL_NAME}
-		
+
 	elif [ "${GEOSERVER_BUILD_TYPE}" == "release" ] && [ "${GEOSERVER_VERSION_PATCH}" != "x" ]; then
 		local GEOSERVER_VERSION_PLUGINS=${GEOSERVER_VERSION_MAIN}.x
         local PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION_MAIN}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
@@ -119,25 +171,41 @@ function download_plugin()  {
     download_from_url_to_a_filepath "${PLUGIN_ARTIFACT_URL}" "${ARTIFACT_DIRECTORY_PLUGINS}/${PLUGIN_FULL_NAME}"
 }
 
+
+#######################################
+#To build artifact i.e unzip GeoServer.war file form ARTIFACT_DIRECTORY_GEOSERVER directory to ARTIFACT_DIRECTORY_TMP
+# ARGUMENTS
+# no argument
+# OUTPUTS:
+#   Write String to stdout
+# RETURN:
+#   0 if succeeds, non-zero on error.
+#######################################
 function build_artifact() {
-    clean_up_directory ${ARTIFACT_DIRECTORY_TMP}
+  clean_up_directory ${ARTIFACT_DIRECTORY_TMP}
+	#./resources/tmp
+	echo $ARTIFACT_DIRECTORY_TMP
+	echo 'test'
 
 	unzip -q -o ${ARTIFACT_DIRECTORY_GEOSERVER}/${ARTIFACT_FILENAME}  -d ${ARTIFACT_DIRECTORY_TMP}
-	
+
 	for f in ${ARTIFACT_DIRECTORY_PLUGINS}/*; do
 		unzip -q -o ${f} -d ${ARTIFACT_DIRECTORY_TMP}/WEB-INF/lib/
 	done
 
     echo "* packing artifact file ... *"
 
-    clean_up_directory ${ARTIFACT_DIRECTORY_GEOSERVER}
+    # clean_up_directory ${ARTIFACT_DIRECTORY_GEOSERVER}
     cd ${ARTIFACT_DIRECTORY_GEOSERVER} && ARTIFACT_DIRECTORY_PATH=`pwd -P` && cd - > /dev/null 2>&1
-	cd ${ARTIFACT_DIRECTORY_TMP} && zip -r "${ARTIFACT_DIRECTORY_PATH}"/${ARTIFACT_FILENAME} ./* > /dev/null 2>&1 && cd - > /dev/null 2>&1
+		echo $ARTIFACT_DIRECTORY_PATH
+		dir=`pwd -P`
+		echo $dir
+	  cd ${ARTIFACT_DIRECTORY_TMP} && zip -r "${ARTIFACT_DIRECTORY_PATH}"/${ARTIFACT_FILENAME} ./* > /dev/null 2>&1 && cd - > /dev/null 2>&1
 
     echo ""
 	echo "Packed GeoServer .war file located in ${ARTIFACT_DIRECTORY_GEOSERVER} folder"
     if hash md5sum 2>/dev/null; then
-        echo "New GeoServer .war file MD5 sum is: $(md5sum ${ARTIFACT_DIRECTORY_GEOSERVER}/${ARTIFACT_FILENAME})"
+			   cd - &&  cd ${ARTIFACT_DIRECTORY_GEOSERVER}  && echo "New GeoServer .war file MD5 sum is:  $(md5sum ${ARTIFACT_FILENAME})"
     fi
 }
 
