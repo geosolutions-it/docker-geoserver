@@ -140,8 +140,8 @@ function build_artifact() {
 	    echo "print done"
 	echo "Packed GeoServer .war file located in ${ARTIFACT_DIRECTORY_GEOSERVER} folder"
    if hash md5sum 2>/dev/null; then
-        #echo "New GeoServer .war file MD5 sum is: $(md5sum ${ARTIFACT_DIRECTORY_GEOSERVER}/${ARTIFACT_FILENAME})"
-	echo "New GeoServer .war file MD5 sum is: $(md5sum $ARTIFACT_DIRECTORY_GEOSERVER/*)"
+        echo "New GeoServer .war file MD5 sum is: $(md5sum ${ARTIFACT_DIRECTORY_GEOSERVER}/${ARTIFACT_FILENAME})"
+	
     fi
 }
 
