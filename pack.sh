@@ -130,7 +130,7 @@ function build_artifact() {
 
     echo "* packing artifact file ... *"
 
-    clean_up_directory ${ARTIFACT_DIRECTORY_GEOSERVER}
+   # clean_up_directory ${ARTIFACT_DIRECTORY_GEOSERVER}
     cd ${ARTIFACT_DIRECTORY_GEOSERVER} && ARTIFACT_DIRECTORY_PATH=`pwd -P` && cd - > /dev/null 2>&1
 	cd ${ARTIFACT_DIRECTORY_TMP} && zip -r "${ARTIFACT_DIRECTORY_PATH}"/${ARTIFACT_FILENAME} ./* > /dev/null 2>&1 && cd - > /dev/null 2>&1
 	for f in ${ARTIFACT_DIRECTORY_GEOSERVER}/* 
@@ -140,7 +140,8 @@ function build_artifact() {
 	    echo "print done"
 	echo "Packed GeoServer .war file located in ${ARTIFACT_DIRECTORY_GEOSERVER} folder"
    if hash md5sum 2>/dev/null; then
-        echo "New GeoServer .war file MD5 sum is: $(md5sum ${ARTIFACT_DIRECTORY_GEOSERVER}/${ARTIFACT_FILENAME})"
+        #echo "New GeoServer .war file MD5 sum is: $(md5sum ${ARTIFACT_DIRECTORY_GEOSERVER}/${ARTIFACT_FILENAME})"
+	echo "New GeoServer .war file MD5 sum is: $(md5sum $ARTIFACT_DIRECTORY_GEOSERVER/*)"
     fi
 }
 
