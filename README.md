@@ -1,5 +1,6 @@
 # docker-geoserver
 
+![](/docker_hub_deployment.png)
 
 |Features| Implemented |
 |--------|-------------|
@@ -43,9 +44,13 @@ docker stop gs
 start GeoServer with data persistence on saved datadir:
 
 ```bash
-docker run -v ./datadir:/var/geoserver/datadir --name gs -p 8080:8080 geosolutionsit/geoserver
+docker run -v datadir:/var/geoserver/datadir --name gs -p 8080:8080 geosolutionsit/geoserver
 ```
 
+start GeoServer with data persistence on saved datadir and change admin password:
+```bash
+docker run -e ADMIN_PASSWORD=securepassword -v datadir:/var/geoserver/datadir --name gs -p 8080:8080 geosolutionsit/geoserver
+```
 Open your browser and point it to `http://localhost:8080/geoserver` .
 GeoServer web interface will show up, you can now log in with user admin and password `geoserver`.
 
@@ -94,8 +99,12 @@ services:
 Example of how to build a docker image with just geoserver war and then add plugins at runtime.
 
 ```bash
-docker build -t geoserver:test-2.19.1 --build-arg GEOSERVER_WEBAPP_SRC=https://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/geoserver-2.19.1-war.zip/download  .
-docker run --env PLUGIN_DYNAMIC_URLS="http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-control-flow-plugin.zip http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-libjpeg-turbo-plugin.zip" --rm --name gs -p 8080:8080 geoserver:test-2.19.1
+docker build -t geoserver:test-2.19.1 \ 
+--build-arg GEOSERVER_WEBAPP_SRC=https://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/geoserver-2.19.1-war.zip/download  .
+docker run \
+--env PLUGIN_DYNAMIC_URLS="http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-control-flow-plugin.zip \
+http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-libjpeg-turbo-plugin.zip" \
+--rm --name gs -p 8080:8080 geoserver:test-2.19.1
 ```
 
 ## How to build the Dockerfile with no helper scrips
@@ -129,6 +138,7 @@ While the container is running you can reload geoserver with:
 ```bash
 docker run -it <your-container-name> exec /usr/local/bin/geoserver-rest-reload.sh
 ```
+
 ### Test plugins on running container
 
 ```bash
@@ -141,8 +151,7 @@ Scripts provided that are for docker hub are under `hooks` directory.
 
 Basically the `hooks/build` script takes these environment variables with current version numbers offered for geoserver:
 
-
-```
+```bash
 export MAINT_VERSION="2.17.3 2.17.2 2.17.1"
 export MIDDLE_STABLE="18"
 export NIGHTLY_MAINT_VERSION="2.17.x"
@@ -162,7 +171,7 @@ To test locally build hook you can use the `test_hooks.sh` script provided.
 
 the script can be run with no parameters to show the needed parameters:
 
-```
+```bash
 ./custom_build.sh
 Usage: ./custom_build.sh [docker image tag] [geoserver version] [geoserver master version] [datadir| nodatadir] [pull|no pull];
 
@@ -181,6 +190,6 @@ or just create a dockr image with the geoserver artifact.
 
 ### Example
 
-```
+```bash
 ./custom_build.sh my-docker-tag 2.18.x 2.18.x nodatadir no_pull
 ```

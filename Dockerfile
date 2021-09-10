@@ -1,5 +1,5 @@
 FROM tomcat:9-jdk11-openjdk as mother
-LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
+LABEL maintainer="Alessandro Parma <alessandro.parma@geosolutionsgroup.com>"
 SHELL ["/bin/bash", "-c"]
 
 # download and install libjpeg-2.0.6 from sources.
@@ -109,7 +109,7 @@ COPY run_tests.sh /docker/tests/run_tests.sh
 # install needed packages and create externalized dirs
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-    && apt-get install --yes gdal-bin postgresql-client-11 fontconfig libfreetype6 jq \
+    && apt-get install --yes git gdal-bin postgresql-client-11 fontconfig libfreetype6 jq \
     && apt-get clean \
     && apt-get -y autoclean \
     && apt-get -y autoremove \
@@ -125,11 +125,11 @@ RUN apt-get update \
     "${GRIB_CACHE_DIR}"
 
 # copy from mother
-
 COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
 COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
 COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
 COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"
+
 COPY geoserver-plugin-download.sh /usr/local/bin/geoserver-plugin-download.sh
 COPY geoserver-rest-config.sh /usr/local/bin/geoserver-rest-config.sh
 COPY geoserver-rest-reload.sh /usr/local/bin/geoserver-rest-reload.sh
