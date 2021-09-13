@@ -94,8 +94,8 @@ http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geos
 ## How to build the Dockerfile with no helper scrips
 
 There are [**build arguments**](https://docs.docker.com/engine/reference/commandline/build/) to customize the image:
-- `PLUG_IN_URLS` using the embedded Docker feature of downloading through ADD, plugins can be downloaded sequentially if urls (local paths can be used as well) are given spearated by a space (see examples), this works both for stable and unsupported community plugin.
-- `GEOSERVER_DATA_DIR_SRC` to add your own custom datadir to the final image. This can be a local zip or directory or remote URL (see [ADD](https://docs.docker.com/engine/reference/builder/#add) instruction Doc)
+- `PLUG_IN_URLS` space-separated list of additional plugins for geoserver (see examples), this works both for extensions and community plugins.
+- `GEOSERVER_DATA_DIR_SRC` add a customized datadir to the final image. This can be a local zip or directory or remote URL (see [ADD](https://docs.docker.com/engine/reference/builder/#add) documentation)
 - `GEOSERVER_WEBAPP_SRC` to add your own custom web app to the final image. This can be a local zip or directory or remote URL (see [ADD](https://docs.docker.com/engine/reference/builder/#add) instruction Doc).
 If you want to build or package your own web app you can customize the "mother" stage of Dockerfile accordingly, if you want to download directly GeoServer you may need to add `/download` at the end of download 
 url which you can copy/paste from [GeoServer official downloads page](http://geoserver.org/download/), see last example below
@@ -168,9 +168,7 @@ Usage: ./custom_build.sh [docker image tag] [geoserver version] [geoserver maste
              docker build use always a remote image or a local image
 ```
 
-This script is meant to be used by Jenkins jobs, custom private builds, variety of tests with highly customized versions of geoserver.
-It can burn a custom datadir inside the docker image (it will expect data dir in ./resources/geoserver-datadir by default), 
-or just create a dockr image with the geoserver artifact.
+This script is meant to be used by automated build, variety of tests with highly customized versions of geoserver.
 
 ### Example
 
