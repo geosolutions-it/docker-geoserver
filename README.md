@@ -2,22 +2,6 @@
 
 ![](/docker_hub_deployment.png)
 
-|Features| Implemented |
-|--------|-------------|
-|Build image with custom GS version|:heavy_check_mark:|
-|Build image with custom (local) WAR file (or zipped WAR)|:heavy_check_mark:|
-|The WAR source can either be a ZIP or a WAR file|:heavy_check_mark:|
-|Burn extensions to the image (docker will download JARs)|:heavy_check_mark:|
-|Burn extensions to the image (local files)|:heavy_check_mark:|
-|Control whether CORS should be|:x:|
-|Allow to burn a local data dir to the resulting image|:heavy_check_mark:|
-|Allow to add custom fonts to the resulting image|:x:|
-|Image Size| to check|
-|Starts up with the default data directory|:heavy_check_mark:|
-|Install extensions dynamically on startup (based on given configuration/env)|:heavy_check_mark:|
-|Allows basic configuration via environment variables (GS Data dir, Memory Size)|:heavy_check_mark:|
-|Change admin password|:heavy_check_mark:|
-
 ## How to run it
 
 Pull the image from [Docker Hub](https://hub.docker.com/r/geosolutionsit/geoserver/)
