@@ -92,6 +92,7 @@ http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geos
 ```
 
 ## How to build the Dockerfile with no helper scrips
+` docker build --build-arg GEOSERVER_WEBAPP_SRC="./geoserver.war" -t geoserver:test .`
 
 There are [**build arguments**](https://docs.docker.com/engine/reference/commandline/build/) to customize the image:
 - `PLUG_IN_URLS` space-separated list of additional plugins for geoserver (see examples), this works both for extensions and community plugins.
