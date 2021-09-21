@@ -1,5 +1,7 @@
 # docker-geoserver
 
+![](/docker_hub_deployment.png)
+
 ## How to run it
 
 Pull the image from [Docker Hub](https://hub.docker.com/r/geosolutionsit/geoserver/)
@@ -26,9 +28,13 @@ docker stop gs
 start GeoServer with data persistence on saved datadir:
 
 ```bash
-docker run -v ./datadir:/var/geoserver/datadir --name gs -p 8080:8080 geosolutionsit/geoserver
+docker run -v datadir:/var/geoserver/datadir --name gs -p 8080:8080 geosolutionsit/geoserver
 ```
 
+start GeoServer with data persistence on saved datadir and change admin password:
+```bash
+docker run -e ADMIN_PASSWORD=securepassword -v datadir:/var/geoserver/datadir --name gs -p 8080:8080 geosolutionsit/geoserver
+```
 Open your browser and point it to `http://localhost:8080/geoserver` .
 GeoServer web interface will show up, you can now log in with user admin and password `geoserver`.
 
@@ -74,25 +80,63 @@ services:
       - ./grib_cache:${GRIB_CACHE_DIR}
 ```
 
+Example of how to build a docker image with just geoserver war and then add plugins at runtime.
+
+```bash
+docker build -t geoserver:test-2.19.1 \ 
+--build-arg GEOSERVER_WEBAPP_SRC=https://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/geoserver-2.19.1-war.zip/download  .
+docker run \
+--env PLUGIN_DYNAMIC_URLS="http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-control-flow-plugin.zip \
+http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-libjpeg-turbo-plugin.zip" \
+--rm --name gs -p 8080:8080 geoserver:test-2.19.1
+```
+
 ## How to build the Dockerfile with no helper scrips
-
-If you want to build the image by yourself just run `docker build` from the root of the repository
-
 ` docker build --build-arg GEOSERVER_WEBAPP_SRC="./geoserver.war" -t geoserver:test .`
 
 There are [**build arguments**](https://docs.docker.com/engine/reference/commandline/build/) to customize the image:
-- `GEOSERVER_DATA_DIR_SRC` to add your own custom datadir to the final image. This can be a local zip or directory or remote URL (see [ADD](https://docs.docker.com/engine/reference/builder/#add) instruction Doc)
-- `GEOSERVER_WEBAPP_SRC` to add your own custom web app to the final image. This can be a local zip or directory or remote URL (see [ADD](https://docs.docker.com/engine/reference/builder/#add) instruction Doc)
-If you want to build or package your own web app you can customize the "mother" stage of Dockerfile accordingly
+- `PLUG_IN_URLS` space-separated list of additional plugins for geoserver (see examples), this works both for extensions and community plugins.
+- `GEOSERVER_DATA_DIR_SRC` add a customized datadir to the final image. This can be a local zip or directory or remote URL (see [ADD](https://docs.docker.com/engine/reference/builder/#add) documentation)
+- `GEOSERVER_WEBAPP_SRC` to add your own custom web app to the final image. This can be a local zip or directory or remote URL (see [ADD](https://docs.docker.com/engine/reference/builder/#add) instruction Doc).
+If you want to build or package your own web app you can customize the "mother" stage of Dockerfile accordingly, if you want to download directly GeoServer you may need to add `/download` at the end of download 
+url which you can copy/paste from [GeoServer official downloads page](http://geoserver.org/download/), see last example below
 
-##Docker Hub build process and related helper scripts
+### Examples about using Docker image
+
+```bash
+# Example of how to build a single customized war of geoserver or simply any vanilla one
+docker build -t geoserver:test . --build-arg GEOSERVER_WEBAPP_SRC="./resources/geoserver/geoserver.war"
+
+# Same kind of build as above but burning custom datadir inside GeoServer Docker image
+
+docker build -t geoserver:test . --build-arg GEOSERVER_WEBAPP_SRC="./resources/geoserver/geoserver.war" --build-arg GEOSERVER_DATA_DIR_SRC="./resources/geoserver-datadir/"
+
+# Example on how to download and build a geoserver version with stable plugins controlflow and libjpegturbo plugins burned in the image
+docker build -t geoserver:luca-test-2.19.1 --build-arg GEOSERVER_WEBAPP_SRC="https://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/geoserver-2.19.1-war.zip/download" --build-arg PLUG_IN_URLS="http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-control-flow-plugin.zip http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-libjpeg-turbo-plugin.zip" .
+
+```
+
+### GeoServer rest reload
+
+While the container is running you can reload geoserver with:
+
+```bash
+docker exec -it <your-container-name> /usr/local/bin/geoserver-rest-reload.sh
+```
+
+### Test plugins on running container
+
+```bash
+docker exec -it <your-container-name> geoserver-plugin-download.sh $CATALINA_BASE/webapps/$APP_LOCATION/WEB-INF/lib <space separated list of plugin urls>
+```
+
+## Docker Hub build process and related helper scripts
 
 Scripts provided that are for docker hub are under `hooks` directory.
 
 Basically the `hooks/build` script takes these environment variables with current version numbers offered for geoserver:
 
-
-```
+```bash
 export MAINT_VERSION="2.17.3 2.17.2 2.17.1"
 export MIDDLE_STABLE="18"
 export NIGHTLY_MAINT_VERSION="2.17.x"
@@ -112,7 +156,7 @@ To test locally build hook you can use the `test_hooks.sh` script provided.
 
 the script can be run with no parameters to show the needed parameters:
 
-```
+```bash
 ./custom_build.sh
 Usage: ./custom_build.sh [docker image tag] [geoserver version] [geoserver master version] [datadir| nodatadir] [pull|no pull];
 
@@ -125,11 +169,10 @@ Usage: ./custom_build.sh [docker image tag] [geoserver version] [geoserver maste
              docker build use always a remote image or a local image
 ```
 
-This script is meant to be used by Jenkins jobs, custom private builds, variety of tests with highly customized versions of geoserver.
-It can burn a custom datadir inside the docker image (it will expect data dir in ./resources/geoserver-datadir by default), or just create a dockr image with the geoserver artifact.
+This script is meant to be used by automated build, variety of tests with highly customized versions of geoserver.
 
 ### Example
 
-```
+```bash
 ./custom_build.sh my-docker-tag 2.18.x 2.18.x nodatadir no_pull
 ```

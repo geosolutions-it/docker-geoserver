@@ -26,7 +26,7 @@ for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_
   var=$(IFS=$'  '; echo "${PLUG_IN_URLS[*]}" )
   docker build \
     --build-arg GEOSERVER_WEBAPP_SRC="$NIGHTLY_URL" \
-    --build-arg PLUG_IN_URLS="./resources/geoserver-plugins" \
+    --build-arg PLUG_IN_PATHS="./resources/geoserver-plugins" \
     -f "$DOCKERFILE_PATH" \
     -t "${DOCKER_REPO}:$NIGHTLY_VERSION" .
   rm -rf ./resources/geoserver-plugins/*
@@ -48,7 +48,7 @@ for VERSION in $STABLE_VERSION $MAINT_VERSION; do
   var=$(IFS=$'\ '; echo "${PLUG_IN_URLS[*]}" )
   docker build \
     --build-arg GEOSERVER_WEBAPP_SRC="$GEOSERVER_URL" \
-    --build-arg PLUG_IN_URLS="./resources/geoserver-plugins" \
+    --build-arg PLUG_IN_PATHS="./resources/geoserver-plugins" \
     -f "$DOCKERFILE_PATH" \
     -t "${DOCKER_REPO}:$VERSION" .
   rm -rf ./resources/geoserver-plugins/*
