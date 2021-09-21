@@ -8,4 +8,4 @@ else
     ADMIN_HEADER=$(echo -n "admin:geoserver"| base64)
 fi 
 
-curl -H "Authorization: basic ${ADMIN_HEADER}" -X GET http://localhost:8080/geoserver/rest/reload -H  "accept: application/json" -H  "content-type: application/json"
+curl -H "Authorization: basic ${ADMIN_HEADER}" -X POST http://localhost:8080/geoserver/rest/reload -H  "accept: application/json" -H  "content-type: application/json"
