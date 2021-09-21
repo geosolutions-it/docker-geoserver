@@ -121,7 +121,7 @@ docker build -t geoserver:luca-test-2.19.1 --build-arg GEOSERVER_WEBAPP_SRC="htt
 While the container is running you can reload geoserver with:
 
 ```bash
-docker exec -it <your-container-name> /usr/local/bin/geoserver-rest-reload.sh
+docker exec -it <your-container-name> bash /usr/local/bin/geoserver-rest-reload.sh
 ```
 
 ### Test plugins on running container
