@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export MAINT_VERSION="2.18.4 2.18.3 2.18.2 2.18.1 2.18.0"
+export MAINT_VERSION="2.18.5 2.18.4 2.18.3 2.18.2 2.18.1 2.18.0"
 export MIDDLE_STABLE="19"
 export NIGHTLY_MAINT_VERSION="2.18.x"
 export NIGHTLY_MASTER_VERSION="main foobar"
