@@ -2,7 +2,7 @@
 set -e
 
 psql -v ON_ERROR_STOP=1 --username ${POSTGRES_USER} --dbname ${POSTGRES_DB} <<-EOSQL
-    CREATE USER geoserver;
+    CREATE USER geoserver WITH LOGIN PASSWORD 'geoserver';
     CREATE DATABASE geoserver;
     \c geoserver
     CREATE EXTENSION postgis;
