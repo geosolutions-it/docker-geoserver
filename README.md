@@ -126,7 +126,7 @@ docker run -it <your-container-name> exec /usr/local/bin/geoserver-rest-reload.s
 ### Test plugins on running container
 
 ```bash
-docker run -it <your-container-name> exec geoserver-plugin-download.sh $CATALINA_BASE/webapps/$APP_LOCATION/WEB-INF/lib <space separated list of plugin urls>
+docker exec -it <your-container-name> geoserver-plugin-download.sh $CATALINA_BASE/webapps/$APP_LOCATION/WEB-INF/lib <space separated list of plugin urls>
 ```
 
 ## Docker Hub build process and related helper scripts
