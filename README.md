@@ -91,7 +91,9 @@ http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geos
 --rm --name gs -p 8080:8080 geoserver:test-2.19.1
 ```
 
-## How to build the Dockerfile with no helper scrips
+## How to build the Docker image with your own geoserver.war file 
+ Make sure you have your war file at `./geoserver.war`
+ 
 ` docker build --build-arg GEOSERVER_WEBAPP_SRC="./geoserver.war" -t geoserver:test .`
 
 There are [**build arguments**](https://docs.docker.com/engine/reference/commandline/build/) to customize the image:
