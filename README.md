@@ -83,13 +83,15 @@ services:
 Example of how to build a docker image with just geoserver war and then add plugins at runtime.
 
 ```bash
-docker build -t geoserver:test-2.19.1 \ 
+docker build -t geoserver:test-2.19.1 \
 --build-arg GEOSERVER_WEBAPP_SRC=https://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/geoserver-2.19.1-war.zip/download  .
+
 docker run \
 --env PLUGIN_DYNAMIC_URLS="http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-control-flow-plugin.zip \
 http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-libjpeg-turbo-plugin.zip" \
 --rm --name gs -p 8080:8080 geoserver:test-2.19.1
 ```
+
 
 ## How to build the Docker image with your own geoserver.war file 
  Make sure you have your war file at `./geoserver.war`
