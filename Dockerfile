@@ -1,6 +1,8 @@
 FROM tomcat:9-jdk11-openjdk as mother
 LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
 
+RUN apt-get install vim
+
 RUN apt-get update && apt-get install -y unzip wget
 
 # accepts local files and URLs. Tar(s) are automatically extracted
