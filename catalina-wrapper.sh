@@ -8,7 +8,7 @@ done
 # update sld files modification date to speed up GS startup
 touch ${GEOSERVER_DATA_DIR}/styles/*sld
 
-webapp_path="${CATALINA_BASE}/webapps/${GEOSERVER_APP_NAME}"
+webapp_path="${CATALINA_BASE}/webapps/${GEOSERVER_APP_NAME}.war"
 
 # not deployed? first run? unpack GeoServer WAR
 if [ $GEOSERVER_APP_NAME != geoserver ]; then
