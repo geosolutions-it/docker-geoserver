@@ -128,7 +128,7 @@ RUN apt-get update \
 # copy from mother
 COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
 COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
-COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
+# COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
 COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"
 
 COPY geoserver-plugin-download.sh /usr/local/bin/geoserver-plugin-download.sh
