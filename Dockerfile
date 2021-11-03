@@ -6,7 +6,7 @@ SHELL ["/bin/bash", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 ARG CMAKE_BUILD_PARALLEL_LEVEL=8
 ARG APP_LOCATION="geoserver"
-RUN apt-get update && apt-get install -y unzip wget cmake nasm\
+RUN apt-get update && apt-get install -y rsync unzip wget cmake nasm\
     && wget https://nav.dl.sourceforge.net/project/libjpeg-turbo/2.0.6/libjpeg-turbo-2.0.6.tar.gz \
     && tar -zxf ./libjpeg-turbo-2.0.6.tar.gz \
     && cd libjpeg-turbo-2.0.6 && cmake -G"Unix Makefiles" && make deb \
@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y unzip wget cmake nasm\
     && rm -rf /usr/share/doc/*
 
 # accepts local files and URLs. Tar(s) are automatically extracted
-WORKDIR /output/datadir
+WORKDIR /output
 ARG GEOSERVER_DATA_DIR_SRC="./datadir.zip"
 ADD "${GEOSERVER_DATA_DIR_SRC}" "./"
 RUN unzip ./datadir.zip && rm datadir.zip
