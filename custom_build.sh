@@ -219,11 +219,11 @@ function main {
     clean_up_directory 
     download_geoserver "${GEOSERVER_VERSION}"
     create_plugins_folder
-    # download_plugin ext monitor
-    # download_plugin ext control-flow
-    # download_plugin ext geofence-plugin
-    # download_plugin ext geofence-server-plugin
-    # download_plugin community sec-oauth2-geonode
+    download_plugin ext monitor
+    download_plugin ext control-flow
+    download_plugin ext geofence-plugin
+    download_plugin ext geofence-server-plugin
+    download_plugin community sec-oauth2-geonode
     #download_marlin
 
 	if  [ "${GEOSERVER_DATA_DIR_RELEASE}" = "nodatadir" ]; then

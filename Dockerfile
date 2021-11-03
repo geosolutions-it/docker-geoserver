@@ -21,8 +21,9 @@ RUN apt-get update && apt-get install -y unzip wget cmake nasm\
 
 # accepts local files and URLs. Tar(s) are automatically extracted
 WORKDIR /output/datadir
-ARG GEOSERVER_DATA_DIR_SRC="./.placeholder"
+ARG GEOSERVER_DATA_DIR_SRC="./datadir.zip"
 ADD "${GEOSERVER_DATA_DIR_SRC}" "./"
+RUN unzip ./datadir.zip && rm datadir.zip
 
 # accepts local files and URLs. Tar(s) are automatically extracted
 WORKDIR /output/webapp
