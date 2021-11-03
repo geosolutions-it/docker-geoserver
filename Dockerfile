@@ -138,7 +138,8 @@ COPY ${CUSTOM_FONTS} $GEOSERVER_DATA_DIR/styles
 RUN groupadd -g $GID $UNAME
 RUN useradd -m -u $UID -g $GID --system $UNAME
 RUN chown -R $UID:$GID $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR $GEOWEBCACHE_CONFIG_DIR $NETCDF_DATA_DIR $GRIB_CACHE_DIR $GEOSERVER_DATA_DIR
-
+COPY --chown=$UID:$GID ./catalina-wrapper.sh ${CATALINA_BASE}/bin/catalina_wrapper.sh
+RUN chmod a+rx ${CATALINA_BASE}/bin/catalina_wrapper.sh
 RUN if [ ! -f "${GEOSERVER_DATA_DIR}/logging.xml" ]; then cp -a ${CATALINA_BASE}/webapps/geoserver/data/* ${GEOSERVER_DATA_DIR};fi
 
 WORKDIR "$CATALINA_BASE"
@@ -146,4 +147,4 @@ USER $UNAME
 
 ENV TERM xterm
 EXPOSE 8080/tcp
-CMD ["/entrypoint.sh"]
+# CMD ["/entrypoint.sh"]
