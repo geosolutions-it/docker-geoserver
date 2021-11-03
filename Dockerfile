@@ -37,12 +37,12 @@ RUN \
     fi
 
 # zip files require explicit extracion
-RUN \
-    if [ "${GEOSERVER_WEBAPP_SRC##*.}" = "zip" ]; then \
-        unzip "./*zip"; \
-        rm ./*zip; \
-    fi \
-    && [ -d "./geoserver" ] || (mkdir -p ./geoserver && unzip ./geoserver.war -d ./geoserver && rm ./geoserver.war)
+# RUN \
+#     if [ "${GEOSERVER_WEBAPP_SRC##*.}" = "zip" ]; then \
+#         unzip "./*zip"; \
+#         rm ./*zip; \
+#     fi \
+#     && [ -d "./geoserver" ] || (mkdir -p ./geoserver && unzip ./geoserver.war -d ./geoserver && rm ./geoserver.war)
 
 WORKDIR /output/plugins
 ARG PLUG_IN_URLS=""
