@@ -170,7 +170,6 @@ Usage: ./custom_build.sh [docker image tag] [geoserver version] [geoserver maste
                               if you use a released version you need to put it to the release number
 [datadir| nodatadir]:         if this parameter is equal to nodatadir the datadir is not burned in the docker images
 [pull|no pull]:               docker build use always a remote image or a local image
-             docker build use always a remote image or a local image
 ```
 
 This script is meant to be used by automated build, variety of tests with highly customized versions of geoserver.
