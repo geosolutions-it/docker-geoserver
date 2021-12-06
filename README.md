@@ -48,37 +48,7 @@ There are some [**environment variables**](https://docs.docker.com/engine/refere
 - `GRIB_CACHE_DIR`o put your GeoServer GRIB cache dir elsewhere
 
 Each of these variables can be associated to an external volume to persist data for example in a docker compose
-configuration it can be done like this:
-
-add an .env file:
-
-```bash
-GEOSERVER_LOG_DIR=/var/geoserver/logs
-GEOSERVER_DATA_DIR=/var/geoserver/datadir
-GEOWEBCACHE_CONFIG_DIR=/var/geoserver/gwc_config
-GEOWEBCACHE_CACHE_DIR=/var/geoserver/gwc
-NETCDF_DATA_DIR=/var/geoserver/netcfd
-GRIB_CACHE_DIR=/var/geoserver/grib_cache
-```
-
-and a docker-compose.yml like this
-
-```yml
-version: "3.8"
-services:
-  geoserver:
-    image: geosolutionsit/geoserver:2.19RC
-    env-file: .env
-    ports:
-     - 8080:8080
-    volumes:
-      - ./logs:${GEOSERVER_LOG_DIR}
-      - ./datadir:${GEOSERVER_DATA_DIR}
-      - ./gwc_config:${GEOWEBCACHE_CONFIG_DIR}
-      - ./gwc:${GEOWEBCACHE_CACHE_DIR}
-      - ./netcfd:${NETCDF_DATA_DIR}
-      - ./grib_cache:${GRIB_CACHE_DIR}
-```
+configuration. More information about this in the section below.
 
 Example of how to build a docker image with just geoserver war and then add plugins at runtime.
 
@@ -92,6 +62,205 @@ http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geos
 --rm --name gs -p 8080:8080 geoserver:test-2.19.1
 ```
 
+
+## Using GeoServer with docker-compose
+Docker Compose is a tool that helps us easily handle multiple containers at once.
+
+Install instructions: [Docker Docs](https://docs.docker.com/compose/install/)
+
+In order to use Compose we need first to set correctly the "docker-compose.yml" file of the Docker-GeoServer.
+
+### Externalize the data directory of the GeoServer container
+
+In order to persist and externalize access to the data of the geoserver container, we need to associated the environment variables to some external volumes in the host.
+
+To achieve this, first we gonna create a .env file (in the same folder of the docker-compose.yml file) and then modify the docker-compose configuration to relate the geoserver container definition with this new file.
+
+.env file content:
+
+```bash
+GEOSERVER_LOG_DIR=/var/geoserver/logs
+GEOSERVER_DATA_DIR=/var/geoserver/datadir
+GEOWEBCACHE_CONFIG_DIR=/var/geoserver/gwc_config
+GEOWEBCACHE_CACHE_DIR=/var/geoserver/gwc
+NETCDF_DATA_DIR=/var/geoserver/netcfd
+GRIB_CACHE_DIR=/var/geoserver/grib_cache
+```
+
+More details on the definition of the .env file: [Docker - The Compose Specification](https://github.com/compose-spec/compose-spec/blob/master/spec.md#env_file)
+
+Modify the docker-compose.yml in order to use the .env file and define volumes for each environment variable:
+
+```yml
+...
+geoserver:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/main/geoserver-main-latest-war.zip"
+    container_name: geoserver
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env-file: .env
+    ports:
+      - 8080
+    volumes:
+      - ./logs:${GEOSERVER_LOG_DIR}
+      - ./datadir:${GEOSERVER_DATA_DIR}
+      - ./gwc_config:${GEOWEBCACHE_CONFIG_DIR}
+      - ./gwc:${GEOWEBCACHE_CACHE_DIR}
+      - ./netcfd:${NETCDF_DATA_DIR}
+      - ./grib_cache:${GRIB_CACHE_DIR}
+...
+```
+
+### Using an alternative war file to build GeoServer container of the stack
+
+In the docker-compose.yml file, actually we are building the GeoServer container from a image on a URL.
+
+```yml
+...
+geoserver:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/main/geoserver-main-latest-war.zip"
+    container_name: geoserver 
+...
+```
+This is dynamic, you can use a local file in the host to build the container as and alternative if you need. In order to do this, we need to modify the docker-compose configuration file like this:
+
+```yml
+...
+geoserver:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        GEOSERVER_WEBAPP_SRC: "/host/directory/alternativegeoserver.war"
+    container_name: geoserver 
+...
+```
+
+This option allows you to use URLs and local files as well to build the GeoServer container in the option that suit you best.
+
+For more details, check the ADD documentation: [Docker - ADD](https://docs.docker.com/engine/reference/builder/#add)
+
+### Accessing GeoServer postgresql server from outside the container
+
+Containers communicate between themselves in networks created, implicitly or through configuration, by docker compose. To reach a container from the host, the ports must be exposed declaratively through the "ports" keyword, which also allows us to choose if we want exposing the port differently in the host. 
+
+```yml
+ports:
+- "hostport:containerport" #host:container SHOULD always be specified as a (quoted) string, to avoid conflicts with yaml base-60 float.
+```
+The Host port and the Container Port can be equal or no, this option allows us to run different containers exposing the same ports without collisions.
+
+GeoServer docker-compose.yml:
+
+```yml
+services:
+  postgres:
+    image: postgis/postgis
+    container_name: postgres
+    ...
+    ports:
+      - 5432
+    ...
+
+  geoserver:
+    ...
+    container_name: geoserver
+    ...
+    ports:
+      - 8080
+    ...
+
+  proxy:
+    image: nginx
+    container_name: proxy
+    ...
+    ports:
+    - "80:80"
+    ...
+```
+In this example the only port visible in the host will be port 80 of the proxy container.
+
+In order to access the postgresql server from outside the container, we need to use the "port" option to expose a port.
+
+```yml
+services:
+  postgres:
+    image: postgis/postgis
+    container_name: postgres
+    ...
+    ports:
+      - "5432:5432"
+    ...
+```
+To test the expose, we can use "curl" command in the host:
+
+```bash
+curl -v localhost:5432
+
+*   Trying 127.0.0.1:5432...
+* TCP_NODELAY set
+* Connected to localhost (127.0.0.1) port 5432 (#0)
+> GET / HTTP/1.1
+> Host: localhost:5432
+> User-Agent: curl/7.68.0
+> Accept: */*
+```
+
+More details on expose containers ports: [Docker - The Compose Specification](https://github.com/compose-spec/compose-spec/blob/master/spec.md#ports)
+
+### Starting the containers
+
+When we have everything configured with the docker-compose.yml file, to start the containers for the first time we gonna use this command (located in the directory when the yml file is):
+
+```bash
+docker-compose up
+```
+This is gonna create and start the containers, the networks, and the volumes defined in the docker-compose.yml file. This is the command you need to use every time after a change on the docker-compose.yml file in order to apply the modifications.
+
+After the first time, we can simply use this command to start the containers:
+
+```bash
+docker-compose start
+```
+
+Console output:
+
+```bash
+Starting postgres ... done
+Starting geoserver ... done
+Starting proxy ... done
+...
+(Continued with the proxy logs)
+```
+
+To stopping all the containers, this is the command:
+
+```bash
+docker-compose stop
+```
+
+Console output:
+
+```bash
+Stopping proxy ... done
+Stopping geoserver ... done
+Stopping postgres  ... done
+```
+
+If you want to reset the status of the containers, we need to run this command, which will destroy everything with only the exception of external volumes:
+
+```bash
+docker-compose down
+```
 
 ## How to build the Docker image with your own geoserver.war file 
  Make sure you have your war file at `./geoserver.war`
@@ -134,6 +303,7 @@ docker exec -it <your-container-name> bash /usr/local/bin/geoserver-rest-reload.
 docker exec -it <your-container-name> geoserver-plugin-download.sh $CATALINA_BASE/webapps/$APP_LOCATION/WEB-INF/lib <space separated list of plugin urls>
 ```
 
+
 ## Docker Hub build process and related helper scripts
 
 Scripts provided that are for docker hub are under `hooks` directory.
@@ -155,6 +325,7 @@ Phantom version `foobar` is supposed to always fail as a test and always tried t
 "MIDDLE_STABLE" has just a function for the scripts logic, increase it with latest minor version number for stable.
 
 To test locally build hook you can use the `test_hooks.sh` script provided.
+
 
 ## How to use `custom_build.sh` script
 
