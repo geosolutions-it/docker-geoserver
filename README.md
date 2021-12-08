@@ -45,7 +45,7 @@ There are some [**environment variables**](https://docs.docker.com/engine/refere
 - `GEOWEBCACHE_CONFIG_DIR` to put your GeoServer cache configuration elsewhere
 - `GEOWEBCACHE_CACHE_DIR` to put your GeoServer cache elsewhere
 - `NETCDF_DATA_DIR` to put your GeoServer NETCDF data dir elsewhere
-- `GRIB_CACHE_DIR`o put your GeoServer GRIB cache dir elsewhere
+- `GRIB_CACHE_DIR` to put your GeoServer GRIB cache dir elsewhere
 
 Each of these variables can be associated to an external volume to persist data for example in a docker compose
 configuration. More information about this in the section below.
@@ -72,24 +72,24 @@ In order to use Compose we need first to set correctly the "docker-compose.yml" 
 
 ### Externalize the data directory of the GeoServer container
 
-In order to persist and externalize access to the data of the geoserver container, we need to associated the environment variables to some external volumes in the host.
+In order to persist and externalize access to the data of the geoserver container we need to set the values of the environment variables (named in the previous section) on the container and then associated this to the external volumes we going to create.
 
-To achieve this, first we gonna create a .env file (in the same folder of the docker-compose.yml file) and then modify the docker-compose configuration to relate the geoserver container definition with this new file.
+To achieve this, first we gonna create a .env file (in the same folder of the docker-compose.yml file) to define in an optimal way (easy to modify later) the environment variables values for the geoserver container:
 
 .env file content:
 
 ```bash
 GEOSERVER_LOG_DIR=/var/geoserver/logs
 GEOSERVER_DATA_DIR=/var/geoserver/datadir
-GEOWEBCACHE_CONFIG_DIR=/var/geoserver/gwc_config
-GEOWEBCACHE_CACHE_DIR=/var/geoserver/gwc
-NETCDF_DATA_DIR=/var/geoserver/netcfd
-GRIB_CACHE_DIR=/var/geoserver/grib_cache
+GEOWEBCACHE_CONFIG_DIR=/var/geoserver/datadir/gwc
+GEOWEBCACHE_CACHE_DIR=/var/geoserver/gwc_cache_dir
+NETCDF_DATA_DIR=/var/geoserver/netcdf_data_dir
+GRIB_CACHE_DIR=/var/geoserver/grib_cache_dir
 ```
 
 More details on the definition of the .env file: [Docker - The Compose Specification](https://github.com/compose-spec/compose-spec/blob/master/spec.md#env_file)
 
-Modify the docker-compose.yml in order to use the .env file and define volumes for each environment variable:
+Then we are going to modify the docker-compose configuration file to set environment variables in the geoserver container with the “environment” key:
 
 ```yml
 ...
@@ -97,24 +97,93 @@ geoserver:
     build:
       context: .
       dockerfile: ./Dockerfile
-      args:
-        GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/main/geoserver-main-latest-war.zip"
-    container_name: geoserver
-    depends_on:
-      postgres:
-        condition: service_healthy
-    env-file: .env
-    ports:
-      - 8080
-    volumes:
-      - ./logs:${GEOSERVER_LOG_DIR}
-      - ./datadir:${GEOSERVER_DATA_DIR}
-      - ./gwc_config:${GEOWEBCACHE_CONFIG_DIR}
-      - ./gwc:${GEOWEBCACHE_CACHE_DIR}
-      - ./netcfd:${NETCDF_DATA_DIR}
-      - ./grib_cache:${GRIB_CACHE_DIR}
+    ...
+    environment:
+      - GEOSERVER_LOG_DIR=${GEOSERVER_LOG_DIR}
+      - GEOSERVER_DATA_DIR=${GEOSERVER_DATA_DIR}
+      - GEOWEBCACHE_CONFIG_DIR=${GEOWEBCACHE_CONFIG_DIR}
+      - GEOWEBCACHE_CACHE_DIR=${GEOWEBCACHE_CACHE_DIR}
+      - NETCDF_DATA_DIR=${NETCDF_DATA_DIR}
+      - GRIB_CACHE_DIR=${GRIB_CACHE_DIR}
 ...
 ```
+
+To be sure that the environment variables are not pass empty, you can set a default value.
+
+Example:
+```yml
+...
+geoserver:
+...
+    environment:
+      - GEOSERVER_LOG_DIR=${GEOSERVER_LOG_DIR:-/var/geoserver/logs}
+...
+```
+If GEOSERVER_LOG_DIR variable is not set in the .env file, is going to take his default value.
+
+
+Next we are going to define the external volumes, modifying again the docker-compose configuration file.
+
+```yml
+services:
+...
+  geoserver:
+    ...
+    volumes:
+      - logs:${GEOSERVER_LOG_DIR}
+      - datadir:${GEOSERVER_DATA_DIR}
+      - gwc_config:${GEOWEBCACHE_CONFIG_DIR}
+      - gwc:${GEOWEBCACHE_CACHE_DIR}
+      - netcfd:${NETCDF_DATA_DIR}
+      - grib_cache:${GRIB_CACHE_DIR}
+  ...
+volumes:
+  pg_data:
+  logs:
+  datadir:
+  gwc_config:
+  gwc:
+  netcfd:
+  grib_cache:
+```
+
+Both configurations together (environment variables and external volumes) are going to show like this in the docker-compose configuration file:
+
+```yml
+services:
+...
+  geoserver:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ...
+    environment:
+      - GEOSERVER_LOG_DIR=${GEOSERVER_LOG_DIR}
+      - GEOSERVER_DATA_DIR=${GEOSERVER_DATA_DIR}
+      - GEOWEBCACHE_CONFIG_DIR=${GEOWEBCACHE_CONFIG_DIR}
+      - GEOWEBCACHE_CACHE_DIR=${GEOWEBCACHE_CACHE_DIR}
+      - NETCDF_DATA_DIR=${NETCDF_DATA_DIR}
+      - GRIB_CACHE_DIR=${GRIB_CACHE_DIR}
+    volumes:
+      - logs:${GEOSERVER_LOG_DIR}
+      - datadir:${GEOSERVER_DATA_DIR}
+      - gwc_config:${GEOWEBCACHE_CONFIG_DIR}
+      - gwc:${GEOWEBCACHE_CACHE_DIR}
+      - netcfd:${NETCDF_DATA_DIR}
+      - grib_cache:${GRIB_CACHE_DIR}
+  ...
+volumes:
+  pg_data:
+  logs:
+  datadir:
+  gwc_config:
+  gwc:
+  netcfd:
+  grib_cache:
+```
+After this our geoserver container is ready and persisting his data.
+
+For more details about volumes, check the documentation: [Docker - Volume](https://docs.docker.com/storage/volumes/)
 
 ### Using an alternative war file to build GeoServer container of the stack
 
