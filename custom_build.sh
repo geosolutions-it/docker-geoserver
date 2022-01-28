@@ -26,11 +26,11 @@ function help(){
 	if [ "$#" -ne 5 ] ; then
 		echo "Usage: $0 [docker image tag] [geoserver version] [geoserver main version] [datadir|nodatadir] [pull|no_pull];"
 		echo "";
-		echo "[docker image tag] :          the tag to be used for the docker iamge ";
+		echo "[docker image tag] :          the tag to be used for the docker image";
 		echo "[geoserver version] :         the release version of geoserver to be used; you can set it to main if you want the last release";
 		echo "[geoserver main version] :  if you use the main version for geoserver you need to set it to the numerical value for the next release;"
 		echo "                              if you use a released version you need to put it to the release number";
-		echo "[datadir|nodatadir]:          datadir: copies ${DATADIR_ARTIFACT_DIRECTORY} in place into the containerr image, nodatadir: does nothing about any custom datadir";
+		echo "[datadir|nodatadir]:          datadir: copies ${DATADIR_ARTIFACT_DIRECTORY} in place into the container image, nodatadir: does nothing about any custom datadir";
 		echo "[pull|no_pull]:               docker build use always a remote image or a local image";
 		exit 1;
 	fi
@@ -38,7 +38,7 @@ function help(){
 
 function clean_up_directory() {
   # we shall never clean datadir
-	rm -rf ./resources/geoserver-plugins/* ./reosurces/geoserver/*
+	rm -rf ./resources/geoserver-plugins/* ./resources/geoserver/*
 }
 function create_plugins_folder() {
   mkdir -p ./resources/geoserver-plugins
@@ -51,9 +51,9 @@ function download_from_url_to_a_filepath {
 	FILE_DOWNLOADED=$(basename "${FILE_PATH}" )
 	if [ ! -f "${FILE_PATH}" ]; then
 		curl -L "${URL}" --output "${FILE_PATH}"
-		echo "* ${FILE_DOWNLOADED} artefact dowloaded *"
+		echo "* ${FILE_DOWNLOADED} artefact downloaded *"
 	else
-		echo "* ${FILE_DOWNLOADED} artefact already dowloaded *"
+		echo "* ${FILE_DOWNLOADED} artefact already downloaded *"
 	fi
 }
 
