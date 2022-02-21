@@ -221,6 +221,7 @@ function main {
     create_plugins_folder
     download_plugin community ogcapi
     download_plugin ext feature-pregeneralized
+    download_plugin ext wps
     download_plugin ext css
     download_plugin ext monitor
     download_plugin ext control-flow
