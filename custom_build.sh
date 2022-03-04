@@ -219,12 +219,21 @@ function main {
     clean_up_directory 
     download_geoserver "${GEOSERVER_VERSION}"
     create_plugins_folder
-    # download_plugin ext monitor
-    # download_plugin ext control-flow
-    # download_plugin ext geofence-plugin
-    # download_plugin ext geofence-server-plugin
-    # download_plugin community sec-oauth2-geonode
-    #download_marlin
+    download_plugin ext monitor
+    download_plugin ext control-flow
+    download_plugin ext authkey
+    download_plugin ext csw
+    download_plugin ext inspire
+    download_plugin ext printing-plugin
+    download_plugin ext querylayer
+    download_plugin ext sldservice
+    download_plugin ext vectortiles
+    download_plugin ext wps
+    download_plugin ext sqlserver
+    download_plugin ext oracle
+    download_plugin ext charts
+    download_plugin ext geofence-server-plugin
+    download_plugin community geofence-server-plugin
 
 	if  [ "${GEOSERVER_DATA_DIR_RELEASE}" = "nodatadir" ]; then
     build_without_data_dir "${TAG}" "${PULL}"
