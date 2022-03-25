@@ -144,7 +144,7 @@ RUN if [ ! -f "${GEOSERVER_DATA_DIR}/logging.xml" ]; then cp -a ${CATALINA_BASE}
 RUN wget http://www.hibernatespatial.org/repository/org/hibernatespatial/hibernate-spatial-postgis/1.1.1/hibernate-spatial-postgis-1.1.1.jar \
       -O ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/ \
       && wget https://repo1.maven.org/maven2/org/postgis/postgis-jdbc/1.3.3/postgis-jdbc-1.3.3.jar \
-      -O ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/
+      -O ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/ \
       && rm -fv ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/hibernate-spatial-h2-geodb-*.jar
 
 WORKDIR "$CATALINA_BASE"
