@@ -141,11 +141,9 @@ RUN chown -R $UID:$GID $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR 
 
 RUN if [ ! -f "${GEOSERVER_DATA_DIR}/logging.xml" ]; then cp -a ${CATALINA_BASE}/webapps/geoserver/data/* ${GEOSERVER_DATA_DIR};fi
 
-RUN wget http://www.hibernatespatial.org/repository/org/hibernatespatial/hibernate-spatial-postgis/1.1.1/hibernate-spatial-postgis-1.1.1.jar \
-      -O ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/
-      
-RUN  wget https://repo1.maven.org/maven2/org/postgis/postgis-jdbc/1.3.3/postgis-jdbc-1.3.3.jar \
-      -O ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/
+RUN wget http://www.hibernatespatial.org/repository/org/hibernatespatial/hibernate-spatial-postgis/1.1.1/hibernate-spatial-postgis-1.1.1.jar -O ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/
+
+RUN  wget https://repo1.maven.org/maven2/org/postgis/postgis-jdbc/1.3.3/postgis-jdbc-1.3.3.jar -O ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/
 
 RUN rm -fv ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/hibernate-spatial-h2-geodb*.jar
 
