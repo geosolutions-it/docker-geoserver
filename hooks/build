@@ -19,7 +19,8 @@ for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_
     echo $PLUG_IN_NAME
     echo $PLUG_IN_VERSION
     URL="https://build.geoserver.org/geoserver/$NIGHTLY_VERSION/ext-latest/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip"
-    wget $URL -O ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip
+    #wget $URL -O ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip
+    curl -o ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip $URL
     #echo "Plugin $PLUG_IN_NAME URL for version $PLUG_IN_VERSION: $URL"
     #PLUG_IN_URLS+=($URL)
   done
@@ -41,7 +42,8 @@ for VERSION in $STABLE_VERSION $MAINT_VERSION; do
     echo $VERSION
     mkdir -p ./resources/geoserver-plugins
     URL="https://netcologne.dl.sourceforge.net/project/geoserver/GeoServer/$VERSION/extensions/geoserver-$VERSION-$PLUG_IN_NAME-plugin.zip"
-    wget $URL -O ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip
+    #wget $URL -O ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip
+    curl -o ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip $URL
     #echo "Plugin $PLUG_IN_NAME URL for version $PLUG_IN_VERSION: $URL"
     #PLUG_IN_URLS+=($URL)
   done
