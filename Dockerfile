@@ -141,6 +141,12 @@ RUN chown -R $UID:$GID $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR 
 
 RUN if [ ! -f "${GEOSERVER_DATA_DIR}/logging.xml" ]; then cp -a ${CATALINA_BASE}/webapps/geoserver/data/* ${GEOSERVER_DATA_DIR};fi
 
+RUN mkdir /gpkg
+COPY ./IUGS-Dockerization/gs_conf/aquifers.gpkg /gpkg
+COPY ./IUGS-Dockerization/gs_conf/app-schema /gpkg/app-schema
+RUN mkdir /gpkg/app-schema/app-schema-cache
+RUN chown -R $UID:$GID /gpkg
+
 WORKDIR "$CATALINA_BASE"
 USER $UNAME
 

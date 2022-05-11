@@ -1,0 +1,3 @@
+[submodule "IUGS-Dockerization"]
+	path = IUGS-Dockerization
+	url = git@github.com:geosolutions-it/IUGS-Dockerization.git
