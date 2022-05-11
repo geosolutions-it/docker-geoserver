@@ -10,6 +10,9 @@ git clone -b C234-IUGS git@github.com:geosolutions-it/docker-geoserver.git
 cd ./docker-geoserver
 git submodule init
 git submodule update
+cd ./IUGS-Dockerization
+git checkout main
+git pull
 # Please copy the prepared war file from google drive
 docker build --build-arg GEOSERVER_WEBAPP_SRC=./resources/geoserver/geoserver.war --build-arg GEOSERVER_DATA_DIR_SRC=./IUGS-Dockerization/gs_conf/data_dir -t geosolutionsit/geoserver:2.21.x-C234-IUGS .
 docker run -d -p 8080:8080 geosolutionsit/geoserver:2.21.x-C234-IUGS
