@@ -2,6 +2,20 @@
 
 ![](/docker_hub_deployment.png)
 
+
+# IUGS GeoServer docker image build
+
+```
+git clone -b C234-IUGS git@github.com:geosolutions-it/docker-geoserver.git
+cd ./docker-geoserver
+git submodule update
+# Please copy the prepared war file from google drive
+docker build --build-arg GEOSERVER_WEBAPP_SRC=./resources/geoserver/geoserver.war --build-arg GEOSERVER_DATA_DIR_SRC=./IUGS-Dockerization/gs_conf/data_dir -t geosolutionsit/geoserver:2.21.x-C234-IUGS .
+docker run -d -p 8080:8080 geosolutionsit/geoserver:2.21.x-C234-IUGS
+```
+
+You can then browse or attach QGIS to http://localhost:8080/geoserver resources.
+
 ## How to run it
 
 Pull the image from [Docker Hub](https://hub.docker.com/r/geosolutionsit/geoserver/)
@@ -197,7 +211,7 @@ geoserver:
       dockerfile: ./Dockerfile
       args:
         GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/main/geoserver-main-latest-war.zip"
-    container_name: geoserver 
+    container_name: geoserver
 ...
 ```
 This is dynamic, you can use a local file in the host to build the container as and alternative if you need. In order to do this, we need to modify the docker-compose configuration file like this:
@@ -210,7 +224,7 @@ geoserver:
       dockerfile: ./Dockerfile
       args:
         GEOSERVER_WEBAPP_SRC: "/host/directory/alternativegeoserver.war"
-    container_name: geoserver 
+    container_name: geoserver
 ...
 ```
 
@@ -220,7 +234,7 @@ For more details, check the ADD documentation: [Docker - ADD](https://docs.docke
 
 ### Accessing GeoServer postgresql server from outside the container
 
-Containers communicate between themselves in networks created, implicitly or through configuration, by docker compose. To reach a container from the host, the ports must be exposed declaratively through the "ports" keyword, which also allows us to choose if we want exposing the port differently in the host. 
+Containers communicate between themselves in networks created, implicitly or through configuration, by docker compose. To reach a container from the host, the ports must be exposed declaratively through the "ports" keyword, which also allows us to choose if we want exposing the port differently in the host.
 
 ```yml
 ports:
@@ -331,16 +345,16 @@ If you want to reset the status of the containers, we need to run this command, 
 docker-compose down
 ```
 
-## How to build the Docker image with your own geoserver.war file 
+## How to build the Docker image with your own geoserver.war file
  Make sure you have your war file at `./geoserver.war`
- 
+
 ` docker build --build-arg GEOSERVER_WEBAPP_SRC="./geoserver.war" -t geoserver:test .`
 
 There are [**build arguments**](https://docs.docker.com/engine/reference/commandline/build/) to customize the image:
 - `PLUG_IN_URLS` space-separated list of additional plugins for geoserver (see examples), this works both for extensions and community plugins.
 - `GEOSERVER_DATA_DIR_SRC` add a customized datadir to the final image. This can be a local zip or directory or remote URL (see [ADD](https://docs.docker.com/engine/reference/builder/#add) documentation)
 - `GEOSERVER_WEBAPP_SRC` to add your own custom web app to the final image. This can be a local zip or directory or remote URL (see [ADD](https://docs.docker.com/engine/reference/builder/#add) instruction Doc).
-If you want to build or package your own web app you can customize the "mother" stage of Dockerfile accordingly, if you want to download directly GeoServer you may need to add `/download` at the end of download 
+If you want to build or package your own web app you can customize the "mother" stage of Dockerfile accordingly, if you want to download directly GeoServer you may need to add `/download` at the end of download
 url which you can copy/paste from [GeoServer official downloads page](http://geoserver.org/download/), see last example below
 
 ### Examples about using Docker image
