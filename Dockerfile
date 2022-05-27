@@ -104,6 +104,10 @@ ENV JAVA_OPTS="-Xms${INITIAL_MEMORY} -Xmx${MAXIMUM_MEMORY} \
   -XX:MaxGCPauseMillis=200 -XX:ParallelGCThreads=20 -XX:ConcGCThreads=5 \
   ${GEOSERVER_OPTS}"
 
+# added for git hash
+ARG GIT_HASH=""
+ENV GIT_HASH "$GIT_HASH"
+
 COPY run_tests.sh /docker/tests/run_tests.sh
 
 # install needed packages and create externalized dirs
