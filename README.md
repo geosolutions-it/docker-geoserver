@@ -54,6 +54,7 @@ Example of how to build a docker image with just geoserver war and then add plug
 
 ```bash
 docker build -t geoserver:test-2.19.1 \
+--build-arg GIT_HASH=`git show -s --format=%H`
 --build-arg GEOSERVER_WEBAPP_SRC=https://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/geoserver-2.19.1-war.zip/download  .
 
 docker run \
@@ -419,3 +420,13 @@ This script is meant to be used by automated build, variety of tests with highly
 ```bash
 ./custom_build.sh my-docker-tag 2.18.x 2.18.x nodatadir no_pull
 ```
+
+### GIT HASH INFORMATION
+
+This argument provides git hash information from inside of container. In order to get git hash information inside of container add this argument to the build line. As requirement git command should be installed.
+
+--build-arg GIT_HASH=`git show -s --format=%H`
+
+Below command shows git hash information.
+
+docker exec -it <geoserver-container-name>  bash -c 'echo $GIT_HASH'
