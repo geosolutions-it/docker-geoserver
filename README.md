@@ -54,7 +54,7 @@ Example of how to build a docker image with just geoserver war and then add plug
 
 ```bash
 docker build -t geoserver:test-2.19.1 \
---build-arg GIT_HASH=`git show -s --format=%H`
+--build-arg GIT_HASH=`git show -s --format=%H` \
 --build-arg GEOSERVER_WEBAPP_SRC=https://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/geoserver-2.19.1-war.zip/download  .
 
 docker run \
@@ -370,7 +370,7 @@ docker exec -it <your-container-name> bash /usr/local/bin/geoserver-rest-reload.
 ### Test plugins on running container
 
 ```bash
-docker exec -it <your-container-name> geoserver-plugin-download.sh $CATALINA_BASE/webapps/$APP_LOCATION/WEB-INF/lib <space separated list of plugin urls>
+docker exec -it <your-container-name> bash -c 'geoserver-plugin-download.sh $CATALINA_BASE/webapps/$APP_LOCATION/WEB-INF/lib <space separated list of plugin urls>'
 ```
 
 
