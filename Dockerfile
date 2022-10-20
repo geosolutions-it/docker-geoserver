@@ -148,6 +148,10 @@ RUN if [ ! -f "${GEOSERVER_DATA_DIR}/logging.xml" ]; then cp -a ${CATALINA_BASE}
 WORKDIR "$CATALINA_BASE"
 USER $UNAME
 
+COPY ./maputnik /var/geoserver/datadir/www/maputnik
+
 ENV TERM xterm
 EXPOSE 8080/tcp
 CMD ["/entrypoint.sh"]
+
+
