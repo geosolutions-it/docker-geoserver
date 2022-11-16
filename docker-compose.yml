@@ -3,31 +3,14 @@ networks:
   geoserver-network:
     driver: bridge
 services:
-  postgres:
-    image: postgis/postgis
-    container_name: postgres
-    restart: on-failure
-    healthcheck:
-      test: /usr/bin/pg_isready -U postgres
-      interval: 5s
-      timeout: 10s
-      retries: 120
-    ports:
-      - 5432
-    env_file:
-      - ./postgres/postgres.env
-    volumes:
-      - pg_data:${PGDATA:-/var/lib/postgresql/data}:rw
-      - ./postgres/01-init-user.sh:/docker-entrypoint-initdb.d/01-init-user.sh
-    networks:
-      - geoserver-network
-
   geoserver:
     build:
       context: .
       dockerfile: ./Dockerfile
       args:
-        GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/main/geoserver-main-latest-war.zip"
+
+        PLUGIN_DYNAMIC_URLS: "https://sourceforge.net/projects/geoserver/files/GeoServer/2.21.2/extensions/geoserver-2.21.2-authkey-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.21.2/extensions/geoserver-2.21.2-vectortiles-plugin.zip"
+        GEOSERVER_WEBAPP_SRC: "https://sourceforge.net/projects/geoserver/files/GeoServer/2.21.2/geoserver-2.21.2-war.zip/download#"
     container_name: geoserver
     depends_on:
       postgres:
@@ -36,18 +19,5 @@ services:
       - 8080
     networks:
       - geoserver-network
-
-  proxy:
-    image: nginx
-    container_name: proxy
-    volumes:
-      - ./geoserver.conf:/etc/nginx/conf.d/default.conf:rw
-    ports:
-    - 80:80
-    depends_on:
-      - geoserver
-    networks:
-      - geoserver-network
-
 volumes:
-  pg_data:
+  data_dir:
