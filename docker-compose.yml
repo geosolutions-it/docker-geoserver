@@ -20,5 +20,3 @@ services:
       - geoserver-network
     volumes:
       - /var/geoserver/data_dir:./data_dir/
-volumes:
-  data_dir:
