@@ -8,7 +8,6 @@ services:
       context: .
       dockerfile: ./Dockerfile
       args:
-
         PLUGIN_DYNAMIC_URLS: "https://sourceforge.net/projects/geoserver/files/GeoServer/2.21.2/extensions/geoserver-2.21.2-authkey-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.21.2/extensions/geoserver-2.21.2-vectortiles-plugin.zip"
         GEOSERVER_WEBAPP_SRC: "https://sourceforge.net/projects/geoserver/files/GeoServer/2.21.2/geoserver-2.21.2-war.zip/download#"
     container_name: geoserver
@@ -16,8 +15,10 @@ services:
       postgres:
         condition: service_healthy
     ports:
-      - 8080
+      - 8082:8080
     networks:
       - geoserver-network
+    volumes:
+      - /var/geoserver/data_dir:./data_dir/
 volumes:
   data_dir:
