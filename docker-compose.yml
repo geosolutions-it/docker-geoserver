@@ -10,7 +10,7 @@ services:
       args:
         INITIAL_MEMORY: "4G"
         MAXIMUM_MEMORY: "4G"
-        PLUGIN_DYNAMIC_URLS: "https://sourceforge.net/projects/geoserver/files/GeoServer/2.21.2/extensions/geoserver-2.21.2-authkey-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.21.2/extensions/geoserver-2.21.2-vectortiles-plugin.zip"
+        PLUGIN_PATHS: "./resources/geoserver-plugins/*zip"
         GEOSERVER_WEBAPP_SRC: "https://sourceforge.net/projects/geoserver/files/GeoServer/2.21.2/geoserver-2.21.2-war.zip/download#"
     container_name: geoserver
     ports:
