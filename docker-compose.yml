@@ -16,4 +16,4 @@ services:
     networks:
       - geoserver-network
     volumes:
-      - /root/geosolutions/data_dir:/var/geoserver/datadir
+      - /opt/geoserver/data_dir_2.21.2:/var/geoserver/datadir
