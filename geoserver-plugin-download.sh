@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 [ "$#" -le "1" ] && ( echo "no plugin urls passed, exiting" ) && exit 0
 
