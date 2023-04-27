@@ -219,7 +219,11 @@ function main {
     clean_up_directory
     download_geoserver "${GEOSERVER_VERSION}"
     create_plugins_folder
-    download_plugin community ogcapi
+    download_plugin community ogcapi-features
+    download_plugin community ogcapi-tiles
+    download_plugin community ogcapi-coverages
+    download_plugin community ogcapi-maps
+    download_plugin community ogcapi-styles
     download_plugin ext feature-pregeneralized
     download_plugin ext wps
     download_plugin ext css
