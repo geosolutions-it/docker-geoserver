@@ -7,7 +7,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG CMAKE_BUILD_PARALLEL_LEVEL=8
 ARG APP_LOCATION="geoserver"
 RUN apt-get update && apt-get install -y unzip wget cmake nasm\
-    && wget https://nav.dl.sourceforge.net/project/libjpeg-turbo/2.0.6/libjpeg-turbo-2.0.6.tar.gz \
+    && wget --content-disposition https://sourceforge.net/projects/libjpeg-turbo/files/2.0.6/libjpeg-turbo-2.0.6.tar.gz/download \
     && tar -zxf ./libjpeg-turbo-2.0.6.tar.gz \
     && cd libjpeg-turbo-2.0.6 && cmake -G"Unix Makefiles" && make deb \
     && dpkg -i ./libjpeg*.deb && apt-get -f install \
@@ -24,24 +24,20 @@ WORKDIR /output/datadir
 ARG GEOSERVER_DATA_DIR_SRC="./.placeholder"
 ADD "${GEOSERVER_DATA_DIR_SRC}" "./"
 
-# accepts local files and URLs. Tar(s) are automatically extracted
+# accepts URLs.
 WORKDIR /output/webapp
 ARG GEOSERVER_WEBAPP_SRC="./.placeholder"
-ADD "${GEOSERVER_WEBAPP_SRC}" "./"
-
-# zip files require explicit extracion
-RUN \
-    if [ -f "./download" ] ; then \
-      mv download geoserver.war.zip && unzip geoserver.war.zip -d geoserver.war && mkdir -p ./geoserver && unzip ./geoserver.war/geoserver.war -d ./geoserver && rm -rf ./geoserver.war;\
+RUN wget --content-disposition "${GEOSERVER_WEBAPP_SRC}"
+RUN file_name=$(ls -1); \
+    if [ "${file_name##*.}" = "zip" ]; then \
+        echo "unzipping ${file_name}"; \
+        unzip "${file_name}" -d geoserver_war; \
+        mkdir -p ./geoserver && unzip ./geoserver_war/geoserver.war -d ./geoserver; \
+        rm "${file_name}" && rm -rf geoserver_war; \
+    else \
+        mkdir -p ./geoserver && unzip "${file_name}" -d ./geoserver; \
+        rm "${file_name}"; \
     fi
-
-# zip files require explicit extracion
-RUN \
-    if [ "${GEOSERVER_WEBAPP_SRC##*.}" = "zip" ]; then \
-        unzip "./*zip"; \
-        rm ./*zip; \
-    fi \
-    && [ -d "./geoserver" ] || (mkdir -p ./geoserver && unzip ./geoserver.war -d ./geoserver && rm ./geoserver.war)
 
 WORKDIR /output/plugins
 ARG PLUG_IN_URLS=""
