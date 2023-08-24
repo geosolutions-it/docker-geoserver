@@ -224,6 +224,7 @@ function main {
     download_plugin community ogcapi-coverages
     download_plugin community ogcapi-maps
     download_plugin community ogcapi-styles
+    download_plugin community wps-longitudinal-profile-plugin
     download_plugin ext feature-pregeneralized
     download_plugin ext wps
     download_plugin ext css
