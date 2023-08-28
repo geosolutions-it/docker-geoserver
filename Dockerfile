@@ -90,7 +90,16 @@ ADD run_tests.sh /docker/tests/run_tests.sh
 
 # create externalized dirs
 RUN apt-get update \
-    && apt-get install --yes gdal-bin postgresql-client fontconfig libfreetype6 jq \
+    && apt-get install --yes \
+    fontconfig \
+    fonts-dejavu \
+    fonts-hanazono \
+    fonts-noto \
+    gdal-bin \
+    jq \
+    libfreetype6 \
+    postgresql-client \
+    unifont \
     && apt-get clean \
     && apt-get autoclean \
     && apt-get autoremove \
