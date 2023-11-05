@@ -2,6 +2,12 @@
 
 ![](/docker_hub_deployment.png)
 
+## Build the image for C268
+
+```sh
+docker build -t geosolutionsit/geoserver:C268-2.23.0 --build-arg GEOSERVER_WEBAPP_SRC="https://sourceforge.net/projects/geoserver/files/GeoServer/2.23.0/geoserver-2.23.0-war.zip/download" --build-arg PLUG_IN_URLS="https://sourceforge.net/projects/geoserver/files/GeoServer/2.23.0/extensions/geoserver-2.23.01-control-flow-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.23.0/extensions/geoserver-2.23.0-css-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.23.0/extensions/geoserver-2.23.0-monitor-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.23.0/extensions/geoserver-2.23.0-wps-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.23.0/extensions/geoserver-2.23.0-wps-jdbc-plugin.zip https://build.geoserver.org/geoserver/2.23.x/community-2023-10-30/geoserver-2.23-SNAPSHOT-jms-cluster-plugin.zip" .
+```
+
 ## How to run it
 
 Pull the image from [Docker Hub](https://hub.docker.com/r/geosolutionsit/geoserver/)
