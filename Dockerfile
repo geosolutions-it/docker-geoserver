@@ -7,7 +7,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG CMAKE_BUILD_PARALLEL_LEVEL=8
 ARG APP_LOCATION="geoserver"
 RUN apt-get update && apt-get install -y unzip wget cmake nasm\
-    && wget https://nav.dl.sourceforge.net/project/libjpeg-turbo/2.0.6/libjpeg-turbo-2.0.6.tar.gz \
+    && wget https://sourceforge.net/projects/libjpeg-turbo/files/2.0.6/libjpeg-turbo-2.0.6.tar.gz \
     && tar -zxf ./libjpeg-turbo-2.0.6.tar.gz \
     && cd libjpeg-turbo-2.0.6 && cmake -G"Unix Makefiles" && make deb \
     && dpkg -i ./libjpeg*.deb && apt-get -f install \
