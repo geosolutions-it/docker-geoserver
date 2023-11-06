@@ -27,7 +27,8 @@ services:
       context: .
       dockerfile: ./Dockerfile
       args:
-        GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/main/geoserver-main-latest-war.zip"
+        GEOSERVER_WEBAPP_SRC: "https://sourceforge.net/projects/geoserver/files/GeoServer/2.23.0/geoserver-2.23.0-war.zip/download"
+        PLUG_IN_URLS: "https://sourceforge.net/projects/geoserver/files/GeoServer/2.23.0/extensions/geoserver-2.23.01-control-flow-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.23.0/extensions/geoserver-2.23.0-css-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.23.0/extensions/geoserver-2.23.0-monitor-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.23.0/extensions/geoserver-2.23.0-wps-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.23.0/extensions/geoserver-2.23.0-wps-jdbc-plugin.zip https://build.geoserver.org/geoserver/2.23.x/community-2023-10-30/geoserver-2.23-SNAPSHOT-jms-cluster-plugin.zip"
     container_name: geoserver
     depends_on:
       postgres:
