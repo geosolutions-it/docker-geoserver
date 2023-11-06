@@ -4,10 +4,10 @@ set -m
 
 # FIXME: this workaround (for a deploy in a Swarm) keeps GS from starting and
 # crashing, because of JDBC not being able to connect to Postgres
-db_err=6
-while [ $db_err -eq 6 ]; do
-  curl -sS "$DATABASE_HOST"
-  db_err=$?
+attempts=0
+while ! /usr/bin/pg_isready -h db; do
+  attempts=$((attempts + 1))
+  printf "Checking database availability: attempt %s\n" "$attempts"
   sleep 1
 done
 
