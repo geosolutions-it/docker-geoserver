@@ -63,7 +63,7 @@ RUN \
 FROM tomcat:9-jdk11-openjdk
 
 ARG UID=1000
-ARG GID=1000
+ARG GID=1001
 ARG UNAME=tomcat
 ARG CUSTOM_FONTS="./.placeholder"
 ENV ADMIN_PASSWORD=""
