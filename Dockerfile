@@ -1,4 +1,4 @@
-FROM tomcat:9-jdk11-openjdk as mother
+FROM tomcat:9-jdk11-temurin as mother
 LABEL maintainer="Alessandro Parma <alessandro.parma@geosolutionsgroup.com>"
 SHELL ["/bin/bash", "-c"]
 
@@ -60,7 +60,7 @@ RUN \
       mv /output/webapp/geoserver /output/webapp/${APP_LOCATION}; \
     fi
 
-FROM tomcat:9-jdk11-openjdk
+FROM tomcat:9-jdk11-temurin
 
 ARG UID=1000
 ARG GID=1000
