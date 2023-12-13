@@ -6,7 +6,7 @@ services:
   postgres:
     image: postgis/postgis
     container_name: postgres
-    restart: on-failure
+    restart: unless-stopped
     healthcheck:
       test: /usr/bin/pg_isready -U postgres
       interval: 5s
@@ -31,6 +31,7 @@ services:
         PLUG_IN_URLS: "https://sourceforge.net/projects/geoserver/files/GeoServer/2.24.1/extensions/geoserver-2.24.1-css-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.24.1/extensions/geoserver-2.24.1-monitor-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.24.1/extensions/geoserver-2.24.1-charts-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.24.1/extensions/geoserver-2.24.1-authkey-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.24.1/extensions/geoserver-2.24.1-dxf-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.24.1/extensions/geoserver-2.24.1-excel-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.24.1/extensions/geoserver-2.24.1-geopkg-output-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.24.1/extensions/geoserver-2.24.1-vectortiles-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.24.1/extensions/geoserver-2.24.1-wcs2_0-eo-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.24.1/extensions/geoserver-2.24.1-wps-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/2.24.1/extensions/geoserver-2.24.1-control-flow-plugin.zip"
 
     container_name: geoserver
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -42,6 +43,7 @@ services:
   proxy:
     image: nginx
     container_name: proxy
+    restart: unless-stopped
     volumes:
       - ./geoserver.conf:/etc/nginx/conf.d/default.conf:rw
     ports:
