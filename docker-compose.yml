@@ -39,13 +39,28 @@ services:
       - 8080
     networks:
       - geoserver-network
+    volumes:
+     - type: bind
+       source: /mount/stgeuwgeoserverp001/geoserver/datadir
+       target: /var/geoserver/datadir
+     - type: bind
+       source: /mount/stgeuwgeoserverp001/geoserver/logs
+       target: /var/geoserver/logs
+     - type: bind
+       source: /mount/stgeuwgeoserverp001/geoserver/backups
+       target: /backup_restore
+     - type: bind
+       source: /mount/stgeuwgeoserverp001/geoserver/data
+       target: /data
 
   proxy:
     image: nginx
     container_name: proxy
     restart: unless-stopped
     volumes:
-      - ./geoserver.conf:/etc/nginx/conf.d/default.conf:rw
+      - type: bind
+        source: /mount/stgeuwgeoserverp001/geoserver/nginxconf
+        target: /etc/nginx/conf.d
     ports:
     - 80:80
     depends_on:
