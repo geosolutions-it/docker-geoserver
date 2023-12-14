@@ -47,6 +47,9 @@ services:
        source: /mount/stgeuwgeoserverp001/geoserver/logs
        target: /var/geoserver/logs
      - type: bind
+       source: /mount/stgeuwgeoserverp001/geoserver/tomcatlogs
+       target: /usr/local/tomcat/logs
+     - type: bind
        source: /mount/stgeuwgeoserverp001/geoserver/backups
        target: /backup_restore
      - type: bind
