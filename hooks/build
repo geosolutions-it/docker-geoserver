@@ -32,7 +32,7 @@ for ARCH in linux/amd64 linux/arm64; do
     docker build \
       --build-arg GEOSERVER_WEBAPP_SRC="$NIGHTLY_URL" \
       --build-arg PLUG_IN_PATHS="./resources/geoserver-plugins" \
-      --platform "$ARCH"
+      --platform "$ARCH" \
       -f "$DOCKERFILE_PATH" \
       -t "${DOCKER_REPO}:$NIGHTLY_VERSION" .
     rm -rf ./resources/geoserver-plugins/*
@@ -59,7 +59,7 @@ for ARCH in linux/amd64 linux/arm64; do
     docker build \
       --build-arg GEOSERVER_WEBAPP_SRC="$GEOSERVER_URL" \
       --build-arg PLUG_IN_PATHS="./resources/geoserver-plugins" \
-      --platform "$ARCH"
+      --platform "$ARCH" \
       -f "$DOCKERFILE_PATH" \
       -t "${DOCKER_REPO}:$VERSION" .
     rm -rf ./resources/geoserver-plugins/*
