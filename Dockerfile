@@ -85,6 +85,7 @@ ENV MAXIMUM_MEMORY="4G"
 ENV LD_LIBRARY_PATH="/opt/libjpeg-turbo/lib64"
 ENV JAIEXT_ENABLED="true"
 ENV PLUGIN_DYNAMIC_URLS=""
+ENV EXTRA_GEOSERVER_OPTS=""
 ENV GEOSERVER_OPTS=" \
   -Dorg.geotools.coverage.jaiext.enabled=${JAIEXT_ENABLED} \
   -Duser.timezone=UTC \
