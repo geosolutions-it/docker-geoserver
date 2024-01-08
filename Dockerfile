@@ -79,7 +79,7 @@ ENV GEOWEBCACHE_CONFIG_DIR="${GEOSERVER_DATA_DIR}/gwc"
 ENV GEOWEBCACHE_CACHE_DIR="${GEOSERVER_HOME}/gwc_cache_dir"
 ENV NETCDF_DATA_DIR="${GEOSERVER_HOME}/netcdf_data_dir"
 ENV GRIB_CACHE_DIR="${GEOSERVER_HOME}/grib_cache_dir"
-# override at run time as needed JAVA_OPTS
+# override at run time as needed CATALINA_OPTS
 ENV INITIAL_MEMORY="2G"
 ENV MAXIMUM_MEMORY="4G"
 ENV LD_LIBRARY_PATH="/opt/libjpeg-turbo/lib64"
@@ -95,7 +95,7 @@ ENV GEOSERVER_OPTS=" \
   -DNETCDF_DATA_DIR=${NETCDF_DATA_DIR} \
   -DGRIB_CACHE_DIR=${GRIB_CACHE_DIR}"
 
-ENV JAVA_OPTS="-Xms${INITIAL_MEMORY} -Xmx${MAXIMUM_MEMORY} \
+ENV CATALINA_OPTS="-Xms${INITIAL_MEMORY} -Xmx${MAXIMUM_MEMORY} \
   -Djava.awt.headless=true -server \
   -Dfile.encoding=UTF8 \
   -Djavax.servlet.request.encoding=UTF-8 \
