@@ -4,70 +4,63 @@ PLUG_IN_LIST="monitor control-flow libjpeg-turbo"
 NIGHTLY_MASTER_PLUG_IN_VERSION="2.$(expr $MIDDLE_STABLE + 1)-SNAPSHOT"
 NIGHTLY_STABLE_PLUG_IN_VERSION="2.$MIDDLE_STABLE-SNAPSHOT"
 NIGHTLY_MAINT_PLUG_IN_VERSION="2.$(expr $MIDDLE_STABLE - 1)-SNAPSHOT"
-BUILD="build"
+
 echo $NIGHTLY_MASTER_PLUG_IN_VERSION
 echo $NIGHTLY_STABLE_PLUG_IN_VERSION
 echo $NIGHTLY_MAINT_PLUG_IN_VERSION
 docker buildx create --name geoserver
 docker buildx use geoserver
 docker buildx inspect --bootstrap
-for ARCH in linux/amd64 linux/arm64; do 
-  for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_MAINT_VERSION; do
-    NIGHTLY_URL="https://build.geoserver.org/geoserver/$NIGHTLY_VERSION/geoserver-$NIGHTLY_VERSION-latest-war.zip"
-    [[ "$NIGHTLY_MASTER_VERSION" == *"$NIGHTLY_VERSION"* ]] && PLUG_IN_VERSION="$NIGHTLY_MASTER_PLUG_IN_VERSION"
-    [[ "$NIGHTLY_STABLE_VERSION" == *"$NIGHTLY_VERSION"* ]] && PLUG_IN_VERSION="$NIGHTLY_STABLE_PLUG_IN_VERSION"
-    [[ "$NIGHTLY_MAINT_VERSION" == *"$NIGHTLY_VERSION"* ]] && PLUG_IN_VERSION="$NIGHTLY_MAINT_PLUG_IN_VERSION"
+
+for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_MAINT_VERSION; do
+  NIGHTLY_URL="https://build.geoserver.org/geoserver/$NIGHTLY_VERSION/geoserver-$NIGHTLY_VERSION-latest-war.zip"
+  [[ "$NIGHTLY_MASTER_VERSION" == *"$NIGHTLY_VERSION"* ]] && PLUG_IN_VERSION="$NIGHTLY_MASTER_PLUG_IN_VERSION"
+  [[ "$NIGHTLY_STABLE_VERSION" == *"$NIGHTLY_VERSION"* ]] && PLUG_IN_VERSION="$NIGHTLY_STABLE_PLUG_IN_VERSION"
+  [[ "$NIGHTLY_MAINT_VERSION" == *"$NIGHTLY_VERSION"* ]] && PLUG_IN_VERSION="$NIGHTLY_MAINT_PLUG_IN_VERSION"
+  echo $PLUG_IN_VERSION
+  #PLUG_IN_URLS=()
+  mkdir -p ./resources/geoserver-plugins
+  for PLUG_IN_NAME in $PLUG_IN_LIST; do
+    echo $PLUG_IN_NAME
     echo $PLUG_IN_VERSION
-    #PLUG_IN_URLS=()
-    mkdir -p ./resources/geoserver-plugins
-    for PLUG_IN_NAME in $PLUG_IN_LIST; do
-      echo $PLUG_IN_NAME
-      echo $PLUG_IN_VERSION
-      URL="https://build.geoserver.org/geoserver/$NIGHTLY_VERSION/ext-latest/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip"
-      #wget $URL -O ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip
-      curl -k -o ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip $URL
-      #echo "Plugin $PLUG_IN_NAME URL for version $PLUG_IN_VERSION: $URL"
-      #PLUG_IN_URLS+=($URL)
-    done
-    if [ "$ARCH" = "linux/arm64" ]; then
-        NIGHTLY_VERSION="${NIGHTLY_VERSION}-arm64"
-        BUILD="buildx build"
-    fi
-    var=$(IFS=$'  '; echo "${PLUG_IN_URLS[*]}" )
-    docker $BUILD \
-      --build-arg GEOSERVER_WEBAPP_SRC="$NIGHTLY_URL" \
-      --build-arg PLUG_IN_PATHS="./resources/geoserver-plugins" \
-      --platform "$ARCH" \
-      -f "$DOCKERFILE_PATH" \
-      -t "${DOCKER_REPO}:$NIGHTLY_VERSION" .
-    rm -rf ./resources/geoserver-plugins/*
+    URL="https://build.geoserver.org/geoserver/$NIGHTLY_VERSION/ext-latest/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip"
+    #wget $URL -O ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip
+    curl -k -o ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip $URL
+    #echo "Plugin $PLUG_IN_NAME URL for version $PLUG_IN_VERSION: $URL"
+    #PLUG_IN_URLS+=($URL)
   done
 
-  for VERSION in $STABLE_VERSION $MAINT_VERSION; do
-    GEOSERVER_URL="https://sourceforge.net/projects/geoserver/files/GeoServer/$VERSION/geoserver-$VERSION-war.zip/download"
-    #PLUG_IN_URLS=()
+  var=$(IFS=$'  '; echo "${PLUG_IN_URLS[*]}" )
+  docker buildx build \
+    --build-arg GEOSERVER_WEBAPP_SRC="$NIGHTLY_URL" \
+    --build-arg PLUG_IN_PATHS="./resources/geoserver-plugins" \
+    --platform "linux/amd64,linux/arm64" \
+    -f "$DOCKERFILE_PATH" \
+    -t "${DOCKER_REPO}:$NIGHTLY_VERSION" .
+  rm -rf ./resources/geoserver-plugins/*
+done
+
+for VERSION in $STABLE_VERSION $MAINT_VERSION; do
+  GEOSERVER_URL="https://sourceforge.net/projects/geoserver/files/GeoServer/$VERSION/geoserver-$VERSION-war.zip/download"
+  #PLUG_IN_URLS=()
+  mkdir -p ./resources/geoserver-plugins
+  for PLUG_IN_NAME in $PLUG_IN_LIST; do
+    echo $PLUG_IN_NAME
+    echo $VERSION
     mkdir -p ./resources/geoserver-plugins
-    for PLUG_IN_NAME in $PLUG_IN_LIST; do
-      echo $PLUG_IN_NAME
-      echo $VERSION
-      mkdir -p ./resources/geoserver-plugins
-      URL="https://sourceforge.net/projects/geoserver/files/GeoServer/$VERSION/extensions/geoserver-$VERSION-$PLUG_IN_NAME-plugin.zip/download"
-      #wget $URL -O ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip
-      curl -k -o ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip $URL
-      #echo "Plugin $PLUG_IN_NAME URL for version $PLUG_IN_VERSION: $URL"
-      #PLUG_IN_URLS+=($URL)
-    done
-    if [ "$ARCH" = "linux/arm64" ]; then
-        VERSION="${VERSION}-arm64"
-        BUILD="buildx build"
-    fi
-    var=$(IFS=$'\ '; echo "${PLUG_IN_URLS[*]}" )
-    docker $BUILD \
-      --build-arg GEOSERVER_WEBAPP_SRC="$GEOSERVER_URL" \
-      --build-arg PLUG_IN_PATHS="./resources/geoserver-plugins" \
-      --platform "$ARCH" \
-      -f "$DOCKERFILE_PATH" \
-      -t "${DOCKER_REPO}:$VERSION" .
-    rm -rf ./resources/geoserver-plugins/*
+    URL="https://sourceforge.net/projects/geoserver/files/GeoServer/$VERSION/extensions/geoserver-$VERSION-$PLUG_IN_NAME-plugin.zip/download"
+    #wget $URL -O ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip
+    curl -k -o ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip $URL
+    #echo "Plugin $PLUG_IN_NAME URL for version $PLUG_IN_VERSION: $URL"
+    #PLUG_IN_URLS+=($URL)
   done
+
+  var=$(IFS=$'\ '; echo "${PLUG_IN_URLS[*]}" )
+  docker buildx build \
+    --build-arg GEOSERVER_WEBAPP_SRC="$GEOSERVER_URL" \
+    --build-arg PLUG_IN_PATHS="./resources/geoserver-plugins" \
+    --platform "linux/amd64,linux/arm64" \
+    -f "$DOCKERFILE_PATH" \
+    -t "${DOCKER_REPO}:$VERSION" .
+  rm -rf ./resources/geoserver-plugins/*
 done
