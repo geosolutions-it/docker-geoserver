@@ -4,6 +4,7 @@ PLUG_IN_LIST="monitor control-flow libjpeg-turbo"
 NIGHTLY_MASTER_PLUG_IN_VERSION="2.$(expr $MIDDLE_STABLE + 1)-SNAPSHOT"
 NIGHTLY_STABLE_PLUG_IN_VERSION="2.$MIDDLE_STABLE-SNAPSHOT"
 NIGHTLY_MAINT_PLUG_IN_VERSION="2.$(expr $MIDDLE_STABLE - 1)-SNAPSHOT"
+BUILD="build"
 echo $NIGHTLY_MASTER_PLUG_IN_VERSION
 echo $NIGHTLY_STABLE_PLUG_IN_VERSION
 echo $NIGHTLY_MAINT_PLUG_IN_VERSION
@@ -27,9 +28,10 @@ for ARCH in linux/amd64 linux/arm64; do
     done
     if [ "$ARCH" = "linux/arm64" ]; then
         NIGHTLY_VERSION="${NIGHTLY_VERSION}-arm64"
+        BUILD="buildx"
     fi
     var=$(IFS=$'  '; echo "${PLUG_IN_URLS[*]}" )
-    docker build \
+    docker $BUILD \
       --build-arg GEOSERVER_WEBAPP_SRC="$NIGHTLY_URL" \
       --build-arg PLUG_IN_PATHS="./resources/geoserver-plugins" \
       --platform "$ARCH" \
@@ -54,9 +56,10 @@ for ARCH in linux/amd64 linux/arm64; do
     done
     if [ "$ARCH" = "linux/arm64" ]; then
         VERSION="${VERSION}-arm64"
+        BUILD="buildx"
     fi
     var=$(IFS=$'\ '; echo "${PLUG_IN_URLS[*]}" )
-    docker build \
+    docker $BUILD \
       --build-arg GEOSERVER_WEBAPP_SRC="$GEOSERVER_URL" \
       --build-arg PLUG_IN_PATHS="./resources/geoserver-plugins" \
       --platform "$ARCH" \
