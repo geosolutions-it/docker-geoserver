@@ -28,7 +28,7 @@ for ARCH in linux/amd64 linux/arm64; do
     done
     if [ "$ARCH" = "linux/arm64" ]; then
         NIGHTLY_VERSION="${NIGHTLY_VERSION}-arm64"
-        BUILD="buildx"
+        BUILD="buildx build"
     fi
     var=$(IFS=$'  '; echo "${PLUG_IN_URLS[*]}" )
     docker $BUILD \
@@ -56,7 +56,7 @@ for ARCH in linux/amd64 linux/arm64; do
     done
     if [ "$ARCH" = "linux/arm64" ]; then
         VERSION="${VERSION}-arm64"
-        BUILD="buildx"
+        BUILD="buildx build"
     fi
     var=$(IFS=$'\ '; echo "${PLUG_IN_URLS[*]}" )
     docker $BUILD \
