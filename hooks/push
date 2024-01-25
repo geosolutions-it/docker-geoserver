@@ -1,24 +1,16 @@
 #!/bin/bash
 
 touch /tmp/failed_versions
-for ARCH in linux/amd64 linux/arm64; do 
-  for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_MAINT_VERSION; do
-    if [ "$ARCH" = "linux/arm64" ]; then
-        NIGHTLY_VERSION="${NIGHTLY_VERSION}-arm64"
-    fi
-    if [ "$(grep $NIGHTLY_VERSION /tmp/failed_versions)" == "" ]; then
-      docker push "${DOCKER_REPO}:$NIGHTLY_VERSION"
-    fi
-  done
+for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_MAINT_VERSION; do
+  if [ "$(grep $NIGHTLY_VERSION /tmp/failed_versions)" == "" ]; then
+    docker push "${DOCKER_REPO}:$NIGHTLY_VERSION"
+  fi
+done
 
-  for VERSION in $STABLE_VERSION $MAINT_VERSION; do 
-    if [ "$ARCH" = "linux/arm64" ]; then
-        VERSION="${VERSION}-arm64"
-    fi
-    if [ "$(grep $VERSION /tmp/failed_versions)" == "" ]; then
-      docker push "${DOCKER_REPO}:$VERSION"
-    fi
-  done
+for VERSION in $STABLE_VERSION $MAINT_VERSION; do 
+  if [ "$(grep $VERSION /tmp/failed_versions)" == "" ]; then
+    docker push "${DOCKER_REPO}:$VERSION"
+  fi
 done
 
 if [ "$(grep $NEWEST_VERSION /tmp/failed_versions)" == "" ]; then
