@@ -39,7 +39,8 @@ Open your browser and point it to `http://localhost:8080/geoserver` .
 GeoServer web interface will show up, you can now log in with user admin and password `geoserver`.
 
 There are some [**environment variables**](https://docs.docker.com/engine/reference/run/) you can use at run time:
-- `JAVA_OPTS` to customize JAVA_OPTS for the container
+- `CATALINA_OPTS` to customize CATALINA_OPTS for the container
+- `EXTRA_GEOSERVER_OPTS` to append to CATALINA_OPTS
 - `GEOSERVER_LOG_DIR` to customize log placement
 - `GEOSERVER_DATA_DIR` to put your GeoServer datadir elsewhere
 - `GEOWEBCACHE_CONFIG_DIR` to put your GeoServer cache configuration elsewhere
