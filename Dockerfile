@@ -2,15 +2,16 @@ FROM tomcat:9-jdk11-temurin as mother
 LABEL maintainer="Alessandro Parma <alessandro.parma@geosolutionsgroup.com>"
 SHELL ["/bin/bash", "-c"]
 
-# download and install libjpeg-2.0.6 from sources.
+# download and install libjpeg-2.1.5.1 from sources.
 ARG DEBIAN_FRONTEND=noninteractive
 ARG CMAKE_BUILD_PARALLEL_LEVEL=8
 ARG APP_LOCATION="geoserver"
 RUN apt-get update && apt-get install -y unzip wget cmake nasm\
-    && wget https://sourceforge.net/projects/libjpeg-turbo/files/2.0.6/libjpeg-turbo-2.0.6.tar.gz \
-    && tar -zxf ./libjpeg-turbo-2.0.6.tar.gz \
-    && cd libjpeg-turbo-2.0.6 && cmake -G"Unix Makefiles" && make deb \
-    && dpkg -i ./libjpeg*.deb && apt-get -f install \
+    && wget https://sourceforge.net/projects/libjpeg-turbo/files/2.1.5.1/libjpeg-turbo-2.1.5.1.tar.gz \
+    && tar -zxf ./libjpeg-turbo-2.1.5.1.tar.gz \
+    && cd libjpeg-turbo-2.1.5.1 && cmake -G"Unix Makefiles" -DWITH_JAVA=1 -DCMAKE_INSTALL_PREFIX=/opt/libjpeg-turbo \
+    && make deb \
+    && dpkg -i ./libjpeg*.deb && apt-get -f install     \
     && apt-get -y purge cmake nasm\
     && apt-get clean \
     && apt-get -y autoclean \
@@ -28,6 +29,7 @@ ADD "${GEOSERVER_DATA_DIR_SRC}" "./"
 WORKDIR /output/webapp
 ARG GEOSERVER_WEBAPP_SRC="./.placeholder"
 ADD "${GEOSERVER_WEBAPP_SRC}" "./"
+
 
 # zip files require explicit extracion
 RUN \
