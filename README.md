@@ -227,7 +227,7 @@ For more details, check the ADD documentation: [Docker - ADD](https://docs.docke
 geoserver:
   image: geosolutionsit/geoserver:2.23.0 ## Initially, include an image to avoid Docker complaints.
   volumes:
-    - /path/custom-war:/usr/local/tomcat/webapps/geoserver ## Define a volume pointing to your custom .war
+    - /path/custom-war:/usr/local/tomcat/webapps/geoserver ## Define a volume pointing to your custom .war, ensuring it's unzipped.
   environment:
     - EXTRA_GEOSERVER_OPTS="-DGEOSERVER_CSRF_WHITELIST=example.org -DENABLE_JSONP=true"
   container_name: geoserver
