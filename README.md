@@ -220,6 +220,42 @@ This option allows you to use URLs and local files as well to build the GeoServe
 
 For more details, check the ADD documentation: [Docker - ADD](https://docs.docker.com/engine/reference/builder/#add)
 
+### Using custom .war file at runtime in Docker Compose
+- Example configuration for the geoserver service:
+```yml
+...
+geoserver:
+  image: geosolutionsit/geoserver:2.23.0 ## Initially, include an image to avoid Docker complaints.
+  volumes:
+    - /path/custom-war:/usr/local/tomcat/webapps/geoserver ## Define a volume pointing to your custom .war, ensuring it's unzipped.
+  environment:
+    - EXTRA_GEOSERVER_OPTS="-DGEOSERVER_CSRF_WHITELIST=example.org -DENABLE_JSONP=true"
+  container_name: geoserver
+  depends_on:
+    postgres:
+      condition: service_healthy
+  ports:
+    - 8080
+  networks:
+    - geoserver-network
+
+...
+```
+
+Adjusting Permissions for the bind mounts.
+
+-Identify User ID: Determine the user ID running Geoserver inside the container. Use docker exec to access the container and run the id command.
+
+-Adjust Permissions: On the host system, use chown to set the owner of the directory containing Geoserver files to match the user ID. Then, use chmod to set appropriate permissions.
+
+-Assuming user ID is 1000 and directory is /path/custom-war
+```
+sudo chown -R 1000:1000 /path/custom-war
+sudo chmod -R 755 /path/custom-war
+```
+
+
+
 ### Accessing GeoServer postgresql server from outside the container
 
 Containers communicate between themselves in networks created, implicitly or through configuration, by docker compose. To reach a container from the host, the ports must be exposed declaratively through the "ports" keyword, which also allows us to choose if we want exposing the port differently in the host. 
