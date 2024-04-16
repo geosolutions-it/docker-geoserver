@@ -3,35 +3,19 @@ networks:
   geoserver-network:
     driver: bridge
 services:
-  postgres:
-    image: postgis/postgis
-    container_name: postgres
-    restart: on-failure
-    healthcheck:
-      test: /usr/bin/pg_isready -U postgres
-      interval: 5s
-      timeout: 10s
-      retries: 120
-    ports:
-      - 5432
-    env_file:
-      - ./postgres/postgres.env
-    volumes:
-      - pg_data:${PGDATA:-/var/lib/postgresql/data}:rw
-      - ./postgres/01-init-user.sh:/docker-entrypoint-initdb.d/01-init-user.sh
-    networks:
-      - geoserver-network
 
   geoserver:
     build:
       context: .
       dockerfile: ./Dockerfile
       args:
-        GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/main/geoserver-main-latest-war.zip"
+        GEOSERVER_WEBAPP_SRC: "https://sourceforge.net/projects/geoserver/files/GeoServer/2.25.0/geoserver-2.25.0-war.zip/download"
     container_name: geoserver
-    depends_on:
-      postgres:
-        condition: service_healthy
+    environment:
+      PLUGIN_DYNAMIC_URLS: >
+        https://sourceforge.net/projects/geoserver/files/GeoServer/2.25.0/extensions/geoserver-2.25.0-control-flow-plugin.zip
+        https://sourceforge.net/projects/geoserver/files/GeoServer/2.25.0/extensions/geoserver-2.25.0-monitor-plugin.zip
+        https://build.geoserver.org/geoserver/2.25.x/community-latest/geoserver-2.25-SNAPSHOT-sec-oauth2-openid-connect-plugin.zip
     ports:
       - 8080
     networks:
@@ -48,6 +32,3 @@ services:
       - geoserver
     networks:
       - geoserver-network
-
-volumes:
-  pg_data:
