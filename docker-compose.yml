@@ -9,6 +9,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
       args:
+        GEOSERVER_DATA_DIR_SRC: "./data_dir/"
         GEOSERVER_WEBAPP_SRC: "https://sourceforge.net/projects/geoserver/files/GeoServer/2.25.0/geoserver-2.25.0-war.zip/download"
     container_name: geoserver
     environment:
