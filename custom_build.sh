@@ -147,7 +147,7 @@ function build_with_data_dir() {
   local PULL_ENABLED=${2}
   DOCKER_VERSION="$(docker --version | grep "Docker version"| awk '{print $3}' | sed 's/,//')"
   case $DOCKER_VERSION in
-    20.*|21.*|22.*|23.*|24.*|25.*|26.*|27.*|28.*|29.*|30.*)
+    2[0-9].*|3[0-9].*)
       if [[ "${PULL_ENABLED}" == "pull" ]]; then        
         DOCKER_BUILD_COMMAND="docker buildx build --pull"    
       else
@@ -188,7 +188,7 @@ function build_without_data_dir() {
 	local PULL_ENABLED=${2}
   DOCKER_VERSION="$(docker --version | grep "Docker version"| awk '{print $3}' | sed 's/,//')"
   case $DOCKER_VERSION in
-    20.*|21.*|22.*|23.*|24.*|25.*|26.*|27.*|28.*|29.*|30.*)
+    2[0-9].*|3[0-9].*)
       docker builder prune --all -f
       if [[ "${PULL_ENABLED}" == "pull" ]]; then        
         DOCKER_BUILD_COMMAND="docker buildx build --pull"    
@@ -196,14 +196,14 @@ function build_without_data_dir() {
         DOCKER_BUILD_COMMAND="docker buildx build"
       fi;
       ;;
-    19.*)
+    *"19"*)
       if [[ "${PULL_ENABLED}" == "pull" ]]; then        
         DOCKER_BUILD_COMMAND="docker build --pull --no-cache"    
       else
         DOCKER_BUILD_COMMAND="docker build --no-cache"
       fi;
       ;;
-    18.*)
+    *"18"*)
       if [[ "${PULL_ENABLED}" == "pull" ]]; then        
         DOCKER_BUILD_COMMAND="docker build --pull --no-cache"    
       else
