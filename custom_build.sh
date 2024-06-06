@@ -147,7 +147,7 @@ function build_with_data_dir() {
   local PULL_ENABLED=${2}
   DOCKER_VERSION="$(docker --version | grep "Docker version"| awk '{print $3}' | sed 's/,//')"
   case $DOCKER_VERSION in
-    *"20"*)
+    20.*|21.*|22.*|23.*|24.*|25.*|26.*|27.*|28.*|29.*|30.*)
       if [[ "${PULL_ENABLED}" == "pull" ]]; then        
         DOCKER_BUILD_COMMAND="docker buildx build --pull"    
       else
@@ -168,9 +168,12 @@ function build_with_data_dir() {
         DOCKER_BUILD_COMMAND="docker build --no-cache"
       fi;
       ;;
- 
+    *)
+      echo "Docker version $DOCKER_VERSION is not supported by this script."
+      exit 1
+      ;;
   esac
-	${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
+    ${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_PATHS=$PLUGIN_ARTIFACT_DIRECTORY \
     --build-arg GEOSERVER_DATA_DIR_SRC=${DATADIR_ARTIFACT_DIRECTORY} \
     --build-arg UID=${USERID} --build-arg GID=${GROUPID} --build-arg UNAME=${UNAME} \
@@ -185,7 +188,7 @@ function build_without_data_dir() {
 	local PULL_ENABLED=${2}
   DOCKER_VERSION="$(docker --version | grep "Docker version"| awk '{print $3}' | sed 's/,//')"
   case $DOCKER_VERSION in
-    *"20"*)
+    20.*|21.*|22.*|23.*|24.*|25.*|26.*|27.*|28.*|29.*|30.*)
       docker builder prune --all -f
       if [[ "${PULL_ENABLED}" == "pull" ]]; then        
         DOCKER_BUILD_COMMAND="docker buildx build --pull"    
@@ -193,23 +196,26 @@ function build_without_data_dir() {
         DOCKER_BUILD_COMMAND="docker buildx build"
       fi;
       ;;
-    *"19"*)
+    19.*)
       if [[ "${PULL_ENABLED}" == "pull" ]]; then        
         DOCKER_BUILD_COMMAND="docker build --pull --no-cache"    
       else
         DOCKER_BUILD_COMMAND="docker build --no-cache"
       fi;
       ;;
-    *"18"*)
+    18.*)
       if [[ "${PULL_ENABLED}" == "pull" ]]; then        
         DOCKER_BUILD_COMMAND="docker build --pull --no-cache"    
       else
         DOCKER_BUILD_COMMAND="docker build --no-cache"
       fi;
       ;;
- 
+    *)
+      echo "Docker version $DOCKER_VERSION is not supported by this script."
+      exit 1
+      ;;
   esac
-	${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
+    ${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_PATHS=$PLUGIN_ARTIFACT_DIRECTORY \
     --build-arg UID=${USERID} --build-arg GID=${GROUPID} --build-arg UNAME=${UNAME} \
     --build-arg GIT_HASH=${GIT_HASH_COMMAND} \
