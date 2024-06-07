@@ -145,9 +145,11 @@ RUN useradd -m -u $UID -g $GID --system $UNAME
 RUN chown -R $UID:$GID $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR $GEOWEBCACHE_CONFIG_DIR $NETCDF_DATA_DIR $GRIB_CACHE_DIR $GEOSERVER_DATA_DIR
 
 RUN if [ ! -f "${GEOSERVER_DATA_DIR}/logging.xml" ]; then cp -a ${CATALINA_BASE}/webapps/geoserver/data/* ${GEOSERVER_DATA_DIR};fi
-
 WORKDIR "$CATALINA_BASE"
 USER $UNAME
+
+# remove unwanted jars
+RUN rm -fv ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/gt-complex-*.jar ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/commons-jxpath-*.jar
 
 ENV TERM xterm
 EXPOSE 8080/tcp
