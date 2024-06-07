@@ -4,20 +4,22 @@ touch /tmp/failed_versions
 
 for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_MAINT_VERSION; do
   if [ "$(grep $NIGHTLY_VERSION /tmp/failed_versions)" == "" ]; then
-    docker push "${DOCKER_REPO}:$NIGHTLY_VERSION"
+    docker tag "${DOCKER_REPO}:${NIGHTLY_VERSION}" "${DOCKER_REPO}:${NIGHTLY_VERSION}_custom"
+    docker push "${DOCKER_REPO}:${NIGHTLY_VERSION}_custom"
   fi
 done
 
 for VERSION in $STABLE_VERSION $MAINT_VERSION; do 
   if [ "$(grep $VERSION /tmp/failed_versions)" == "" ]; then
-    docker push "${DOCKER_REPO}:$VERSION"
+    docker tag "${DOCKER_REPO}:${VERSION}" "${DOCKER_REPO}:${VERSION}_custom"
+    docker push "${DOCKER_REPO}:${VERSION}_custom"
   fi
 done
 
 if [ "$(grep $NEWEST_VERSION /tmp/failed_versions)" == "" ]; then
   docker pull "${DOCKER_REPO}:$NEWEST_VERSION" || exit 1
-  docker tag "${DOCKER_REPO}:$NEWEST_VERSION" ${DOCKER_REPO}:latest
-  docker push "${DOCKER_REPO}:latest"
+  docker tag "${DOCKER_REPO}:$NEWEST_VERSION" ${DOCKER_REPO}:latest_custom
+  docker push "${DOCKER_REPO}:latest_custom"
 fi
 
 echo "List of versions with problems not uploaded: \n $(cat /tmp/failed_versions)"
