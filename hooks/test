@@ -2,10 +2,30 @@
 
 for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_MAINT_VERSION; do
   export VERSION=$NIGHTLY_VERSION
+
+  SKIP=0
+  for IGNORE_VERSION in $IGNORE_VERSIONS; do
+    if [ "$IGNORE_VERSION" == "$VERSION" ]; then
+      SKIP=1
+      break
+    fi
+  done
+  [ "$SKIP" -eq 1 ] && continue
+
   timeout 10m docker-compose -f docker-compose.test.yml run --rm sut || ( echo "test for docker image geoserver:$VERSION failed" && echo $VERSION >> /tmp/failed_versions )
 done
 
 for VERSION in $STABLE_VERSION $MAINT_VERSION; do 
   #export VERSION=$VERSION
+
+  SKIP=0
+  for IGNORE_VERSION in $IGNORE_VERSIONS; do
+    if [ "$IGNORE_VERSION" == "$VERSION" ]; then
+      SKIP=1
+      break
+    fi
+  done
+  [ "$SKIP" -eq 1 ] && continue
+
   timeout 10m docker-compose -f docker-compose.test.yml run --rm sut || ( echo "test for docker image geoserver:$VERSION failed" && echo $VERSION >> /tmp/failed_versions )
 done
