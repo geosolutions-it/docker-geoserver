@@ -23,7 +23,7 @@ readonly USERID=1000
 readonly GROUPID=1000
 readonly UNAME=tomcat
 
-function help(){
+function help() {
 	if [ "$#" -ne 5 ] ; then
 		echo "Usage: $0 [docker image tag] [geoserver version] [geoserver main version] [datadir|nodatadir] [pull|no_pull];"
 		echo "";
@@ -39,11 +39,10 @@ function help(){
 
 function clean_up_directory() {
   # we shall never clean datadir
-	rm -rf ./resources/geoserver-plugins/* ./resources/geoserver/*
+	echo "rm -rf ./resources/geoserver-plugins/* ./resources/geoserver/*"
 }
 function create_plugins_folder() {
   mkdir -p ./resources/geoserver-plugins
-
 }
 
 function download_from_url_to_a_filepath {
@@ -67,7 +66,6 @@ function download_plugin()  {
 		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION%.*}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
 		PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
 		;;
-
 		"main")
 		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_MASTER_VERSION%.*}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
 		PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
@@ -84,20 +82,18 @@ function download_plugin()  {
 			PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION%.*}.x/${TYPE}-latest/${PLUGIN_FULL_NAME}
 		fi
 		;;
-
 	esac
-
   download_from_url_to_a_filepath "${PLUGIN_ARTIFACT_URL}" "${PLUGIN_ARTIFACT_DIRECTORY}/${PLUGIN_FULL_NAME}"
 }
 
-function download_fonts()  {
+function download_fonts() {
     if [ ! -e "${FONTS_ARTIFACT_DIRECTORY}" ]; then
         mkdir -p "${FONTS_ARTIFACT_DIRECTORY}"
     fi
     download_from_url_to_a_filepath "${EXTRA_FONTS_URL}" "${FONTS_ARTIFACT_DIRECTORY}/fonts.tar.gz"
 }
 
-function download_marlin()  {
+function download_marlin() {
     IFS='.' read -r -a marlin_v_arr <<< "$MARLIN_VERSION"
     unset IFS
 
@@ -142,8 +138,7 @@ function download_geoserver() {
 
 
 function build_with_data_dir() {
-
-	local TAG=${1}
+  local TAG=${1}
   local PULL_ENABLED=${2}
   DOCKER_VERSION="$(docker --version | grep "Docker version"| awk '{print $3}' | sed 's/,//')"
   case $DOCKER_VERSION in
@@ -183,7 +178,6 @@ function build_with_data_dir() {
 }
 
 function build_without_data_dir() {
-
 	local TAG=${1}
 	local PULL_ENABLED=${2}
   DOCKER_VERSION="$(docker --version | grep "Docker version"| awk '{print $3}' | sed 's/,//')"
