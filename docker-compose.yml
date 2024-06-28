@@ -21,6 +21,9 @@ services:
       - ./postgres/01-init-user.sh:/docker-entrypoint-initdb.d/01-init-user.sh
     networks:
       - geoserver-network
+    profiles:
+      - postgres
+      - all
 
   geoserver:
     build:
@@ -29,13 +32,35 @@ services:
       args:
         GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/main/geoserver-main-latest-war.zip"
     container_name: geoserver
-    depends_on:
-      postgres:
-        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: /usr/bin/curl --fail http://127.0.0.1:8080/geoserver/styles/raster.sld || exit 1
+      interval: 5s
+      timeout: 10s
+      retries: 3
     ports:
-      - 8080
+      - 8080:8080
+    environment:
+      - GEOSERVER_LOG_DIR=${GEOSERVER_LOG_DIR}
+      - GEOSERVER_DATA_DIR=${GEOSERVER_DATA_DIR}
+      - GEOWEBCACHE_CONFIG_DIR=${GEOWEBCACHE_CONFIG_DIR}
+      - GEOWEBCACHE_CACHE_DIR=${GEOWEBCACHE_CACHE_DIR}
+      - NETCDF_DATA_DIR=${NETCDF_DATA_DIR}
+      - GRIB_CACHE_DIRL=${GRIB_CACHE_DIR}
+      - TOMCAT_LOG_DIR=${TOMCAT_LOG_DIR}
     networks:
       - geoserver-network
+    volumes:
+      - logs:${GEOSERVER_LOG_DIR:-/var/geoserver/logs}
+      - datadir:${GEOSERVER_DATA_DIR:-/var/geoserver/datadir}
+      - gwc_config:${GEOWEBCACHE_CONFIG_DIR:-/var/geoserver/datadir/gwc}
+      - gwc:${GEOWEBCACHE_CACHE_DIR:-/var/geoserver/gwc_cache_dir}
+      - netcfd:${NETCDF_DATA_DIR:-/var/geoserver/netcdf_data_dir}
+      - grib_cache:${GRIB_CACHE_DIR:-/var/geoserver/grib_cache_dir}
+      - tomcat_logs:${TOMCAT_LOG_DIR:-/usr/local/tomcat/logs}
+    profiles:
+      - geoserver
+      - all
 
   proxy:
     image: nginx
@@ -48,6 +73,16 @@ services:
       - geoserver
     networks:
       - geoserver-network
+    profiles:
+      - proxy
+      - all
 
 volumes:
   pg_data:
+  logs:
+  datadir:
+  gwc_config:
+  gwc:
+  netcfd:
+  grib_cache:
+  tomcat_logs:
