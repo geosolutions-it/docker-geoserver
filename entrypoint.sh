@@ -46,6 +46,9 @@ if [ "${CORS_ENABLED}" = "true" ]; then
   fi
 fi
 
+# Disable tomcat version disclosure
+sed -i '/<\/Host>/i\ \ \ \ \ \ \ \ <Valve className="org.apache.catalina.valves.ErrorReportValve" showReport="false" showServerInfo="false"/>' "$CATALINA_HOME/conf/server.xml";
+
 catalina.sh run &
 /usr/local/bin/geoserver-rest-config.sh
 fg %1
