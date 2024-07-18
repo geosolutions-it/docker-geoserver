@@ -43,7 +43,7 @@ jobs:
     - name: Download the dependencies (plugins)
       if: steps.plugincache.outputs.cache-hit != 'true'
       env:
-        PLUG_IN_LIST: "monitor control-flow libjpeg-turbo"
+        PLUG_IN_LIST: "monitor control-flow"
         NIGHTLY_MASTER_VERSION: ${{ vars.NIGHTLY_MASTER_VERSION }}
         NIGHTLY_STABLE_VERSION: ${{ vars.NIGHTLY_STABLE_VERSION }}
         NIGHTLY_MAINT_VERSION: ${{ vars.NIGHTLY_MAINT_VERSION }}
