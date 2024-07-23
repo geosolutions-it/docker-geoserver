@@ -3,12 +3,30 @@
 touch /tmp/failed_versions
 
 for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_MAINT_VERSION; do
+  SKIP=0
+  for IGNORE_VERSION in $IGNORE_VERSIONS; do
+    if [ "$IGNORE_VERSION" == "$NIGHTLY_VERSION" ]; then
+      SKIP=1
+      break
+    fi
+  done
+  [ "$SKIP" -eq 1 ] && continue
+
   if [ "$(grep $NIGHTLY_VERSION /tmp/failed_versions)" == "" ]; then
     docker push "${DOCKER_REPO}:$NIGHTLY_VERSION"
   fi
 done
 
 for VERSION in $STABLE_VERSION $MAINT_VERSION; do 
+  SKIP=0
+  for IGNORE_VERSION in $IGNORE_VERSIONS; do
+    if [ "$IGNORE_VERSION" == "$VERSION" ]; then
+      SKIP=1
+      break
+    fi
+  done
+  [ "$SKIP" -eq 1 ] && continue
+
   if [ "$(grep $VERSION /tmp/failed_versions)" == "" ]; then
     docker push "${DOCKER_REPO}:$VERSION"
   fi
