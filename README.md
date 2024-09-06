@@ -72,6 +72,16 @@ Install instructions: [Docker Docs](https://docs.docker.com/compose/install/)
 
 In order to use Compose we need first to set correctly the "docker-compose.yml" file of the Docker-GeoServer.
 
+
+### Deploy GeoServer with docker-compose
+
+GeoServer docker compose definition use profiles to separate the different involved components.  To run GeoServer the profile ```geoserver``` need to be activated.
+
+Execute the compose script:
+```
+docker compose --profile geoserver up -d
+```
+
 ### Externalize the data directory of the GeoServer container
 
 In order to persist and externalize access to the data of the geoserver container we need to set the values of the environment variables (named in the previous section) on the container and then associated this to the external volumes we going to create.
@@ -87,103 +97,22 @@ GEOWEBCACHE_CONFIG_DIR=/var/geoserver/datadir/gwc
 GEOWEBCACHE_CACHE_DIR=/var/geoserver/gwc_cache_dir
 NETCDF_DATA_DIR=/var/geoserver/netcdf_data_dir
 GRIB_CACHE_DIR=/var/geoserver/grib_cache_dir
+TOMCAT_LOG_DIR=/usr/local/tomcat/logs
 ```
 
 More details on the definition of the .env file: [Docker - The Compose Specification](https://github.com/compose-spec/compose-spec/blob/master/spec.md#env_file)
 
-Then we are going to modify the docker-compose configuration file to set environment variables in the geoserver container with the “environment” key:
-
+The defined volumes for GeoServer are:
 ```yml
-...
-geoserver:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    ...
-    environment:
-      - GEOSERVER_LOG_DIR=${GEOSERVER_LOG_DIR}
-      - GEOSERVER_DATA_DIR=${GEOSERVER_DATA_DIR}
-      - GEOWEBCACHE_CONFIG_DIR=${GEOWEBCACHE_CONFIG_DIR}
-      - GEOWEBCACHE_CACHE_DIR=${GEOWEBCACHE_CACHE_DIR}
-      - NETCDF_DATA_DIR=${NETCDF_DATA_DIR}
-      - GRIB_CACHE_DIR=${GRIB_CACHE_DIR}
-...
-```
-
-To be sure that the environment variables are not pass empty, you can set a default value.
-
-Example:
-```yml
-...
-geoserver:
-...
-    environment:
-      - GEOSERVER_LOG_DIR=${GEOSERVER_LOG_DIR:-/var/geoserver/logs}
-...
-```
-If GEOSERVER_LOG_DIR variable is not set in the .env file, is going to take his default value.
-
-
-Next we are going to define the external volumes, modifying again the docker-compose configuration file.
-
-```yml
-services:
-...
-  geoserver:
-    ...
-    volumes:
-      - logs:${GEOSERVER_LOG_DIR}
-      - datadir:${GEOSERVER_DATA_DIR}
-      - gwc_config:${GEOWEBCACHE_CONFIG_DIR}
-      - gwc:${GEOWEBCACHE_CACHE_DIR}
-      - netcfd:${NETCDF_DATA_DIR}
-      - grib_cache:${GRIB_CACHE_DIR}
-  ...
 volumes:
-  pg_data:
   logs:
   datadir:
   gwc_config:
   gwc:
   netcfd:
   grib_cache:
+  tomcat_logs:
 ```
-
-Both configurations together (environment variables and external volumes) are going to show like this in the docker-compose configuration file:
-
-```yml
-services:
-...
-  geoserver:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    ...
-    environment:
-      - GEOSERVER_LOG_DIR=${GEOSERVER_LOG_DIR}
-      - GEOSERVER_DATA_DIR=${GEOSERVER_DATA_DIR}
-      - GEOWEBCACHE_CONFIG_DIR=${GEOWEBCACHE_CONFIG_DIR}
-      - GEOWEBCACHE_CACHE_DIR=${GEOWEBCACHE_CACHE_DIR}
-      - NETCDF_DATA_DIR=${NETCDF_DATA_DIR}
-      - GRIB_CACHE_DIR=${GRIB_CACHE_DIR}
-    volumes:
-      - logs:${GEOSERVER_LOG_DIR}
-      - datadir:${GEOSERVER_DATA_DIR}
-      - gwc_config:${GEOWEBCACHE_CONFIG_DIR}
-      - gwc:${GEOWEBCACHE_CACHE_DIR}
-      - netcfd:${NETCDF_DATA_DIR}
-      - grib_cache:${GRIB_CACHE_DIR}
-  ...
-volumes:
-  pg_data:
-  logs:
-  datadir:
-  gwc_config:
-  gwc:
-  netcfd:
-  grib_cache:
-```
-After this our geoserver container is ready and persisting his data.
 
 For more details about volumes, check the documentation: [Docker - Volume](https://docs.docker.com/storage/volumes/)
 
@@ -329,14 +258,14 @@ More details on expose containers ports: [Docker - The Compose Specification](ht
 When we have everything configured with the docker-compose.yml file, to start the containers for the first time we gonna use this command (located in the directory when the yml file is):
 
 ```bash
-docker-compose up
+docker-compose --profile all up
 ```
 This is gonna create and start the containers, the networks, and the volumes defined in the docker-compose.yml file. This is the command you need to use every time after a change on the docker-compose.yml file in order to apply the modifications.
 
 After the first time, we can simply use this command to start the containers:
 
 ```bash
-docker-compose start
+docker-compose --profile all start
 ```
 
 Console output:
