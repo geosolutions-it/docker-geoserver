@@ -28,7 +28,7 @@ docker stop gs
 start GeoServer with data persistence on saved datadir:
 
 ```bash
-docker run -v datadir:/var/geoserver/datadir --name gs -p 8080:8080 geosolutionsit/geoserver
+docker run -v ./datadir:/var/geoserver/datadir --name gs -p 8080:8080 geosolutionsit/geoserver
 ```
 
 start GeoServer with data persistence on saved datadir and change admin password:
