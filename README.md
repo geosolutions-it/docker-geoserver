@@ -9,6 +9,22 @@ Based on the official tomcat docker image, specifically:
 
 ![Current build diagram](/docker_hub_deployment.png)
 
+## Features
+
+- Ability to use a datadir from host machine for persistence.
+- Set [ADMIN_PASSWORD](#starting-geoserver-with-data-persistence) with env variable.
+- Flexibility to mount [other paths for persistence](#environment-variables).
+- Build geoserver webapp (WAR) file from [local/remote URL](#building-with-war-files-and-plugins).
+- Run with custom geoserver WAR file [during runtime](#using-custom-war-file-at-runtime-in-docker-compose).
+- Helper [script to reload geoserver](#geoserver-rest-reload) during runtime.
+- Helper [script to test plugins](#test-plugins-on-running-container) during runtime.
+- [CORS](#cors-variables) support.
+- Specify [custom fonts](#custom-fonts) during build time.
+
+## Important note
+
+Most of the paths if mounted from the host to locations on the container such as $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR $GEOWEBCACHE_CONFIG_DIR $NETCDF_DATA_DIR $GRIB_CACHE_DIR $GEOSERVER_DATA_DIR should be owned by the UID of user that geoserver is running on, which at the moment is UID 1000. The paths should be recursively chown-ed with this UID.
+
 ## How to run it
 
 Pull the image from [Docker Hub](https://hub.docker.com/r/geosolutionsit/geoserver/)
@@ -38,12 +54,16 @@ start GeoServer with data persistence on saved datadir:
 docker run -v ./datadir:/var/geoserver/datadir --name gs -p 8080:8080 geosolutionsit/geoserver
 ```
 
+### Starting geoserver with data persistence
+
 start GeoServer with data persistence on saved datadir and change admin password:
 ```bash
 docker run -e ADMIN_PASSWORD=securepassword -v datadir:/var/geoserver/datadir --name gs -p 8080:8080 geosolutionsit/geoserver
 ```
 Open your browser and point it to `http://localhost:8080/geoserver` .
 GeoServer web interface will show up, you can now log in with user admin and password `geoserver`.
+
+### Environment variables
 
 There are some [**environment variables**](https://docs.docker.com/engine/reference/run/) you can use at run time:
 - `CATALINA_OPTS` to customize CATALINA_OPTS for the container
@@ -54,9 +74,28 @@ There are some [**environment variables**](https://docs.docker.com/engine/refere
 - `GEOWEBCACHE_CACHE_DIR` to put your GeoServer cache elsewhere
 - `NETCDF_DATA_DIR` to put your GeoServer NETCDF data dir elsewhere
 - `GRIB_CACHE_DIR` to put your GeoServer GRIB cache dir elsewhere
+- `JAIEXT_ENABLED` by default is true. More info [here](https://docs.geoserver.org/maintain/en/user/configuration/image_processing/index.html#jai-ext).
+
+Java heap size tuning env variables:
+
+- `INITIAL_MEMORY` by default is "2G". (`-Xms`)
+- `MAXIMUM_MEMORY` by default is "4G" (`-Xmx`)
 
 Each of these variables can be associated to an external volume to persist data for example in a docker compose
 configuration. More information about this in the section below.
+
+#### CORS variables
+
+CORS headers can be configured with env variables (they are also build arguments):
+
+- `CORS_ENABLED` to true to enable CORS support. The following environment variables can be used to customize the CORS configuration.
+- `CORS_ALLOWED_ORIGINS` (default `*`)
+- `CORS_ALLOWED_METHODS` (default `GET,POST,PUT,DELETE,HEAD,OPTIONS`)
+- `CORS_ALLOWED_HEADERS` (default `*`)
+- `CORS_ALLOW_CREDENTIALS` (default `false`) Setting this to true will only have the desired effect if 
+- `CORS_ALLOWED_ORIGINS` defines explicit origins (not *)
+
+### Building with WAR files and plugins
 
 Example of how to build a docker image with just geoserver war and then add plugins at runtime.
 
@@ -72,10 +111,10 @@ http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geos
 ```
 
 
-## Using GeoServer with docker-compose
+### Using GeoServer with docker-compose
 Docker Compose is a tool that helps us easily handle multiple containers at once.
 
-Install instructions: [Docker Docs](https://docs.docker.com/compose/install/)
+Install instructions: [Docker Docs](https://docs.docker.com/compose/install/) (Not required if you have Docker Desktop, where it's pre-installed)
 
 In order to use Compose we need first to set correctly the "docker-compose.yml" file of the Docker-GeoServer.
 
@@ -193,6 +232,10 @@ volumes:
 After this our geoserver container is ready and persisting his data.
 
 For more details about volumes, check the documentation: [Docker - Volume](https://docs.docker.com/storage/volumes/)
+
+### Custom fonts
+
+Set the `CUSTOM_FONTS` build argument to a path on the host with the fonts. This will be copied to the image during docker build.
 
 ### Using an alternative war file to build GeoServer container of the stack
 
