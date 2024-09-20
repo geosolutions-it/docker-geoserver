@@ -29,13 +29,9 @@ Most of the paths if mounted from the host to locations on the container such as
 
 ## How to run it
 
-Pull the image from [Docker Hub](https://hub.docker.com/r/geosolutionsit/geoserver/)
-
-`docker pull geosolutionsit/geoserver`
-
-And run it
-
-`docker run --name gs -p 8080:8080 geosolutionsit/geoserver`
+```bash
+docker run --name gs -p 8080:8080 geosolutionsit/geoserver
+```
 
 Or for data persistence starting with default geoserver datadir (in this example GEOSERVER_DATA_DIR is pointing to `/var/geoserver/datadir`):
 
@@ -117,15 +113,14 @@ http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geos
 --rm --name gs -p 8080:8080 geoserver:test-2.19.1
 ```
 
-
-### Using GeoServer with docker-compose
+### Using GeoServer with docker compose
 Docker Compose is a tool that helps us easily handle multiple containers at once.
 
 Install instructions: [Docker Docs](https://docs.docker.com/compose/install/) (Not required if you have Docker Desktop, where it's pre-installed)
 
-In order to use Compose we need first to set correctly the "docker-compose.yml" file of the Docker-GeoServer.
+In order to use compose we need first to set correctly the "docker-compose.yml" file of the docker-geoserver.
 
-### Externalize the data directory of the GeoServer container
+#### Externalize the data directory of the GeoServer container
 
 In order to persist and externalize access to the data of the geoserver container we need to set the values of the environment variables (named in the previous section) on the container and then associated this to the external volumes we going to create.
 
@@ -240,11 +235,7 @@ After this our geoserver container is ready and persisting his data.
 
 For more details about volumes, check the documentation: [Docker - Volume](https://docs.docker.com/storage/volumes/)
 
-### Custom fonts
-
-Set the `CUSTOM_FONTS` build argument to a path on the host with the fonts. This will be copied to the image during docker build.
-
-### Using an alternative war file to build GeoServer container of the stack
+#### Using an alternative war file to build GeoServer container of the stack
 
 In the docker-compose.yml file, actually we are building the GeoServer container from a image on a URL.
 
@@ -277,7 +268,7 @@ This option allows you to use URLs and local files as well to build the GeoServe
 
 For more details, check the ADD documentation: [Docker - ADD](https://docs.docker.com/engine/reference/builder/#add)
 
-### Using custom .war file at runtime in Docker Compose
+#### Using custom .war file at runtime in Docker Compose
 - Example configuration for the geoserver service:
 ```yml
 ...
@@ -311,7 +302,9 @@ sudo chown -R 1000:1000 /path/custom-war
 sudo chmod -R 755 /path/custom-war
 ```
 
+### Custom fonts
 
+Set the `CUSTOM_FONTS` build argument to a path on the host with the fonts. This will be copied to the image during docker build.
 
 ### Accessing GeoServer postgresql server from outside the container
 
