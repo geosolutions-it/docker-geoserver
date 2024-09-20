@@ -1,5 +1,7 @@
 # docker-geoserver
 
+[![dockerhub pulls](https://img.shields.io/docker/pulls/geosolutionsit/geoserver)](https://hub.docker.com/r/geosolutionsit/geoserver/)
+
 Run geoserver within docker.
 
 Based on the official tomcat docker image, specifically:
