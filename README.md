@@ -65,24 +65,29 @@ GeoServer web interface will show up, you can now log in with user admin and pas
 
 ### Environment variables
 
-There are some [**environment variables**](https://docs.docker.com/engine/reference/run/) you can use at run time:
-- `CATALINA_OPTS` to customize CATALINA_OPTS for the container
-- `EXTRA_GEOSERVER_OPTS` to append to CATALINA_OPTS
+There are some [**environment variables**](https://docs.docker.com/engine/reference/run/) you can use at runtime.
+
+#### Env variables to a path:
+
 - `GEOSERVER_LOG_DIR` to customize log placement
 - `GEOSERVER_DATA_DIR` to put your GeoServer datadir elsewhere
 - `GEOWEBCACHE_CONFIG_DIR` to put your GeoServer cache configuration elsewhere
 - `GEOWEBCACHE_CACHE_DIR` to put your GeoServer cache elsewhere
 - `NETCDF_DATA_DIR` to put your GeoServer NETCDF data dir elsewhere
 - `GRIB_CACHE_DIR` to put your GeoServer GRIB cache dir elsewhere
+
+Each of these variables can be associated to an external volume to persist data for example in a docker compose.
+
+#### Other env variables:
+
+- `CATALINA_OPTS` to customize CATALINA_OPTS for the container
+- `EXTRA_GEOSERVER_OPTS` to append to CATALINA_OPTS
 - `JAIEXT_ENABLED` by default is true. More info [here](https://docs.geoserver.org/maintain/en/user/configuration/image_processing/index.html#jai-ext).
 
-Java heap size tuning env variables:
+#### Java heap size tuning env variables:
 
 - `INITIAL_MEMORY` by default is "2G". (`-Xms`)
 - `MAXIMUM_MEMORY` by default is "4G" (`-Xmx`)
-
-Each of these variables can be associated to an external volume to persist data for example in a docker compose
-configuration. More information about this in the section below.
 
 #### CORS variables
 
