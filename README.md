@@ -11,7 +11,7 @@ Based on the official tomcat docker image, specifically:
 
 ## Features
 
-- Ability to use a datadir from host machine for persistence.
+- Ability to use a [datadir from host machine for persistence](#externalize-the-data-directory-of-the-geoserver-container).
 - Set [ADMIN_PASSWORD](#starting-geoserver-with-data-persistence) with env variable.
 - Flexibility to mount [other paths for persistence](#environment-variables).
 - Build geoserver webapp (WAR) file from [local/remote URL](#building-with-war-files-and-plugins).
