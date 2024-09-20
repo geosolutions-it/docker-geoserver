@@ -1,6 +1,13 @@
 # docker-geoserver
 
-![](/docker_hub_deployment.png)
+Run geoserver within docker.
+
+Based on the official tomcat docker image, specifically:
+- Tomcat 9
+- JDK 11 (eclipse temurin)
+- Ubuntu Jammy (22.04 LTS)
+
+![Current build diagram](/docker_hub_deployment.png)
 
 ## How to run it
 
