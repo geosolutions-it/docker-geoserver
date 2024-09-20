@@ -386,14 +386,14 @@ More details on expose containers ports: [Docker - The Compose Specification](ht
 When we have everything configured with the docker-compose.yml file, to start the containers for the first time we gonna use this command (located in the directory when the yml file is):
 
 ```bash
-docker-compose up
+docker compose up
 ```
 This is gonna create and start the containers, the networks, and the volumes defined in the docker-compose.yml file. This is the command you need to use every time after a change on the docker-compose.yml file in order to apply the modifications.
 
 After the first time, we can simply use this command to start the containers:
 
 ```bash
-docker-compose start
+docker compose start
 ```
 
 Console output:
@@ -409,7 +409,7 @@ Starting proxy ... done
 To stopping all the containers, this is the command:
 
 ```bash
-docker-compose stop
+docker compose stop
 ```
 
 Console output:
@@ -423,7 +423,7 @@ Stopping postgres  ... done
 If you want to reset the status of the containers, we need to run this command, which will destroy everything with only the exception of external volumes:
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ## How to build the Docker image with your own geoserver.war file 
