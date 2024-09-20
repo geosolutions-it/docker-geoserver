@@ -78,14 +78,14 @@ Each of these variables can be associated to an external volume to persist data 
 
 #### Other env variables:
 
-- `CATALINA_OPTS` to customize CATALINA_OPTS for the container
-- `EXTRA_GEOSERVER_OPTS` to append to CATALINA_OPTS
-- `JAIEXT_ENABLED` by default is true. More info [here](https://docs.geoserver.org/maintain/en/user/configuration/image_processing/index.html#jai-ext).
+- `CATALINA_OPTS` to customize `CATALINA_OPTS` for the container
+- `EXTRA_GEOSERVER_OPTS` to append to `CATALINA_OPTS`
+- `JAIEXT_ENABLED` by default is `true`. More info [here](https://docs.geoserver.org/maintain/en/user/configuration/image_processing/index.html#jai-ext).
 
 #### Java heap size tuning env variables:
 
-- `INITIAL_MEMORY` by default is "2G". (`-Xms`)
-- `MAXIMUM_MEMORY` by default is "4G" (`-Xmx`)
+- `INITIAL_MEMORY` by default is `2G`. (`-Xms`)
+- `MAXIMUM_MEMORY` by default is `4G` (`-Xmx`)
 
 #### CORS variables
 
