@@ -312,9 +312,10 @@ Containers communicate between themselves in networks created, implicitly or thr
 
 ```yml
 ports:
-- "hostport:containerport" #host:container SHOULD always be specified as a (quoted) string, to avoid conflicts with yaml base-60 float.
+- "bind_address:hostport:containerport" # bind_address:hostport:containerport SHOULD always be specified as a (quoted) string, to avoid conflicts with yaml base-60 float.
 ```
 The Host port and the Container Port can be equal or no, this option allows us to run different containers exposing the same ports without collisions.
+It is advised to specify the `bind_address` on the host explicitly to avoid [security issues](https://dev.to/kovah/be-careful-with-docker-ports-3pih).
 
 GeoServer docker-compose.yml:
 
