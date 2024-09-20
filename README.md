@@ -25,7 +25,7 @@ Based on the official tomcat docker image, specifically:
 
 ## Important note
 
-Most of the paths if mounted from the host to locations on the container such as $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR $GEOWEBCACHE_CONFIG_DIR $NETCDF_DATA_DIR $GRIB_CACHE_DIR $GEOSERVER_DATA_DIR should be owned by the UID of user that geoserver is running on, which at the moment is UID 1000. The paths should be recursively chown-ed with this UID.
+Most of the paths if mounted from the host to locations on the container such as `$GEOSERVER_LOG_DIR` `$CATALINA_BASE` `$GEOWEBCACHE_CACHE_DIR` `$GEOWEBCACHE_CONFIG_DIR` `$NETCDF_DATA_DIR` `$GRIB_CACHE_DIR` `$GEOSERVER_DATA_DIR` should be owned by the UID of user that geoserver is running on, which at the moment is UID 1000. The paths should be recursively chown-ed with this UID. More info [here](#adjusting-permissions-for-the-bind-mounts)
 
 ## How to run it
 
@@ -299,7 +299,7 @@ geoserver:
 ...
 ```
 
-Adjusting Permissions for the bind mounts.
+### Adjusting Permissions for the bind mounts
 
 -Identify User ID: Determine the user ID running Geoserver inside the container. Use docker exec to access the container and run the id command.
 
