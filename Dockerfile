@@ -112,8 +112,9 @@ COPY run_tests.sh /docker/tests/run_tests.sh
 # install needed packages and create externalized dirs
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-    && apt-get install --yes git vim gdal-bin postgresql-client fontconfig libfreetype6 jq unzip \
-    && fonts-noto fonts-dejavu unifont fonts-hanazono \
+    && apt-get install --yes git vim gdal-bin postgresql-client \
+    fontconfig libfreetype6 fonts-noto fonts-dejavu unifont fonts-hanazono \
+    jq unzip \
     && apt-get clean \
     && apt-get -y autoclean \
     && apt-get -y autoremove \
