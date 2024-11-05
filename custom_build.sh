@@ -182,7 +182,6 @@ function main {
     download_plugin ext css
     download_plugin ext monitor
     download_plugin ext control-flow
-    download_plugin ext libjpeg-turbo
     download_marlin
 
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "nodatadir" ]]; then
