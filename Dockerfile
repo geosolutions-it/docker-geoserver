@@ -23,7 +23,6 @@ RUN \
     && [ -d "./geoserver" ] || (mkdir -p ./geoserver && unzip ./geoserver.war -d ./geoserver && rm ./geoserver.war)
 
 RUN apt-get update; apt-get upgrade --yes; apt-get install wget rsync --yes
-RUN wget https://downloads.sourceforge.net/project/libjpeg-turbo/1.5.3/libjpeg-turbo-official_1.5.3_amd64.deb && dpkg -i ./libjpeg*.deb && apt-get -f install
 
 WORKDIR /output/plugins
 ARG PLUG_IN_URLS=""
@@ -58,7 +57,7 @@ ENV GRIB_CACHE_DIR="${GEOSERVER_HOME}/grib_cache_dir"
 # override at run time as needed JAVA_OPTS
 ENV INITIAL_MEMORY="2G"
 ENV MAXIMUM_MEMORY="4G"
-ENV LD_LIBRARY_PATH="/opt/libjpeg-turbo/lib64"
+ENV LD_LIBRARY_PATH=""
 ENV JAIEXT_ENABLED="true"
 
 ENV GEOSERVER_OPTS=" \
@@ -101,7 +100,6 @@ RUN apt-get update \
 
 # copy from mother
 
-COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
 COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
 #COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
 COPY --from=mother "/output/webapp" "${CATALINA_BASE}/webapps"
