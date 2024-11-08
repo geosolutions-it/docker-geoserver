@@ -49,8 +49,9 @@ ADD .placeholder ${PLUG_IN_PATHS} /output/plugins/
 COPY geoserver-plugin-download.sh /usr/local/bin/geoserver-plugin-download.sh
 RUN /usr/local/bin/geoserver-plugin-download.sh /output/plugins/ ${PLUG_IN_URLS}
 RUN \
-    if [ -f *.zip ] ; then \
+    if ls *.zip >/dev/null 2>&1; then \
        unzip -o "./*.zip"; \
+       rm ./*zip; \
     fi
 
 WORKDIR /output/webapp
