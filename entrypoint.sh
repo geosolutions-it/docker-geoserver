@@ -49,6 +49,11 @@ fi
 # Disable tomcat version disclosure
 sed -i '/<\/Host>/i\ \ \ \ \ \ \ \ <Valve className="org.apache.catalina.valves.ErrorReportValve" showReport="false" showServerInfo="false"/>' "$CATALINA_HOME/conf/server.xml";
 
+# Custom webapp location
+if [ -n "${APP_LOCATION}" ] && [ "${APP_LOCATION}" != "geoserver" ]; then
+  mv "${CATALINA_BASE}"/webapps/geoserver "${CATALINA_BASE}"/webapps/"${APP_LOCATION}"
+fi
+
 catalina.sh run &
 /usr/local/bin/geoserver-rest-config.sh
 fg %1
