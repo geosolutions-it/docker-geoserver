@@ -230,7 +230,7 @@ function main {
     download_plugin ext css
     download_plugin ext monitor
     download_plugin ext control-flow
-    download_plugin ext mapml
+    #download_plugin ext mapml
     download_plugin community gwc-mbtiles
     download_marlin
 
