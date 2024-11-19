@@ -144,6 +144,10 @@ RUN chown -R $UID:$GID $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR 
 
 RUN if [ ! -f "${GEOSERVER_DATA_DIR}/logging.xml" ]; then cp -a ${CATALINA_BASE}/webapps/geoserver/data/* ${GEOSERVER_DATA_DIR};fi
 
+# Remediation
+RUN rm -f /usr/local/tomcat/webapps/geoserver/WEB-INF/lib/gt-complex-*.jar
+RUN rm -f /usr/local/tomcat/webapps/geoserver/WEB-INF/lib/commons-jxpath-*.jar
+
 WORKDIR "$CATALINA_BASE"
 USER $UNAME
 
