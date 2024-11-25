@@ -4,7 +4,7 @@ x-geoserver-common: &geoserver-common
   restart: unless-stopped
 
 services:
-  geoserver_ui:
+  geoserver-ui:
     <<: *geoserver-common
     profiles:
       - master
@@ -15,7 +15,6 @@ services:
     #    GEOSERVER_WEBAPP_SRC: ./geoserver.war
     #    PLUG_IN_PATHS: ./plugins
     #    GEOSERVER_DATA_DIR_SRC: ./hvx-geoserver-config
-    #image: docker_migration-geoserver
     environment:
       APP_LOCATION: "geoserver_ui"
       EXTRA_GEOSERVER_OPTS: "${EXTRA_GEOSERVER_OPTS}"
@@ -23,7 +22,7 @@ services:
       AWS_SECRET_KEY: "${AWS_SECRET_KEY}"
       POSTGRES_NHP_DATA_SIM_HOST: "${POSTGRES_NHP_DATA_SIM_HOST}"
       POSTGRES_NHP_DATA_SIM_PASSWORD: "${POSTGRES_NHP_DATA_SIM_PASSWORD}"
-    container_name: geoserver_ui
+    container_name: geoserver-ui
     ports:
       - 8080:8080
     volumes:
