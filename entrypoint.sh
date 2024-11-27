@@ -8,8 +8,8 @@ export CATALINA_OPTS="$CATALINA_OPTS $EXTRA_GEOSERVER_OPTS"
 # to the end of the web.xml
 # (this will only happen if our filter has not yet been added before)
 if [ "${CORS_ENABLED}" = "true" ]; then
-  if ! grep -q DockerGeoServerCorsFilter "$CATALINA_HOME/webapps/geoserver/WEB-INF/web.xml"; then
-    echo "Enable CORS for $CATALINA_HOME/webapps/geoserver/WEB-INF/web.xml"
+  if ! grep -q DockerGeoServerCorsFilter "$CATALINA_HOME/webapps/${APP_LOCATION}/WEB-INF/web.xml"; then
+    echo "Enable CORS for $CATALINA_HOME/webapps/${APP_LOCATION}/WEB-INF/web.xml"
 
     # Add support for access-control-allow-credentials when the origin is not a wildcard when specified via env var
     if [ "${CORS_ALLOWED_ORIGINS}" != "*" ] && [ "${CORS_ALLOW_CREDENTIALS}" = "true" ]; then
@@ -42,7 +42,7 @@ if [ "${CORS_ENABLED}" = "true" ]; then
     <filter-mapping>\n\
       <filter-name>DockerGeoServerCorsFilter</filter-name>\n\
       <url-pattern>/*</url-pattern>\n\
-    </filter-mapping>" "$CATALINA_HOME/webapps/geoserver/WEB-INF/web.xml";
+    </filter-mapping>" "$CATALINA_HOME/webapps/${APP_LOCATION}/WEB-INF/web.xml";
   fi
 fi
 

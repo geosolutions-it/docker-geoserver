@@ -18,6 +18,11 @@ services:
     environment:
       APP_LOCATION: "geoserver_ui"
       EXTRA_GEOSERVER_OPTS: "${EXTRA_GEOSERVER_OPTS}"
+      CORS_ENABLED: true
+      CORS_ALLOWED_ORIGINS: "*"
+      CORS_ALLOWED_METHODS: "HEAD,POST,GET,OPTIONS,PUT"
+      CORS_ALLOWED_HEADERS: "origin,x-requested-with,access-control-request-headers,content-type,access-control-request-method,accept"
+      CORS_ALLOW_CREDENTIALS: false
       AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
       AWS_SECRET_KEY: "${AWS_SECRET_KEY}"
       POSTGRES_NHP_DATA_SIM_HOST: "${POSTGRES_NHP_DATA_SIM_HOST}"
@@ -56,6 +61,11 @@ services:
     environment:
       APP_LOCATION: "geoserver"
       EXTRA_GEOSERVER_OPTS: "${EXTRA_GEOSERVER_OPTS}"
+      CORS_ENABLED: true
+      CORS_ALLOWED_ORIGINS: "*"
+      CORS_ALLOWED_METHODS: "HEAD,POST,GET,OPTIONS,PUT"
+      CORS_ALLOWED_HEADERS: "origin,x-requested-with,access-control-request-headers,content-type,access-control-request-method,accept"
+      CORS_ALLOW_CREDENTIALS: false
       AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
       AWS_SECRET_KEY: "${AWS_SECRET_KEY}"
       POSTGRES_NHP_DATA_SIM_HOST: "${POSTGRES_NHP_DATA_SIM_HOST}"
