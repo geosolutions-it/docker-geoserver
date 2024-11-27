@@ -6,3 +6,6 @@
 
 # zip files
 *.zip
+
+master.env
+slave.env
