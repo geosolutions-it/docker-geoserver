@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+
+# Custom webapp location
+if [ -n "${APP_LOCATION}" ] && [ "${APP_LOCATION}" != "geoserver" ]; then
+  mv "${CATALINA_BASE}"/webapps/geoserver "${CATALINA_BASE}"/webapps/"${APP_LOCATION}"
+fi
+
 geoserver-plugin-download.sh ${CATALINA_BASE}/webapps/${APP_LOCATION}/WEB-INF/lib $PLUGIN_DYNAMIC_URLS
 set -m
 export CATALINA_OPTS="$CATALINA_OPTS $EXTRA_GEOSERVER_OPTS"
@@ -48,11 +54,6 @@ fi
 
 # Disable tomcat version disclosure
 # sed -i '/<\/Host>/i\ \ \ \ \ \ \ \ <Valve className="org.apache.catalina.valves.ErrorReportValve" showReport="false" showServerInfo="false"/>' "$CATALINA_HOME/conf/server.xml";
-
-# Custom webapp location
-if [ -n "${APP_LOCATION}" ] && [ "${APP_LOCATION}" != "geoserver" ]; then
-  mv "${CATALINA_BASE}"/webapps/geoserver "${CATALINA_BASE}"/webapps/"${APP_LOCATION}"
-fi
 
 catalina.sh run &
 /usr/local/bin/geoserver-rest-config.sh
