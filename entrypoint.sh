@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
-geoserver-plugin-download.sh ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib $PLUGIN_DYNAMIC_URLS
+
+# Custom webapp location
+if [ -n "${APP_LOCATION}" ] && [ "${APP_LOCATION}" != "geoserver" ]; then
+  mv "${CATALINA_BASE}"/webapps/geoserver "${CATALINA_BASE}"/webapps/"${APP_LOCATION}"
+fi
+
+geoserver-plugin-download.sh ${CATALINA_BASE}/webapps/${APP_LOCATION}/WEB-INF/lib $PLUGIN_DYNAMIC_URLS
 set -m
 export CATALINA_OPTS="$CATALINA_OPTS $EXTRA_GEOSERVER_OPTS"
 
@@ -8,8 +14,8 @@ export CATALINA_OPTS="$CATALINA_OPTS $EXTRA_GEOSERVER_OPTS"
 # to the end of the web.xml
 # (this will only happen if our filter has not yet been added before)
 if [ "${CORS_ENABLED}" = "true" ]; then
-  if ! grep -q DockerGeoServerCorsFilter "$CATALINA_HOME/webapps/geoserver/WEB-INF/web.xml"; then
-    echo "Enable CORS for $CATALINA_HOME/webapps/geoserver/WEB-INF/web.xml"
+  if ! grep -q DockerGeoServerCorsFilter "$CATALINA_HOME/webapps/${APP_LOCATION}/WEB-INF/web.xml"; then
+    echo "Enable CORS for $CATALINA_HOME/webapps/${APP_LOCATION}/WEB-INF/web.xml"
 
     # Add support for access-control-allow-credentials when the origin is not a wildcard when specified via env var
     if [ "${CORS_ALLOWED_ORIGINS}" != "*" ] && [ "${CORS_ALLOW_CREDENTIALS}" = "true" ]; then
@@ -42,17 +48,12 @@ if [ "${CORS_ENABLED}" = "true" ]; then
     <filter-mapping>\n\
       <filter-name>DockerGeoServerCorsFilter</filter-name>\n\
       <url-pattern>/*</url-pattern>\n\
-    </filter-mapping>" "$CATALINA_HOME/webapps/geoserver/WEB-INF/web.xml";
+    </filter-mapping>" "$CATALINA_HOME/webapps/${APP_LOCATION}/WEB-INF/web.xml";
   fi
 fi
 
 # Disable tomcat version disclosure
 sed -i '/<\/Host>/i\ \ \ \ \ \ \ \ <Valve className="org.apache.catalina.valves.ErrorReportValve" showReport="false" showServerInfo="false"/>' "$CATALINA_HOME/conf/server.xml";
-
-# Custom webapp location
-if [ -n "${APP_LOCATION}" ] && [ "${APP_LOCATION}" != "geoserver" ]; then
-  mv "${CATALINA_BASE}"/webapps/geoserver "${CATALINA_BASE}"/webapps/"${APP_LOCATION}"
-fi
 
 add_web_xml_constraints() {
   WEB_XML="$1"
