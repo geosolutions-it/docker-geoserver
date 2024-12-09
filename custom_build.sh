@@ -219,19 +219,19 @@ function main {
     clean_up_directory
     download_geoserver "${GEOSERVER_VERSION}"
     create_plugins_folder
-    download_plugin community ogcapi-features
     download_plugin community ogcapi-tiles
     download_plugin community ogcapi-coverages
     download_plugin community ogcapi-maps
     download_plugin community ogcapi-styles
     download_plugin community wps-longitudinal-profile
+    download_plugin community gwc-mbtiles
     download_plugin ext feature-pregeneralized
     download_plugin ext wps
     download_plugin ext css
     download_plugin ext monitor
     download_plugin ext control-flow
     download_plugin ext mapml
-    download_plugin community gwc-mbtiles
+    download_plugin ext ogcapi-features
     download_marlin
 
 	if  [ "${GEOSERVER_DATA_DIR_RELEASE}" = "nodatadir" ]; then
