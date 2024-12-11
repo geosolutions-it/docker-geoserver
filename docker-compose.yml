@@ -7,6 +7,7 @@ services:
         GEOSERVER_WEBAPP_SRC: ./geoserver.war
         PLUG_IN_PATHS: ./plugins
     container_name: geoserver
+    restart: unless-stopped
     ports:
       - 8080:8080
     volumes:
