@@ -11,6 +11,7 @@ services:
     ports:
       - 8080:8080
     volumes:
+      - ./context.xml:/usr/local/tomcat/conf/context.xml:ro
       - gs_datadir:/var/geoserver/datadir
 
 volumes:
