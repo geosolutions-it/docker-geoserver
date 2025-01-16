@@ -1,0 +1,3 @@
+https://cogtestdata.blob.core.windows.net/terracon/CP235006/s1/Orthos/terracon_milwaukee_wi_20230901_ORTHO_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/CP235006/s1/Orthos/TerraconOlathe_PL_20230301_Ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/CP235006/s1/Orthos/roundrock_TX_20240226_ORTHO_COG.tif

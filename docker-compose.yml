@@ -1,11 +1,32 @@
 services:
+
+  postgres:
+    image: postgis/postgis
+    container_name: postgres
+    restart: on-failure
+    healthcheck:
+      test: /usr/bin/pg_isready -U postgres
+      interval: 5s
+      timeout: 10s
+      retries: 120
+    ports:
+      - 5432
+    env_file:
+      - ./postgres/postgres.env
+    volumes:
+      - pg_data:/var/lib/postgresql/data:rw  
+      - ./postgres/01-init-user.sh:/docker-entrypoint-initdb.d/01-init-user.sh
+
   geoserver:
     build:
       context: .
       dockerfile: ./Dockerfile
       args:
-        GEOSERVER_WEBAPP_SRC: ./geoserver.war
-        PLUG_IN_PATHS: ./plugins
+        GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/2.26.x/geoserver-2.26.x-latest-war.zip"
+        PLUG_IN_URLS: "https://build.geoserver.org/geoserver/2.26.x/community-latest/geoserver-2.26-SNAPSHOT-cog-azure-plugin.zip"
+        #PLUG_IN_PATHS: ./plugins
+    environment:
+      EXTRA_GEOSERVER_OPTS: "-Dit.geosolutions.cog.default.header.length=262144 -Dit.geosolutions.skip.external.files.lookup=true -Dazure.reader.accountkey=${AZURE_KEY}"
     container_name: geoserver
     restart: unless-stopped
     ports:
@@ -16,3 +37,5 @@ services:
 
 volumes:
   gs_datadir:
+  pg_data:
+

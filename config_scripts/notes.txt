@@ -1,0 +1,68 @@
+Need to create a script that will generate the two layers, orthos and heatmaps.
+- Orthos is a single geotiff, just provide its location and make sure to create a COG geotiff store
+- Heatmaps is an image mosaic, base it on https://docs.geoserver.org/main/en/user/community/cog/mosaic.html
+- Heatmap variables might be the full file name and the collection date
+- Use a single centralized postgis database for all mosaics, it's going to be a separate table per heatmap (use the name of the workspace, native name is different from the layer name mind)
+- The harvesting should take a list of URLs to the COGs
+- The mosaic index should also be published on the web
+- Have ChatGPT create a script with string templates, and then generate on the fly the zip to upload to geoserver for mosaic creation
+
+
+# Database creation
+
+createdb -U cite terracon
+psql -U cite terracon -c "create extension postgis"
+psql -U cite terracon -c "create schema pavement"
+
+# JNDI data store
+
+In context.xml:
+
+    <!-- Resource definition for a PostgreSQL connection pool -->
+    <Resource name="jdbc/pavement" 
+              auth="Container" 
+              type="javax.sql.DataSource"
+              factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+              driverClassName="org.postgresql.Driver" 
+              url="jdbc:postgresql://localhost:5432/terracon" 
+              username="cite" 
+              password="cite"
+              
+              maxActive="20" 
+              minIdle="5" 
+              maxIdle="20"
+              initialSize="5"
+
+              minEvictableIdleTimeMillis="300000"
+              timeBetweenEvictionRunsMillis="30000"
+              maxAge="300000"
+
+              testOnBorrow="true" 
+              validationQuery="SELECT 1" 
+              validationQueryTimeout="3"
+
+              removeAbandoned="true" 
+              removeAbandonedTimeout="60"
+              logAbandoned="true"
+              
+              jmxEnabled="true" 
+              fairQueue="true" 
+              maxWait="10000"
+    />
+
+and then remember to copy the postgresql driver in Tomcat own lib directory.
+
+
+File collection
+---------------
+
+find . -type f -name "*.tif"  -printf "http://localhost/terracon/pavement/data/CP235006/s1/Orthos/%f\n" > /home/aaime/devel/gisData/terracon/pavement/scripts/CP235006_orthos.txt
+
+find * -type f -path "*/Heatmaps/*.tif"  -printf "http://localhost/terracon/pavement/data/CP235006/%p\n" > /home/aaime/devel/gisData/terracon/pavement/scripts/CP235006_heatmaps.txt
+
+Finding a common CRS, inside a project directory:
+
+find * -type f -path "*/Heatmaps/*.tif"  -exec gdalinfo {} \; | grep -E "^\s{4}ID"
+    ID["EPSG",32614]]
+    ID["EPSG",3857]]
+    ID["EPSG",32615]]

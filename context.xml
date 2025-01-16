@@ -29,29 +29,36 @@
     <Manager pathname="" />
     -->
 
-    <Resource
-      name="jdbc/geoserver"
-      auth="Container"
-      type="javax.sql.DataSource"
-      driverClassName="org.postgresql.Driver"
-      url="jdbc:postgresql://xxx/xxx"
-      username="xxx"
-      password="xxx"
-      initialSize="5"
-      minActive="5"
-      maxTotal="30"
-      maxIdle="10"
-      maxWaitMillis="2500"
-      testWhileIdle="true"
-      minEvictableIdleTimeMillis="300000"
-      timeBetweenEvictionRunsMillis="300000"
-      numTestsPerEvictionRun="5"
-      testOnBorrow="false"
-      removeAbandonedOnMaintenance="true"
-      removeAbandonedTimeout="300"
-      logAbandoned="false"
-      maxOpenPreparedStatements="20"
-      validationQuery="SELECT 1"
+    <!-- Resource definition for a PostgreSQL connection pool -->
+    <Resource name="jdbc/pavement" 
+              auth="Container" 
+              type="javax.sql.DataSource"
+              factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+              driverClassName="org.postgresql.Driver" 
+              url="jdbc:postgresql://postgres:5432/geoserver" 
+              username="geoserver" 
+              password="geoserver"
+              
+              maxActive="20" 
+              minIdle="5" 
+              maxIdle="20"
+              initialSize="5"
+
+              minEvictableIdleTimeMillis="300000"
+              timeBetweenEvictionRunsMillis="30000"
+              maxAge="300000"
+
+              testOnBorrow="true" 
+              validationQuery="SELECT 1" 
+              validationQueryTimeout="3"
+
+              removeAbandoned="true" 
+              removeAbandonedTimeout="60"
+              logAbandoned="true"
+              
+              jmxEnabled="true" 
+              fairQueue="true" 
+              maxWait="10000"
     />
 
 </Context>

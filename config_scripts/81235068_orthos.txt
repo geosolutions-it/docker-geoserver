@@ -1,0 +1,16 @@
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/homedepot_spokane_wa_section1_asphalt_final_20230921_ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/homedepot_spokane_wa_section4_asphalt_final_20230921_ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/warped/homedepot_spokane_wa_section1_asphalt_final_20230921_ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/warped/homedepot_spokane_wa_section4_asphalt_final_20230921_ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/warped/homedepot_spokane_wa_section1_concrete_final_20230921_ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/warped/homedepot_spokane_wa_section3_asphalt_final_20230921_ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/warped/homedepot_spokane_wa_section2_asphalt_final_20230921_ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/sparse/homedepot_spokane_wa_section1_asphalt_final_20230921_ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/sparse/homedepot_spokane_wa_section4_asphalt_final_20230921_ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/sparse/homedepot_spokane_wa_section1_concrete_final_20230921_ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/sparse/homedepot_spokane_wa_section3_asphalt_final_20230921_ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/sparse/homedepot_spokane_wa_section2_asphalt_final_20230921_ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/homedepot_spokane_wa_section1_concrete_final_20230921_ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/homedepot_spokane_wa_section3_asphalt_final_20230921_ortho_COG.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/output.tif
+https://cogtestdata.blob.core.windows.net/terracon/81235068/s1/Orthos/homedepot_spokane_wa_section2_asphalt_final_20230921_ortho_COG.tif
