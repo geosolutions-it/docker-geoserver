@@ -3,7 +3,7 @@ services:
   postgres:
     image: postgis/postgis
     container_name: postgres
-    restart: on-failure
+    restart: unless-stopped
     healthcheck:
       test: /usr/bin/pg_isready -U postgres
       interval: 5s
