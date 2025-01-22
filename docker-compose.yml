@@ -1,5 +1,5 @@
 x-geoserver-common: &geoserver-common
-  image: ghcr.io/seaislandsoftware/hvx-geoserver:dev
+  image: ghcr.io/seaislandsoftware/hvx-geoserver:${IMAGE_TAG}
   pull_policy: always
   restart: unless-stopped
 
