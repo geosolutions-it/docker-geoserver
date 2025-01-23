@@ -14,13 +14,13 @@ ARG GEOSERVER_WEBAPP_SRC="./.placeholder"
 ADD "${GEOSERVER_WEBAPP_SRC}" "./"
 
 # download and install libjpeg-2.0.6 from sources.
-RUN wget https://sourceforge.net/projects/libjpeg-turbo/files/2.0.6/libjpeg-turbo-2.0.6.tar.gz \
-    && tar -zxf ./libjpeg-turbo-2.0.6.tar.gz \
-    && cd libjpeg-turbo-2.0.6 && apt-get install cmake -yq && cmake -G"Unix Makefiles" && make deb \
-    && dpkg -i ./libjpeg*.deb && apt-get -f install \
-    && apt-get clean \
-    && apt-get autoclean \
-    && apt-get autoremove
+#RUN wget https://sourceforge.net/projects/libjpeg-turbo/files/2.0.6/libjpeg-turbo-2.0.6.tar.gz \
+#    && tar -zxf ./libjpeg-turbo-2.0.6.tar.gz \
+#    && cd libjpeg-turbo-2.0.6 && apt-get install cmake -yq && cmake -G"Unix Makefiles" && make deb \
+#    && dpkg -i ./libjpeg*.deb && apt-get -f install \
+#    && apt-get clean \
+#    && apt-get autoclean \
+#    && apt-get autoremove
 
 # zip files require explicit extracion
 RUN \
@@ -64,7 +64,7 @@ ENV GRIB_CACHE_DIR="${GEOSERVER_HOME}/grib_cache_dir"
 # override at run time as needed JAVA_OPTS
 ENV INITIAL_MEMORY="2G"
 ENV MAXIMUM_MEMORY="4G"
-ENV LD_LIBRARY_PATH="/opt/libjpeg-turbo/lib64"
+#ENV LD_LIBRARY_PATH="/opt/libjpeg-turbo/lib64"
 ENV JAIEXT_ENABLED="true"
 
 ENV GEOSERVER_OPTS=" \
@@ -116,7 +116,7 @@ RUN apt-get update \
 
 # copy from mother
 
-COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
+#COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
 COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
 COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
 COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"
