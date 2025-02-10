@@ -13,6 +13,9 @@ services:
     volumes:
       - ./context.xml:/usr/local/tomcat/conf/context.xml:ro
       - gs_datadir:/var/geoserver/datadir
+    env_file: ".env" # stores S3 credentials and region
+    environment:
+      EXTRA_GEOSERVER_OPTS: "-Dit.geosolutions.cog.default.header.length=262144 -Dit.geosolutions.skip.external.files.lookup=true"
 
 volumes:
   gs_datadir:
