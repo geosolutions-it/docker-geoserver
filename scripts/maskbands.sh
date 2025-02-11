@@ -38,3 +38,6 @@ gdal_translate -q -of COG -co compress=DEFLATE -co NUM_THREADS=ALL_CPUS work/mas
 
 # cleanup work directory
 rm -rf work
+
+# cleanup original bands to save space
+rm B02.tif B03.tif B04.tif B05.tif B08.tif SCL.tif
