@@ -1,3 +1,6 @@
+# get inside working directory
+cd $1
+
 # start clean
 rm -rf work
 rm -rf masked
