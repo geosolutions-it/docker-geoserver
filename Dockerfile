@@ -1,4 +1,4 @@
-FROM tomcat:9-jdk11-temurin as mother
+FROM tomcat:9-jdk11-temurin-jammy as mother
 LABEL maintainer="Alessandro Parma <alessandro.parma@geosolutionsgroup.com>"
 SHELL ["/bin/bash", "-c"]
 
@@ -6,16 +6,7 @@ SHELL ["/bin/bash", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 ARG CMAKE_BUILD_PARALLEL_LEVEL=8
 ARG APP_LOCATION="geoserver"
-RUN apt-get update && apt-get install -y unzip wget cmake nasm\
-    && wget https://sourceforge.net/projects/libjpeg-turbo/files/2.1.5.1/libjpeg-turbo-2.1.5.1.tar.gz \
-    && tar -zxf ./libjpeg-turbo-2.1.5.1.tar.gz \
-    && cd libjpeg-turbo-2.1.5.1 && cmake -G"Unix Makefiles" -DWITH_JAVA=1 -DCMAKE_INSTALL_PREFIX=/opt/libjpeg-turbo \
-    && make deb \
-    && dpkg -i ./libjpeg*.deb && apt-get -f install     \
-    && apt-get -y purge cmake nasm\
-    && apt-get clean \
-    && apt-get -y autoclean \
-    && apt-get -y autoremove \
+RUN apt-get update && apt-get install -y unzip wget \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /usr/share/man/* \
     && rm -rf /usr/share/doc/*
@@ -62,7 +53,7 @@ RUN \
       mv /output/webapp/geoserver /output/webapp/${APP_LOCATION}; \
     fi
 
-FROM tomcat:9-jdk11-temurin
+FROM tomcat:9-jdk11-temurin-jammy
 
 ARG UID=1000
 ARG GID=1000
@@ -83,7 +74,7 @@ ENV GRIB_CACHE_DIR="${GEOSERVER_HOME}/grib_cache_dir"
 # override at run time as needed CATALINA_OPTS
 ENV INITIAL_MEMORY="2G"
 ENV MAXIMUM_MEMORY="4G"
-ENV LD_LIBRARY_PATH="/opt/libjpeg-turbo/lib64"
+#ENV LD_LIBRARY_PATH="/opt/libjpeg-turbo/lib64"
 ENV JAIEXT_ENABLED="true"
 ENV PLUGIN_DYNAMIC_URLS=""
 ENV EXTRA_GEOSERVER_OPTS=""
@@ -131,7 +122,7 @@ RUN apt-get update \
     "${GRIB_CACHE_DIR}"
 
 # copy from mother
-COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
+#COPY --from=mother "/opt/libjpeg-turbo" "/opt/libjpeg-turbo"
 COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
 COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
 COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"

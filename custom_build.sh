@@ -9,7 +9,7 @@ readonly GEOSERVER_DATA_DIR_RELEASE=${4}
 readonly PULL=${5}
 readonly ALL_PARAMETERS=$*
 readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver"
-readonly BASE_BUILD_URL_STABLE="https://netcologne.dl.sourceforge.net/project/geoserver/GeoServer"
+readonly BASE_BUILD_URL_STABLE="https://master.dl.sourceforge.net/project/geoserver/GeoServer"
 #readonly BASE_BUILD_URL_STABLE="https://build.geoserver.org/geoserver"
 readonly EXTRA_FONTS_URL="https://www.dropbox.com/s/hs5743lwf1rktws/fonts.tar.gz?dl=1"
 readonly ARTIFACT_DIRECTORY=./resources
@@ -49,7 +49,7 @@ function download_from_url_to_a_filepath {
 	FILE_PATH=${2}
 	FILE_DOWNLOADED=$(basename "${FILE_PATH}" )
 	if [ ! -f "${FILE_PATH}" ]; then
-		curl -L "${URL}" --output "${FILE_PATH}"
+		#curl -vL "${URL}" --output "${FILE_PATH}"
 		echo "* ${FILE_DOWNLOADED} artefact downloaded *"
 	else
 		echo "* ${FILE_DOWNLOADED} artefact already downloaded *"
@@ -150,7 +150,7 @@ function build_with_data_dir() {
       ;;
  
   esac
-	${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
+  docker build --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_PATHS=$PLUGIN_ARTIFACT_DIRECTORY \
     --build-arg GEOSERVER_DATA_DIR_SRC=${DATADIR_ARTIFACT_DIRECTORY} \
     --build-arg UID=${USERID} --build-arg GID=${GROUPID} --build-arg UNAME=${UNAME} \
