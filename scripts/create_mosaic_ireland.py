@@ -7,7 +7,7 @@ from io import BytesIO
 def create_indexer_properties( mosaic_name, mosaic_crs):
     return f"""Cog=true
 SuggestedSPI=it.geosolutions.imageioimpl.plugins.cog.CogImageReaderSpi
-CogRangeReader=it.geosolutions.imageioimpl.plugins.cog.HttpRangeReader
+CogRangeReader=it.geosolutions.imageioimpl.plugins.cog.S3RangeReader
 CanBeEmpty=true
 SuggestedFormat=org.geotools.gce.geotiff.GeoTiffFormat
 TimeAttribute=collected
@@ -18,7 +18,7 @@ GranuleHandler=org.geotools.gce.imagemosaic.granulehandler.ReprojectingGranuleHa
 HeterogeneousCRS=true
 MosaicCRS={mosaic_crs}
 Heterogeneous=true
-NoData=0
+NoData=65535
 CoverageNameCollectorSPI=org.geotools.gce.imagemosaic.namecollector.FileNameRegexNameCollectorSPI:regex=^([a-zA-Z0-9]+)
 """
 
@@ -26,7 +26,7 @@ def create_datastore_properties():
     return f"""SPI=org.geotools.data.postgis.PostgisNGJNDIDataStoreFactory
 jndiReferenceName=java:comp/env/jdbc/geoserver
 Loose\ bbox=true
-schema=virginia
+schema=ireland
 preparedStatements=true"""
 
 def create_regex_properties(regex):
