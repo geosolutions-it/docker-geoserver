@@ -1,3 +1,6 @@
+# fail fast
+set -e
+
 # get inside working directory
 folder_path="$1"
 cd $folder_path
