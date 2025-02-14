@@ -27,22 +27,23 @@ gdal_translate -a_nodata 1 -q -co NUM_THREADS=ALL_CPUS work/cloudMask1.tif work/
 gdal_fillnodata.py -md 2 -q -co NUM_THREADS=ALL_CPUS -si 0 -of GTiff work/cloudMask2.tif work/cloudMask3.tif
 gdal_translate -q -a_nodata none -co NUM_THREADS=ALL_CPUS work/cloudMask3.tif work/cloudMask4.tif
 gdal_sieve.py -st 47 -q work/cloudMask4.tif work/cloudMask5.tif
-gdal_calc.py -Awork/cloudMask5.tif --outfile=masked/MASK.tif --calc="A==1" --quiet --creation-option NUM_THREADS=ALL_CPUS
+gdal_calc.py -Awork/cloudMask5.tif --outfile=work/mask.tif --calc="A==1" --quiet --creation-option NUM_THREADS=ALL_CPUS
+gdal_translate -q -of COG -co compress=DEFLATE -co NUM_THREADS=ALL_CPUS work/mask.tif masked/MASK.tif
 
 # mask the various files
-gdal_calc.py --quiet -A masked/MASK.tif -B B02.tif --outfile=work/masked_B02.tif --calc="where(A == 0, B, 65535)" --NoDataValue=65535
+gdal_calc.py --quiet -A work/cloudMask5.tif -B B02.tif --outfile=work/masked_B02.tif --calc="where(A == 1, B, 65535)" --NoDataValue=65535
 gdal_translate -q -of COG -co compress=DEFLATE -co NUM_THREADS=ALL_CPUS work/masked_B02.tif masked/B02.tif
 
-gdal_calc.py --quiet -A masked/MASK.tif -B B03.tif --outfile=work/masked_B03.tif --calc="where(A == 0, B, 65535)" --NoDataValue=65535
+gdal_calc.py --quiet -A work/cloudMask5.tif -B B03.tif --outfile=work/masked_B03.tif --calc="where(A == 1, B, 65535)" --NoDataValue=65535
 gdal_translate -q -of COG -co compress=DEFLATE -co NUM_THREADS=ALL_CPUS work/masked_B03.tif masked/B03.tif
 
-gdal_calc.py --quiet -A masked/MASK.tif -B B04.tif --outfile=work/masked_B04.tif --calc="where(A == 0, B, 65535)" --NoDataValue=65535
+gdal_calc.py --quiet -A work/cloudMask5.tif -B B04.tif --outfile=work/masked_B04.tif --calc="where(A == 1, B, 65535)" --NoDataValue=65535
 gdal_translate -q -of COG -co compress=DEFLATE -co NUM_THREADS=ALL_CPUS work/masked_B04.tif masked/B04.tif
 
-gdal_calc.py --quiet -A masked/MASK.tif -B work/B0510.tif --outfile=work/masked_B05.tif --calc="where(A == 0, B, 65535)" --NoDataValue=65535
+gdal_calc.py --quiet -A work/cloudMask5.tif -B work/B0510.tif --outfile=work/masked_B05.tif --calc="where(A == 1, B, 65535)" --NoDataValue=65535
 gdal_translate -q -of COG -co compress=DEFLATE -co NUM_THREADS=ALL_CPUS work/masked_B05.tif masked/B05.tif
 
-gdal_calc.py --quiet -A masked/MASK.tif -B B08.tif --outfile=work/masked_B08.tif --calc="where(A == 0, B, 65535)" --NoDataValue=65535
+gdal_calc.py --quiet -A work/cloudMask5.tif -B B08.tif --outfile=work/masked_B08.tif --calc="where(A == 1, B, 65535)" --NoDataValue=65535
 gdal_translate -q -of COG -co compress=DEFLATE -co NUM_THREADS=ALL_CPUS work/masked_B08.tif masked/B08.tif
 
 # cleanup work directory

@@ -36,7 +36,7 @@ def download_from_file(file_path, output_dir, max_workers=4):
         executor.map(lambda url: download_file(url, output_dir), urls)
 
 if __name__ == "__main__":
-    input_file = "/home/ubuntu/docker-geoserver/scripts/sources.txt"
+    input_file = "/home/aaime/devel/gisData/rurall/docker-geoserver/scripts/sources.txt"
     output_directory = "downloaded_rasters"
     max_parallel_downloads = 4  # Adjust for your network and system capacity
     
