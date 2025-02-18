@@ -1,0 +1,18 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "count": "365739",
+        "min": 0.0235,
+        "max": 0.9232,
+        "sum": 127186.59389999868,
+        "avg": 0.34775234224406104,
+        "stddev": 0.19386477343714786
+      },
+      "geometry": null,
+      "id": "fid--36280fa7_19514d581d0_-488d"
+    }
+  ]
+}

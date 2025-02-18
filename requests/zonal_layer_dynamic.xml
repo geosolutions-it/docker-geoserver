@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wps:Execute version="1.0.0" service="WPS"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.opengis.net/wps/1.0.0"
+  xmlns:wfs="http://www.opengis.net/wfs"
+  xmlns:wps="http://www.opengis.net/wps/1.0.0"
+  xmlns:ows="http://www.opengis.net/ows/1.1"
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:wcs="http://www.opengis.net/wcs/1.1.1"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd">
+
+  <ows:Identifier>gs:RasterZonalStatistics</ows:Identifier>
+  <wps:DataInputs>
+    <wps:Input>
+      <ows:Identifier>data</ows:Identifier>
+      <wps:Reference mimeType="text/xml" xlink:href="http://geoserver/wps" method="POST">
+        <wps:Body>
+          <wps:Execute version="1.0.0" service="WPS">
+            <ows:Identifier>ras:Jiffle</ows:Identifier>
+            <wps:DataInputs>
+              <wps:Input>
+                <ows:Identifier>coverage</ows:Identifier>
+                <wps:Reference mimeType="image/tiff"
+                  xlink:href="http://geoserver/wcs?service=WCS&amp;request=GetCoverage&amp;version=2.0.1&amp;coverageId={{WORKSPACE}}__{{INDEX}}&amp;subset=TIME(%22{{DATE}}%22)&amp;outputCRS=EPSG%3A32632&amp;subset=E(728000,748963)&amp;subset=N(4967000,4976000)&amp;subsettingCRS=EPSG:32632"
+                  method="GET" />
+              </wps:Input>
+              <wps:Input>
+                <ows:Identifier>script</ows:Identifier>
+                <wps:Data>
+                  <wps:LiteralData><![CDATA[
+                    mask = src[2];
+                    if (mask == 0) {
+                      dest = null;
+                    } else {
+                      nir = src[1];
+                      vir = src[0];
+                      dest = mask * (nir - vir) / (nir + vir);
+                    }
+                    <]]>
+                </wps:LiteralData>
+                </wps:Data>
+              </wps:Input>
+              <wps:Input>
+                <ows:Identifier>outputType</ows:Identifier>
+                <wps:Data>
+                  <wps:LiteralData>FLOAT</wps:LiteralData>
+                </wps:Data>
+              </wps:Input>
+            </wps:DataInputs>
+            <wps:ResponseForm>
+              <wps:RawDataOutput mimeType="image/tiff">
+                <ows:Identifier>result</ows:Identifier>
+              </wps:RawDataOutput>
+            </wps:ResponseForm>
+          </wps:Execute>
+        </wps:Body>
+      </wps:Reference>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>zones</ows:Identifier>
+      <wps:Reference mimeType="text/xml" xlink:href="http://geoserver/wfs" method="POST">
+        <wps:Body>
+          <wfs:GetFeature service="WFS" version="1.0.0" outputFormat="GML2"
+            xmlns:rra="http://www.geoserver.org/rurall">
+            <wfs:Query typeName="idx:piano_colturale_2024" />
+          </wfs:GetFeature>
+        </wps:Body>
+      </wps:Reference>
+    </wps:Input>
+  </wps:DataInputs>
+  <wps:ResponseForm>
+    <wps:RawDataOutput mimeType="application/json">
+      <ows:Identifier>statistics</ows:Identifier>
+    </wps:RawDataOutput>
+  </wps:ResponseForm>
+</wps:Execute>
