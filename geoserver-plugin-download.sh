@@ -7,7 +7,7 @@ set -u
 
 PLUGIN_INSTALL_PATH=$1
 
-for url in "$@"
+for url in "${@:2}"
 do
     case "$url" in
         *sourceforge*) wget "$url/download" && unzip -o ./download -d ${PLUGIN_INSTALL_PATH} && rm ./download
