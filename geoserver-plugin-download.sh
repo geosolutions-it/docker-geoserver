@@ -12,7 +12,7 @@ do
     case "$url" in
         *sourceforge*) wget "$url/download" && unzip -o ./download -d ${PLUGIN_INSTALL_PATH} && rm ./download
         ;;
-        *) wget -O ./download "$url" && unzip -o ./download -d ${PLUGIN_INSTALL_PATH}
+        *) wget -O ./download "$url" && unzip -o ./download -d ${PLUGIN_INSTALL_PATH} && rm ./download
         ;;
     esac
 done
