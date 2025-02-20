@@ -14,7 +14,9 @@ do
         url="$url/download"
     fi
 
-    wget -O ./download "$url"
+    wget \
+        --no-verbose \
+        -O ./download "$url"
     unzip -o ./download -d "${PLUGIN_INSTALL_PATH}"
     rm ./download
 done
