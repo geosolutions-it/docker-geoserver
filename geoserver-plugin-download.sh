@@ -16,6 +16,7 @@ do
 
     wget \
         --no-verbose \
+        -U 'geosolutionsit/geoserver Docker image build' \
         -O ./download "$url"
     unzip -o ./download -d "${PLUGIN_INSTALL_PATH}"
     rm ./download
