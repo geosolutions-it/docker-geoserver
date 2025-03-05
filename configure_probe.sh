@@ -1,8 +1,9 @@
 #!/bin/bash
 
-PROBE_URL_PATH=$1
 
-echo "The probe URL is, "${PROBE_URL_PATH}""
+PROBE_URL_PATH=$1
+PROBE_CONTEXT_ROOT_PATH=$2
+
 
 OUTPUT_DESTINATION=/tmp/probe.war
 
@@ -21,5 +22,5 @@ fi
 
 # Deploy Application
 
-unzip -o ${OUTPUT_DESTINATION} -d "${CATALINA_HOME}"/webapps/"${PROBE_CONTEXT_ROOT}"
+unzip -o ${OUTPUT_DESTINATION} -d "${CATALINA_HOME}"/webapps/"${PROBE_CONTEXT_ROOT_PATH}"
 

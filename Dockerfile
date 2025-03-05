@@ -65,13 +65,14 @@ ARG UID=1000
 ARG GID=1000
 ARG UNAME=tomcat
 ARG CUSTOM_FONTS="./.placeholder"
-ARG PROBE_VERSION=3.6.0
+ARG PROBE_VERSION=3.7.3
 ARG PROBE_URL="https://github.com/psi-probe/psi-probe/releases/download/psi-probe-${PROBE_VERSION}/probe.war"
 ARG DEPLOY_PROBE=NO
+ARG PROBE_CONTEXT_ROOT=probe
 ENV ADMIN_PASSWORD=""
 ENV APP_LOCATION="geoserver"
 ENV ACTIVATE_PROBE=NO
-ENV PROBE_CONTEXT_ROOT=probe
+
 
 ENV CATALINA_BASE "$CATALINA_HOME"
 # set externalizations
@@ -145,7 +146,7 @@ COPY entrypoint.sh /entrypoint.sh
 COPY ${CUSTOM_FONTS} $GEOSERVER_DATA_DIR/styles/
 RUN groupadd -g $GID $UNAME
 RUN useradd -m -u $UID -g $GID --system $UNAME
-RUN if [ ${DEPLOY_PROBE} = 'YES' ];then /usr/local/bin/configure_probe.sh ${PROBE_URL};fi
+RUN if [ ${DEPLOY_PROBE} = 'YES' ];then /usr/local/bin/configure_probe.sh ${PROBE_URL} ${PROBE_CONTEXT_ROOT};fi
 RUN chown -R $UID:$GID $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR $GEOWEBCACHE_CONFIG_DIR $NETCDF_DATA_DIR $GRIB_CACHE_DIR $GEOSERVER_DATA_DIR
 
 RUN if [ ! -f "${GEOSERVER_DATA_DIR}/logging.xml" ]; then cp -a ${CATALINA_BASE}/webapps/geoserver/data/* ${GEOSERVER_DATA_DIR};fi
