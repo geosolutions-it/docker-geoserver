@@ -65,6 +65,7 @@ ARG UID=1000
 ARG GID=1000
 ARG UNAME=tomcat
 ARG CUSTOM_FONTS="./.placeholder"
+ARG ACTIVATE_PROBE=NO
 ENV ADMIN_PASSWORD=""
 ENV APP_LOCATION="geoserver"
 
@@ -83,6 +84,7 @@ ENV INITIAL_MEMORY="2G"
 ENV MAXIMUM_MEMORY="4G"
 ENV JAIEXT_ENABLED="true"
 ENV PLUGIN_DYNAMIC_URLS=""
+ENV PROBE_JVM_PARAMS=""
 ENV EXTRA_GEOSERVER_OPTS=""
 ENV GEOSERVER_OPTS=" \
   -Dorg.geotools.coverage.jaiext.enabled=${JAIEXT_ENABLED} \
@@ -92,7 +94,8 @@ ENV GEOSERVER_OPTS=" \
   -DGEOWEBCACHE_CONFIG_DIR=${GEOWEBCACHE_CONFIG_DIR} \
   -DGEOWEBCACHE_CACHE_DIR=${GEOWEBCACHE_CACHE_DIR} \
   -DNETCDF_DATA_DIR=${NETCDF_DATA_DIR} \
-  -DGRIB_CACHE_DIR=${GRIB_CACHE_DIR}"
+  -DGRIB_CACHE_DIR=${GRIB_CACHE_DIR} \
+  ${PROBE_JVM_PARAMS}"
 
 ENV CATALINA_OPTS="-Xms${INITIAL_MEMORY} -Xmx${MAXIMUM_MEMORY} \
   -Djava.awt.headless=true -server \
@@ -135,6 +138,7 @@ COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF
 COPY geoserver-plugin-download.sh /usr/local/bin/geoserver-plugin-download.sh
 COPY geoserver-rest-config.sh /usr/local/bin/geoserver-rest-config.sh
 COPY geoserver-rest-reload.sh /usr/local/bin/geoserver-rest-reload.sh
+COPY configure_probe.sh /usr/local/bin/configure_probe.sh
 COPY entrypoint.sh /entrypoint.sh
 COPY ${CUSTOM_FONTS} $GEOSERVER_DATA_DIR/styles/
 RUN groupadd -g $GID $UNAME
@@ -142,6 +146,8 @@ RUN useradd -m -u $UID -g $GID --system $UNAME
 RUN chown -R $UID:$GID $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR $GEOWEBCACHE_CONFIG_DIR $NETCDF_DATA_DIR $GRIB_CACHE_DIR $GEOSERVER_DATA_DIR
 
 RUN if [ ! -f "${GEOSERVER_DATA_DIR}/logging.xml" ]; then cp -a ${CATALINA_BASE}/webapps/geoserver/data/* ${GEOSERVER_DATA_DIR};fi
+
+RUN if [ ${ACTIVATE_PROBE} = 'YES' ];then /usr/local/bin/configure_probe.sh;fi
 
 WORKDIR "$CATALINA_BASE"
 USER $UNAME
