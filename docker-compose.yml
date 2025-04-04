@@ -1,5 +1,6 @@
 services:
   geoserver:
+    image: geosolutionsit/geoserver:C321-2.26.x
     build:
       context: .
       dockerfile: ./Dockerfile
