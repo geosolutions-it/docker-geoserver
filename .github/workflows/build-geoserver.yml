@@ -1,0 +1,64 @@
+name: Build and Package GeoServer Docker Image
+
+on:
+  push:
+    branches:
+      - C321
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v3
+
+      - name: Install required packages
+        run: |
+          set -e
+          sudo apt-get update
+          sudo apt-get install -y unzip wget git
+
+      - name: Clone docker-geoserver repo
+        run: |
+          set -e
+          ls -l
+          wget -q 'https://build.geoserver.org/geoserver/2.26.x/geoserver-2.26.x-latest-war.zip' -O geoserver-war.zip
+          unzip ./geoserver-war.zip
+          pwd
+          ls
+
+      - name: Download Plugins
+        run: |
+          set -e
+          mkdir plugins && pushd plugins
+          wget -q 'https://build.geoserver.org/geoserver/2.26.x/ext-latest/geoserver-2.26-SNAPSHOT-authkey-plugin.zip'
+          wget -q 'https://build.geoserver.org/geoserver/2.26.x/ext-latest/geoserver-2.26-SNAPSHOT-control-flow-plugin.zip'
+          wget -q 'https://build.geoserver.org/geoserver/2.26.x/ext-latest/geoserver-2.26-SNAPSHOT-monitor-plugin.zip'
+          wget -q 'https://build.geoserver.org/geoserver/2.26.x/ext-latest/geoserver-2.26-SNAPSHOT-wmts-multi-dimensional-plugin.zip'
+          wget -q 'https://build.geoserver.org/geoserver/2.26.x/ext-latest/geoserver-2.26-SNAPSHOT-wps-jdbc-plugin.zip'
+          wget -q 'https://build.geoserver.org/geoserver/2.26.x/ext-latest/geoserver-2.26-SNAPSHOT-wps-plugin.zip'
+          wget -q 'https://build.geoserver.org/geoserver/2.26.x/ext-latest/geoserver-2.26-SNAPSHOT-web-resource-plugin.zip'
+          wget -q 'https://build.geoserver.org/geoserver/2.26.x/community-latest/geoserver-2.26-SNAPSHOT-cog-s3-plugin.zip'
+          wget -q 'https://build.geoserver.org/geoserver/2.26.x/community-latest/geoserver-2.26-SNAPSHOT-cog-http-plugin.zip'
+          wget -q 'https://build.geoserver.org/geoserver/2.26.x/ext-latest/geoserver-2.26-SNAPSHOT-gwc-s3-plugin.zip'
+          popd
+          pwd
+
+      - name: Build Docker image
+        run: |
+          set -e
+          pwd
+          ls -l
+          docker compose build
+
+      - name: Save Docker image as tarball
+        run: |
+          set -e
+          docker save geosolutionsit/geoserver:C321-2.26.x -o geoserver_C321-2.26.x.tar
+
+      - name: Upload Docker image as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: geoserver_C321-2.26.x.tar
+          path: ./geoserver_C321-2.26.x.tar
