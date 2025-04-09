@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-geoserver-plugin-download.sh ${CATALINA_BASE}/webapps/${APP_LOCATION}/WEB-INF/lib $PLUGIN_DYNAMIC_URLS
+geoserver-plugin-download.sh ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib $PLUGIN_DYNAMIC_URLS
 set -m
 export CATALINA_OPTS="$CATALINA_OPTS $EXTRA_GEOSERVER_OPTS"
 
