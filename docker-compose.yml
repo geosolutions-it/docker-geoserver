@@ -1,53 +1,84 @@
-version: "3"
-networks:
-  geoserver-network:
-    driver: bridge
-services:
-  postgres:
-    image: postgis/postgis
-    container_name: postgres
-    restart: on-failure
-    healthcheck:
-      test: /usr/bin/pg_isready -U postgres
-      interval: 5s
-      timeout: 10s
-      retries: 120
-    ports:
-      - 5432
-    env_file:
-      - ./postgres/postgres.env
-    volumes:
-      - pg_data:${PGDATA:-/var/lib/postgresql/data}:rw
-      - ./postgres/01-init-user.sh:/docker-entrypoint-initdb.d/01-init-user.sh
-    networks:
-      - geoserver-network
+x-geoserver-common: &geoserver-common
+  image: geoserver-mbtiles:latest
+  restart: unless-stopped
 
-  geoserver:
+services:
+  geoserver-ui:
+    <<: *geoserver-common
     build:
       context: .
       dockerfile: ./Dockerfile
       args:
-        GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/main/geoserver-main-latest-war.zip"
-    container_name: geoserver
-    depends_on:
-      postgres:
-        condition: service_healthy
+        GEOSERVER_WEBAPP_SRC: ./geoserver.war
+        PLUG_IN_PATHS: ./resources/geoserver-plugins
+    container_name: geoserver-ui
+    environment:
+      APP_LOCATION: "geoserver_ui"
+      EXTRA_GEOSERVER_OPTS: "-DGEOSERVER_NODE_OPTS=id:backoffice-$${HOSTNAME} -DGEOSERVER_LOG_LOCATION=$${GEOSERVER_HOME}/logs/$${HOSTNAME}-backoffice.log -DGEOSERVER_AUDIT_PATH=$${GEOSERVER_HOME}/audit/geoserver-backoffice-$${HOSTNAME} -DGEOWEBCACHE_CONFIG_DIR=$${GEOSERVER_HOME}/gwc"
+      CORS_ENABLED: true
+      CORS_ALLOWED_ORIGINS: "*"
+      CORS_ALLOWED_METHODS: "HEAD,POST,GET,OPTIONS,PUT"
+      CORS_ALLOWED_HEADERS: "origin,x-requested-with,access-control-request-headers,content-type,access-control-request-method,accept"
+      CORS_ALLOW_CREDENTIALS: false
     ports:
       - 8080
-    networks:
-      - geoserver-network
+    volumes:
+      - gs_audits:/var/geoserver/audit
+      - gs_data:/var/geoserver/data
+      - gs_datadir_backoffice:/var/geoserver/datadir
+      - gs_logs:/var/geoserver/logs
+      - gwc_cache:/var/geoserver/gwc_cache_dir
+      - gwc_conf:/var/geoserver/gwc
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f 'http://geoserver-ui:8080/geoserver_ui/ows?service=WMS&request=GetCapabilities&version=1.3.0' | grep '<Name>WMS</Name>'"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+      start_period: 30s
 
-  proxy:
-    image: nginx
-    container_name: proxy
+  geoserver:
+    <<: *geoserver-common
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      APP_LOCATION: "geoserver"
+      EXTRA_GEOSERVER_OPTS: "-DGEOSERVER_NODE_OPTS=id:$${HOSTNAME} -DGEOSERVER_LOG_LOCATION=$${GEOSERVER_HOME}/logs/$${HOSTNAME}.log -DGEOSERVER_AUDIT_PATH=$${GEOSERVER_HOME}/audit/geoserver-$${HOSTNAME} -DGEOWEBCACHE_CONFIG_DIR=$${GEOSERVER_HOME}/gwc"
+      CORS_ENABLED: true
+      CORS_ALLOWED_ORIGINS: "*"
+      CORS_ALLOWED_METHODS: "HEAD,POST,GET,OPTIONS,PUT"
+      CORS_ALLOWED_HEADERS: "origin,x-requested-with,access-control-request-headers,content-type,access-control-request-method,accept"
+      CORS_ALLOW_CREDENTIALS: false
+    # ports:
+    #   - 8080
+    volumes:
+      - gs_audits:/var/geoserver/audit
+      - gs_data:/var/geoserver/data
+      - gs_datadir:/var/geoserver/datadir
+      - gs_logs:/var/geoserver/logs
+      - gwc_cache:/var/geoserver/gwc_cache_dir
+      - gwc_conf:/var/geoserver/gwc
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f 'http://geoserver:8080/geoserver/ows?service=WMS&request=GetCapabilities&version=1.3.0' | grep '<Name>WMS</Name>'"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+      start_period: 30s
+
+  nginx:
+    image: nginx:stable-bookworm-perl
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
     volumes:
       - ./geoserver.conf:/etc/nginx/conf.d/default.conf:rw
-    ports:
-    - 80:80
-    depends_on:
-      - geoserver
-    networks:
-      - geoserver-network
 
 volumes:
-  pg_data:
+  gs_audits:
+  gs_data:
+  gs_datadir_backoffice:
+  gs_datadir:
+  gs_logs:
+  gwc_cache:
+  gwc_conf:
