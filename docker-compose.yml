@@ -6,6 +6,7 @@ services:
       args:
         GEOSERVER_WEBAPP_SRC: ./geoserver.war
         PLUG_IN_PATHS: ./plugins
+    image: geosolutionsit/geoserver:C321-2.26.x
     container_name: geoserver
     restart: unless-stopped
     ports:
