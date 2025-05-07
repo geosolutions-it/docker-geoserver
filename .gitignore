@@ -6,3 +6,6 @@
 
 # zip files
 *.zip
+
+# env files
+.env

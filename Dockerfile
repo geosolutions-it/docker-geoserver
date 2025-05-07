@@ -60,15 +60,6 @@ RUN \
       mv /output/webapp/geoserver /output/webapp/${APP_LOCATION}; \
     fi
 
-WORKDIR /output/fonts
-RUN \
-    wget 'https://www.dropbox.com/scl/fi/nfrq0sd72cvz4jeqih8u8/openmaptiles-fonts.zip?rlkey=8tbq0nt6cjtpzzc36qs4ww6gh&st=ddit1d36&dl=1' \
-      -O openmaptiles-fonts.zip; \
-    mkdir -p ttf; \
-    cd ttf; \
-    unzip ../openmaptiles-fonts.zip
-
-
 FROM tomcat:9-jdk11-temurin-jammy
 
 ARG UID=1000
@@ -143,7 +134,6 @@ RUN apt-get update \
 COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
 COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
 COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"
-COPY --from=mother "/output/fonts/ttf" /usr/local/share/fonts
 
 COPY geoserver-plugin-download.sh /usr/local/bin/geoserver-plugin-download.sh
 COPY geoserver-rest-config.sh /usr/local/bin/geoserver-rest-config.sh
