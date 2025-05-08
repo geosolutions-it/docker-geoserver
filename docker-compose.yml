@@ -5,6 +5,7 @@ x-geoserver-common: &geoserver-common
 services:
   geoserver-ui:
     <<: *geoserver-common
+    profiles: [bo]
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -42,6 +43,7 @@ services:
 
   geoserver:
     <<: *geoserver-common
+    profiles: [prod]
     deploy:
       mode: replicated
       replicas: 1
@@ -71,6 +73,7 @@ services:
       start_period: 20s
 
   nginx:
+    profiles: [bo, prod]
     image: nginx:stable-bookworm-perl
     container_name: nginx
     restart: unless-stopped
