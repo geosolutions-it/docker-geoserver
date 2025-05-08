@@ -170,6 +170,7 @@ function build_with_data_dir() {
   esac
     ${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_PATHS=$PLUGIN_ARTIFACT_DIRECTORY \
+    --build-arg PLUG_IN_URLS="${PLUG_IN_URLS:-}" \
     --build-arg GEOSERVER_DATA_DIR_SRC=${DATADIR_ARTIFACT_DIRECTORY} \
     --build-arg UID=${USERID} --build-arg GID=${GROUPID} --build-arg UNAME=${UNAME} \
     --build-arg GIT_HASH=${GIT_HASH_COMMAND} \
@@ -210,6 +211,7 @@ function build_without_data_dir() {
       ;;
   esac
     ${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
+    --build-arg GEOSERVER_VERSION="${GEOSERVER_VERSION}" \
     --build-arg PLUG_IN_PATHS=$PLUGIN_ARTIFACT_DIRECTORY \
     --build-arg UID=${USERID} --build-arg GID=${GROUPID} --build-arg UNAME=${UNAME} \
     --build-arg GIT_HASH=${GIT_HASH_COMMAND} \
