@@ -222,6 +222,7 @@ function main {
     download_plugin community ogcapi-tiles
     download_plugin community ogcapi-coverages
     download_plugin community ogcapi-maps
+    download_plugin community ogcapi-processes    
     download_plugin community ogcapi-styles
     download_plugin community wps-longitudinal-profile
     download_plugin community gwc-mbtiles
