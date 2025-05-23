@@ -1,4 +1,4 @@
-FROM tomcat:9-jdk11-openjdk as mother
+FROM tomcat:9-jdk11-temurin-jammy as mother
 LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
 
 RUN apt-get update && apt-get install -y unzip rsync
@@ -41,7 +41,7 @@ RUN \
     fi
 
 
-FROM tomcat:9-jdk11-openjdk
+FROM tomcat:9-jdk11-temurin-jammy
 
 
 ENV CATALINA_BASE "$CATALINA_HOME"
