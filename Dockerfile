@@ -31,7 +31,11 @@ ADD .placeholder ${PLUG_IN_URLS} /output/plugins/
 #   if [ "$(echo ${PLUG_IN_URLS}| grep http)" != "" ]; then \
 #     for URL in "${PLUG_IN_URLS}"; do wget $URL;done; unzip -o "./*zip"; rm -f ./*zip; \
 #   fi
-RUN unzip -o "./*.zip";rm -f ./*zip
+RUN \
+    # We want ZIPs  to be extracted in alphabetical order, so we don't use `unzip -o "./*.zip"`. \
+    # Useful when applying patches.
+    find . -type f -name '*.zip' | sort | xargs -I {} unzip -o {}; \
+    rm -f ./*zip
 
 WORKDIR /output/webapp
 ARG APP_LOCATION="geoserver"
