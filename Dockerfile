@@ -83,6 +83,8 @@ ENV JAVA_OPTS="-Xms${INITIAL_MEMORY} -Xmx${MAXIMUM_MEMORY} \
   -XX:MaxGCPauseMillis=200 -XX:ParallelGCThreads=20 -XX:ConcGCThreads=5 \
   ${GEOSERVER_OPTS}"
 
+ENV ENTITY_RESOLUTION_ALLOWLIST="www.w3.org|schemas.opengis.net|www.opengis.net|inspire.ec.europa.eu/schemas"
+
 ADD run_tests.sh /docker/tests/run_tests.sh
 
 # create externalized dirs
