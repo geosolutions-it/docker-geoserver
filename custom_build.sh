@@ -163,6 +163,8 @@ function main {
     download_plugin ext monitor
     download_plugin ext control-flow
 
+    download_from_url_to_a_filepath 'https://www.dropbox.com/scl/fi/tz9v5ux714twu4edf0uai/2.25.3.zip?rlkey=sgi7fm4924jg54lxrvmfimjda&st=ip901r7u&dl=0' "${PLUGIN_ARTIFACT_DIRECTORY}/ZZZ_patch1.zip"
+
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "nodatadir" ]]; then
    	    build_without_data_dir "${TAG}" "${PULL}"
    	else
