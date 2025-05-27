@@ -135,6 +135,7 @@ function build_with_data_dir() {
     --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY \
     --build-arg GEOSERVER_DATA_DIR_SRC=${GEOSERVER_DATA_DIR_DIRECTORY} \
 		-t geosolutionsit/geoserver:"${TAG}-${GEOSERVER_VERSION}" \
+    --no-cache \
 		 .
 }
 
@@ -150,6 +151,7 @@ function build_without_data_dir() {
 	${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY\
 		-t geosolutionsit/geoserver:"${TAG}-${GEOSERVER_VERSION}" \
+    --no-cache \
 		 .
 }
 
