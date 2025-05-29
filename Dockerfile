@@ -144,6 +144,12 @@ RUN chown -R $UID:$GID $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR 
 RUN if [ ! -f "${GEOSERVER_DATA_DIR}/logging.xml" ]; then cp -a ${CATALINA_BASE}/webapps/geoserver/data/* ${GEOSERVER_DATA_DIR};fi
 
 WORKDIR "$CATALINA_BASE"
+
+# install dialects for GeoFence
+RUN rm -vf "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/hibernate-spatial-h2-geodb*jar"
+ADD "https://maven.geo-solutions.it/org/hibernatespatial/hibernate-spatial-postgis/1.1.3.2/hibernate-spatial-postgis-1.1.3.2.jar" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/hibernate-spatial-postgis-1.1.3.2.jar"
+ADD "https://repo1.maven.org/maven2/org/postgis/postgis-jdbc/1.3.3/postgis-jdbc-1.3.3.jar" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/postgis-jdbc-1.3.3.jar"
+#ADD "https://repo1.maven.org/maven2/postgresql/postgresql/8.4-702.jdbc3/postgresql-8.4-702.jdbc3.jar" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/postgresql-8.4-702.jdbc3.jar"
 USER $UNAME
 
 ENV TERM xterm
