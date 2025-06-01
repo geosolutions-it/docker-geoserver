@@ -44,7 +44,7 @@ RUN \
 
 WORKDIR /output/plugins
 ARG PLUG_IN_URLS=""
-ARG PLUG_IN_PATHS=""
+ARG PLUG_IN_PATHS=".placeholder"
 ADD .placeholder ${PLUG_IN_PATHS} /output/plugins/
 COPY geoserver-plugin-download.sh /usr/local/bin/geoserver-plugin-download.sh
 RUN /usr/local/bin/geoserver-plugin-download.sh /output/plugins/ ${PLUG_IN_URLS}
