@@ -114,8 +114,11 @@ COPY run_tests.sh /docker/tests/run_tests.sh
 
 # install needed packages and create externalized dirs
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update \
+RUN \
+    echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
+    && apt-get update \
     && apt-get install --yes git vim gdal-bin postgresql-client fontconfig libfreetype6 jq unzip \
+    fonts-dejavu fonts-liberation2 ttf-bitstream-vera ttf-mscorefonts-installer xfonts-scalable \
     && apt-get clean \
     && apt-get -y autoclean \
     && apt-get -y autoremove \
@@ -134,6 +137,11 @@ RUN apt-get update \
 COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
 COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
 COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"
+
+RUN \
+    wget 'https://www.dropbox.com/scl/fi/g8z415sd1rr1ju9z9oxmu/fonts.zip?rlkey=kw6hcqrxpluiv2qro05ba83f0&st=wj5n4d42&dl=0' -O /tmp/fonts.zip \
+    && unzip /tmp/fonts.zip -d /usr/local/share/fonts/ \
+    && rm -f /tmp/fonts.zip
 
 COPY geoserver-plugin-download.sh /usr/local/bin/geoserver-plugin-download.sh
 COPY geoserver-rest-config.sh /usr/local/bin/geoserver-rest-config.sh
