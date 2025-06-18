@@ -1,0 +1,95 @@
+name: Generate changelog and create release
+
+on:
+    # Meant to run once manually on the release branch
+    workflow_dispatch:
+        inputs:
+            new-version:
+                description: 'Version to release (in semver format)'
+                required: true
+            previous-version:
+                required: true
+
+jobs:
+    changelog:
+        concurrency: release-${{ github.ref }}
+        env:
+            LAST_VERSION: ${{ github.event.inputs.previous-version }}
+            NEW_VERSION: ${{ github.event.inputs.new-version }}
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check branch
+              uses: actions/github-script@v7
+              if: ${{ github.ref == 'refs/heads/master' }}
+              with:
+                script: |
+                    core.setFailed('This workflow can not run on master branch')
+                
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Generate changelog on release branch
+              run: |
+                changelogFile="CHANGELOG.md"
+                # Get the current date in the format YYYY-MM-DD
+                currentDate=$(date +'%Y-%m-%d')
+                changelogEntry=$(cat <<EOF
+                ## [${NEW_VERSION}](https://github.com/${{ github.repository }}/tree/${NEW_VERSION}) (${currentDate})
+
+                - **[Full changelog](https://github.com/${{ github.repository }}/compare/${LAST_VERSION}...${NEW_VERSION})**
+                - **[Implemented enhancements](https://github.com/${{ github.repository }}/issues?q=is%3Aissue+milestone%3A%22${NEW_VERSION}%22+is%3Aclosed+label%3Aenhancement)**
+                - **[Fixed bugs](https://github.com/${{ github.repository }}/issues?q=is%3Aissue+milestone%3A%22${NEW_VERSION}%22+is%3Aclosed+label%3Abug)**
+                - **[Closed issues](https://github.com/${{ github.repository }}/issues?q=is%3Aissue+milestone%3A%22${NEW_VERSION}%22+is%3Aclosed)**
+                EOF
+                )
+                # Prepend the new changelog to the changelog file
+                echo -e "${changelogEntry}\n$(cat ${changelogFile})" > ${changelogFile}
+
+                echo "Initializing git"
+                # Initializing git
+                git config user.name github-actions
+                git config user.email github-actions@github.com
+
+                # Commit changes
+                echo "Committing changes"
+
+                git add CHANGELOG.md
+                git commit -m "Version Release ${NEW_VERSION}"
+                git tag ${NEW_VERSION} # create tag
+
+            - name: Push to protected branch
+              uses: CasperWA/push-protected@v2
+              with:
+                token: ${{ secrets.GITHUB_TOKEN }}
+                ref: ${{ github.ref }}
+                tags: true
+                unprotect_reviews: true
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - name: github release
+              uses: softprops/action-gh-release@v2
+              with:
+                repository: ${{ github.repository }}
+                # create a personal access token with permissions to create releases in the repo (full control of private repo checkbox)
+                token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+                draft: true
+                prerelease: false
+                # Commitish value that determines where the Git tag is created from. Can be any branch or commit SHA.
+                target_commitish: ${{ github.ref }}
+                # name of tag, also becomes the release name by default
+                tag_name: ${{ github.event.inputs.new-version }}
+                body: |
+                    ## Main Features
+
+                    - ...
+
+                    ## Main Improvements
+
+                    - ...
+
+                    ## Useful links related to **[${{ github.event.inputs.previous-version }}](https://github.com/${{ github.repository }}/tree/${{ github.event.inputs.new-version }})**
+                    - **[Full Changelog](https://github.com/${{ github.repository }}/compare/${{ github.event.inputs.previous-version }}...${{ github.event.inputs.new-version }})**
+                    - **[Implemented enhancements](https://github.com/${{ github.repository }}/issues?q=is%3Aissue+milestone%3A%22${{ github.event.inputs.new-version }}%22+is%3Aclosed+label%3Aenhancement)**
+                    - **[Fixed bugs](https://github.com/${{ github.repository }}/issues?q=is%3Aissue+milestone%3A%22${{ github.event.inputs.new-version }}%22+is%3Aclosed+label%3Abug)**
+                    - **[Closed issues](https://github.com/${{ github.repository }}/issues?q=is%3Aissue+milestone%3A%22${{ github.event.inputs.new-version }}%22+is%3Aclosed)**
