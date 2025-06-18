@@ -1,0 +1,117 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main", '[0-9]+\.[0-9]+\.[0-9]+', '[0-9]+\.[0-9]+\.[x]' ]
+
+env:
+  DOCKER_REPO: ${{ vars.DOCKER_REPO }}
+
+jobs:
+  build_image:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Validate build conditions
+      env:
+        NIGHTLY_MASTER_VERSION: ${{ vars.NIGHTLY_MASTER_VERSION }}
+        NIGHTLY_STABLE_VERSION: ${{ vars.NIGHTLY_STABLE_VERSION }}
+        NIGHTLY_MAINT_VERSION: ${{ vars.NIGHTLY_MAINT_VERSION }}
+        STABLE_VERSION: ${{ vars.STABLE_VERSION }}
+        MAINT_VERSION: ${{ vars.MAINT_VERSION }}
+      run: |
+        buildable_status=1
+        versions=("$NIGHTLY_MASTER_VERSION" "$NIGHTLY_STABLE_VERSION" "$NIGHTLY_MAINT_VERSION" "$STABLE_VERSION" "$MAINT_VERSION")
+        # We will proceed with the build only if the branch name is valid and supported by our repo-level vars.
+        for version in "${versions[@]}"; do
+          for single_version in $version; do
+            if [[ "$GITHUB_REF_NAME" == "$single_version" ]]; then
+              # Valid version
+              buildable_status=0
+              break;
+            fi
+          done
+        done
+        exit $buildable_status
+
+    - name: Initialise the cache for the plugin dependencies
+      id: plugincache
+      uses: actions/cache@v4
+      with:
+        path: ./resources/geoserver-plugins/
+        key: ${{ runner.os }}-build-${{ github.ref_name }}
+
+    - name: Download the dependencies (plugins)
+      if: steps.plugincache.outputs.cache-hit != 'true'
+      env:
+        PLUG_IN_LIST: "monitor control-flow"
+        NIGHTLY_MASTER_VERSION: ${{ vars.NIGHTLY_MASTER_VERSION }}
+        NIGHTLY_STABLE_VERSION: ${{ vars.NIGHTLY_STABLE_VERSION }}
+        NIGHTLY_MAINT_VERSION: ${{ vars.NIGHTLY_MAINT_VERSION }}
+        STABLE_VERSION: ${{ vars.STABLE_VERSION }}
+        MAINT_VERSION: ${{ vars.MAINT_VERSION }}
+      run: |
+        for version in $NIGHTLY_MASTER_VERSION; do
+          if [[ "$GITHUB_REF_NAME" == $version ]]; then
+            PLUG_IN_VERSION="2.$(expr $MIDDLE_STABLE + 1)-SNAPSHOT"
+            break
+          fi
+        done
+        if [ -z $PLUG_IN_VERSION ]; then
+          for version in $NIGHTLY_STABLE_VERSION; do
+            if [[ "$GITHUB_REF_NAME" == $version ]]; then
+              PLUG_IN_VERSION="2.$MIDDLE_STABLE-SNAPSHOT"
+              break
+            fi
+          done
+        fi
+        if [ -z $PLUG_IN_VERSION ]; then
+          for version in $NIGHTLY_MAINT_VERSION; do
+            if [[ "$GITHUB_REF_NAME" == $version ]]; then
+              PLUG_IN_VERSION="2.$(expr $MIDDLE_STABLE - 1)-SNAPSHOT"
+              break
+            fi
+          done
+        fi
+        
+        if [ -z $PLUG_IN_VERSION ]; then
+          for version in $STABLE_VERSION $MAINT_VERSION; do
+            if [[ "$GITHUB_REF_NAME" == $version ]]; then
+              PLUG_IN_VERSION="$version"
+              break
+            fi
+          done
+        fi
+
+        mkdir -p ./resources/geoserver-plugins
+        for PLUG_IN_NAME in $PLUG_IN_LIST; do
+          URL="https://build.geoserver.org/geoserver/$GITHUB_REF_NAME/ext-latest/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip"
+          curl -C - -k -o ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip $URL
+        done
+
+    - uses: actions/checkout@v4
+    - name: Build the geoserver image
+      run: |
+        WAR_FILE="https://build.geoserver.org/geoserver/$GITHUB_REF_NAME/geoserver-$GITHUB_REF_NAME-latest-war.zip"
+        docker build \
+          --build-arg GEOSERVER_WEBAPP_SRC="$WAR_FILE" \
+          --build-arg PLUG_IN_PATHS="./resources/geoserver-plugins" \
+          -f "$DOCKERFILE_PATH" \
+          -t "${DOCKER_REPO}:$GITHUB_REF_NAME" .
+        rm -rf ./resources/geoserver-plugins/*
+
+    - name: Login to docker hub
+      uses: docker/login-action@v3.2.0
+      with:
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: Push docker image
+      run: docker push "${DOCKER_REPO}:$GITHUB_REF_NAME"
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build_image
+    timeout-minutes: 10
+    steps:
+      - name: Run the tests
+        run: docker run --rm -i "${DOCKER_REPO}:$GITHUB_REF_NAME" /docker/tests/run_tests.sh
