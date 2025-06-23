@@ -171,6 +171,20 @@ case "$GS_CORE_JAR" in
   ;;
 esac
 
+# Patch tomcat-users for psi-probe.
+if ! grep -q 'rolename="probeuser"' "$CATALINA_HOME/conf/tomcat-users.xml"; then
+  echo "Patching $CATALINA_HOME/conf/tomcat-users.xml for psi-probe"
+
+  sed -i "\:</tomcat-users>:i\\
+  <role rolename=\"probeuser\" />\n\
+  <role rolename=\"poweruser\" />\n\
+  <role rolename=\"poweruserplus\" />\n\
+  <role rolename=\"manager-gui\" />\n\
+\n\
+  <user username=\"admin\" password=\"${PROBE_PASSWORD}\" roles=\"manager-gui\" />\n\
+" "$CATALINA_HOME/conf/tomcat-users.xml";
+fi
+
 catalina.sh run &
 /usr/local/bin/geoserver-rest-config.sh
 fg %1
