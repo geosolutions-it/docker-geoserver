@@ -1,0 +1,170 @@
+#!/bin/bash -x
+
+#
+# Multi-architecture Docker Build and Push Script
+# 
+# This script builds and pushes GeoServer Docker images for multiple architectures
+# (linux/amd64, linux/arm64) including nightly, stable, and maintenance versions.
+# It downloads required plugins and handles the latest tag creation.
+#
+
+PLUG_IN_LIST="monitor control-flow"
+PLATFORMS="linux/amd64,linux/arm64"
+NIGHTLY_MASTER_PLUG_IN_VERSION="2.$(expr $MIDDLE_STABLE + 1)-SNAPSHOT"
+NIGHTLY_STABLE_PLUG_IN_VERSION="2.$MIDDLE_STABLE-SNAPSHOT"
+NIGHTLY_MAINT_PLUG_IN_VERSION="2.$(expr $MIDDLE_STABLE - 1)-SNAPSHOT"
+
+docker buildx create --name multiarch-builder --use 2>/dev/null || docker buildx use multiarch-builder
+
+touch /tmp/failed_versions
+
+echo "Plugin versions:"
+echo "NIGHTLY_MASTER_PLUG_IN_VERSION: $NIGHTLY_MASTER_PLUG_IN_VERSION"
+echo "NIGHTLY_STABLE_PLUG_IN_VERSION: $NIGHTLY_STABLE_PLUG_IN_VERSION"
+echo "NIGHTLY_MAINT_PLUG_IN_VERSION: $NIGHTLY_MAINT_PLUG_IN_VERSION"
+
+#
+# Downloads GeoServer plugins for a specific version
+# Args: $1=plugin_version, $2=geoserver_version, $3=is_nightly
+#
+download_plugins() {
+    local PLUG_IN_VERSION=$1
+    local VERSION=$2
+    local IS_NIGHTLY=$3
+    
+    mkdir -p ./resources/geoserver-plugins
+    
+    for PLUG_IN_NAME in $PLUG_IN_LIST; do
+        echo "Downloading plugin: $PLUG_IN_NAME for version: $PLUG_IN_VERSION"
+        
+        if [ "$IS_NIGHTLY" = "true" ]; then
+            URL="https://build.geoserver.org/geoserver/$VERSION/ext-latest/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip"
+        else
+            URL="https://sourceforge.net/projects/geoserver/files/GeoServer/$VERSION/extensions/geoserver-$VERSION-$PLUG_IN_NAME-plugin.zip/download"
+        fi
+        
+        echo "Downloading from: $URL"
+        if ! curl -k -o ./resources/geoserver-plugins/geoserver-$PLUG_IN_VERSION-$PLUG_IN_NAME-plugin.zip "$URL"; then
+            echo "Failed to download plugin $PLUG_IN_NAME for version $VERSION"
+            echo "$VERSION" >> /tmp/failed_versions
+            return 1
+        fi
+    done
+    return 0
+}
+
+#
+# Builds and pushes multi-architecture Docker image
+# Args: $1=version, $2=geoserver_url
+#
+build_and_push_multiarch() {
+    local VERSION=$1
+    local GEOSERVER_URL=$2
+    local TAG="${DOCKER_REPO}:$VERSION"
+    
+    echo "Building and pushing multi-arch image for version: $VERSION"
+    echo "GeoServer URL: $GEOSERVER_URL"
+    echo "Docker tag: $TAG"
+    echo "Platforms: $PLATFORMS"
+    
+    if docker buildx build \
+        --platform "$PLATFORMS" \
+        --build-arg GEOSERVER_WEBAPP_SRC="$GEOSERVER_URL" \
+        --build-arg PLUG_IN_PATHS="./resources/geoserver-plugins" \
+        -f "$DOCKERFILE_PATH" \
+        -t "$TAG" \
+        --push \
+        .; then
+        echo "Successfully built and pushed $TAG"
+        return 0
+    else
+        echo "Failed to build and push $TAG"
+        echo "$VERSION" >> /tmp/failed_versions
+        return 1
+    fi
+}
+
+# Process nightly versions
+echo "Processing nightly versions..."
+for NIGHTLY_VERSION in $NIGHTLY_MASTER_VERSION $NIGHTLY_STABLE_VERSION $NIGHTLY_MAINT_VERSION; do
+    SKIP=0
+    for IGNORE_VERSION in $IGNORE_VERSIONS; do
+        if [ "$IGNORE_VERSION" == "$NIGHTLY_VERSION" ]; then
+            SKIP=1
+            break
+        fi
+    done
+    [ "$SKIP" -eq 1 ] && continue
+
+    echo "Processing nightly version: $NIGHTLY_VERSION"
+    
+    # Determine plugin version based on nightly version type
+    PLUG_IN_VERSION=""
+    [[ "$NIGHTLY_MASTER_VERSION" == *"$NIGHTLY_VERSION"* ]] && PLUG_IN_VERSION="$NIGHTLY_MASTER_PLUG_IN_VERSION"
+    [[ "$NIGHTLY_STABLE_VERSION" == *"$NIGHTLY_VERSION"* ]] && PLUG_IN_VERSION="$NIGHTLY_STABLE_PLUG_IN_VERSION"
+    [[ "$NIGHTLY_MAINT_VERSION" == *"$NIGHTLY_VERSION"* ]] && PLUG_IN_VERSION="$NIGHTLY_MAINT_PLUG_IN_VERSION"
+    
+    echo "Using plugin version: $PLUG_IN_VERSION"
+    
+    NIGHTLY_URL="https://build.geoserver.org/geoserver/$NIGHTLY_VERSION/geoserver-$NIGHTLY_VERSION-latest-war.zip"
+    
+    if download_plugins "$PLUG_IN_VERSION" "$NIGHTLY_VERSION" "true"; then
+        build_and_push_multiarch "$NIGHTLY_VERSION" "$NIGHTLY_URL"
+    fi
+    
+    rm -rf ./resources/geoserver-plugins/*
+done
+
+# Process stable and maintenance versions
+echo "Processing stable and maintenance versions..."
+for VERSION in $STABLE_VERSION $MAINT_VERSION; do
+    SKIP=0
+    for IGNORE_VERSION in $IGNORE_VERSIONS; do
+        if [ "$IGNORE_VERSION" == "$VERSION" ]; then
+            SKIP=1
+            break
+        fi
+    done
+    [ "$SKIP" -eq 1 ] && continue
+
+    echo "Processing stable/maintenance version: $VERSION"
+    
+    GEOSERVER_URL="https://sourceforge.net/projects/geoserver/files/GeoServer/$VERSION/geoserver-$VERSION-war.zip/download"
+    
+    if download_plugins "$VERSION" "$VERSION" "false"; then
+        build_and_push_multiarch "$VERSION" "$GEOSERVER_URL"
+    fi
+    
+    rm -rf ./resources/geoserver-plugins/*
+done
+
+# Handle latest tag
+echo "Processing latest tag..."
+if [ "$(grep $NEWEST_VERSION /tmp/failed_versions)" == "" ]; then
+    echo "Creating and pushing latest tag from $NEWEST_VERSION"
+    
+    # For multi-arch, we need to create a manifest that points to the existing multi-arch image
+    if docker buildx imagetools create -t "${DOCKER_REPO}:latest" "${DOCKER_REPO}:$NEWEST_VERSION"; then
+        echo "Successfully created and pushed latest tag"
+    else
+        echo "Failed to create latest tag"
+        echo "latest" >> /tmp/failed_versions
+    fi
+else
+    echo "Skipping latest tag creation due to failed build of $NEWEST_VERSION"
+fi
+
+# Report results
+echo "================================"
+echo "Multi-arch build and push completed"
+echo "Platforms built: $PLATFORMS"
+if [ -s /tmp/failed_versions ]; then
+    echo "Versions with build/push failures:"
+    cat /tmp/failed_versions
+    exit 1
+else
+    echo "All versions built and pushed successfully!"
+fi
+
+# Clean up
+rm -f /tmp/failed_versions
