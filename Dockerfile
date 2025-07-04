@@ -147,10 +147,12 @@ WORKDIR "$CATALINA_BASE"
 
 # install dialects for GeoFence
 RUN rm -vf "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/hibernate-spatial-h2-geodb*jar"
-USER $UNAME
+
 ADD "https://maven.geo-solutions.it/org/hibernatespatial/hibernate-spatial-postgis/1.1.3.2/hibernate-spatial-postgis-1.1.3.2.jar" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/hibernate-spatial-postgis-1.1.3.2.jar"
 ADD "https://repo1.maven.org/maven2/org/postgis/postgis-jdbc/1.3.3/postgis-jdbc-1.3.3.jar" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/postgis-jdbc-1.3.3.jar"
 #ADD "https://repo1.maven.org/maven2/postgresql/postgresql/8.4-702.jdbc3/postgresql-8.4-702.jdbc3.jar" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/postgresql-8.4-702.jdbc3.jar"
+RUN chown -R $UID:$GID ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib/
+USER $UNAME
 
 ENV TERM xterm
 EXPOSE 8080/tcp
