@@ -99,6 +99,68 @@ CORS headers can be configured with env variables (they are also build arguments
 - `CORS_ALLOW_CREDENTIALS` (default `false`) Setting this to true will only have the desired effect if 
 - `CORS_ALLOWED_ORIGINS` defines explicit origins (not *)
 
+### PSI Probe Integration
+
+This Docker image includes optional PSI Probe integration for monitoring database connections and connection pools. PSI Probe is a powerful web application monitoring tool that provides detailed insights into Tomcat's internals, including:
+
+- Database connection pool monitoring
+- Session tracking
+- Thread pool monitoring
+- Memory usage analysis
+- Application performance metrics
+
+#### PSI Probe Configuration
+
+PSI Probe can be enabled at both build time and runtime with the following configuration options:
+
+**Build-time arguments:**
+- `PSI_PROBE_ENABLED` - Enable/disable PSI Probe (default: `false`)
+- `PSI_PROBE_VERSION` - PSI Probe version to download (default: `3.5.1`)
+
+**Runtime environment variables:**
+- `PSI_PROBE_ENABLED` - Enable/disable PSI Probe at runtime (default: `false`)
+- `PSI_PROBE_PASSWORD` - Password for PSI Probe authentication (required for security)
+
+#### Usage Examples
+
+**Enable PSI Probe with Docker Compose:**
+
+```yaml
+services:
+  geoserver:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+                 GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/main/geoserver-main-latest-war.zip"
+         PSI_PROBE_ENABLED: "true"
+         PSI_PROBE_VERSION: "3.5.5"
+    environment:
+      PSI_PROBE_ENABLED: "true"
+      PSI_PROBE_PASSWORD: "your-secure-password"
+    ports:
+      - 8080:8080
+```
+
+**Enable PSI Probe with Docker run:**
+
+```bash
+docker run -e PSI_PROBE_ENABLED=true \
+           -e PSI_PROBE_PASSWORD=mypassword \
+           -p 8080:8080 \
+           geosolutionsit/geoserver
+```
+
+#### Accessing PSI Probe
+
+Once enabled, PSI Probe will be available at:
+- **Local access**: `http://localhost:8080/probe`
+- **Container access**: `http://container-ip:8080/probe`
+
+**Default credentials:**
+- **Username**: `probe`
+- **Password**: The value set in `PSI_PROBE_PASSWORD`
+
 ### Building with WAR files and plugins
 
 Example of how to build a docker image with just geoserver war and then add plugins at runtime.
