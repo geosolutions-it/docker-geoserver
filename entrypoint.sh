@@ -171,18 +171,66 @@ case "$GS_CORE_JAR" in
   ;;
 esac
 
-# Patch tomcat-users for psi-probe.
-if ! grep -q 'rolename="probeuser"' "$CATALINA_HOME/conf/tomcat-users.xml"; then
-  echo "Patching $CATALINA_HOME/conf/tomcat-users.xml for psi-probe"
+# Configure PSI Probe if enabled
+setup_psi_probe() {
+  if [ "${PSI_PROBE_ENABLED}" = "true" ]; then
+    printf "INFO: Setting up PSI Probe...\n"
 
-  sed -i "\:</tomcat-users>:i\\
-  <role rolename=\"probeuser\" />\n\
-  <role rolename=\"poweruser\" />\n\
-  <role rolename=\"poweruserplus\" />\n\
-  <role rolename=\"manager-gui\" />\n\
-\n\
-  <user username=\"admin\" password=\"${PROBE_PASSWORD}\" roles=\"manager-gui\" />\n\
-" "$CATALINA_HOME/conf/tomcat-users.xml";
+    if [ -f "/tmp/probe/probe.war" ]; then
+      cp "/tmp/probe/probe.war" "$CATALINA_HOME/webapps/"
+      printf "INFO: PSI Probe WAR deployed\n"
+    else
+      printf "WARNING: PSI Probe WAR not found, skipping deployment\n"
+      return
+    fi
+
+    # Patch tomcat-users for psi-probe.
+    if ! grep -q 'rolename="probeuser"' "$CATALINA_HOME/conf/tomcat-users.xml"; then
+      echo "Patching $CATALINA_HOME/conf/tomcat-users.xml for psi-probe"
+
+      sed -i "\:</tomcat-users>:i\\
+      <role rolename=\"probeuser\" />\n\
+      <role rolename=\"poweruser\" />\n\
+      <role rolename=\"poweruserplus\" />\n\
+      <role rolename=\"manager-gui\" />\n\
+    \n\
+      <user username=\"admin\" password=\"${PSI_PROBE_PASSWORD}\" roles=\"manager-gui\" />\n\
+    " "$CATALINA_HOME/conf/tomcat-users.xml";
+    fi
+
+    # Force proper WAR extraction (fix Tomcat auto-deployment issues)
+    if [ -f "$CATALINA_HOME/webapps/probe.war" ]; then
+      printf "INFO: Ensuring PSI Probe WAR is properly extracted...\n"
+      cd "$CATALINA_HOME/webapps"
+      rm -rf probe
+      unzip -q probe.war -d probe
+      printf "INFO: PSI Probe WAR manually extracted\n"
+    fi
+
+    # Configure access restrictions
+    printf "INFO: Configuring PSI Probe for Docker-compatible local access...\n"
+    CONTEXT_XML="$CATALINA_HOME/webapps/probe/META-INF/context.xml"
+    mkdir -p "$CATALINA_HOME/webapps/probe/META-INF"
+    cat > "$CONTEXT_XML" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<Context privileged="true">
+  <Valve className="org.apache.catalina.valves.RemoteAddrValve"
+         allow="127\.0\.0\.1|::1|0:0:0:0:0:0:0:1|172\.1[6-9]\..*|172\.2[0-9]\..*|172\.3[0-1]\..*|10\..*|192\.168\..*"/>
+</Context>
+EOF
+
+    printf "INFO: PSI Probe configured for Docker-compatible access\n"
+
+    printf "INFO: PSI Probe setup completed\n"
+  else
+    printf "INFO: PSI Probe disabled, skipping setup\n"
+  fi
+}
+
+if [ -n "${PSI_PROBE_PASSWORD}" ]; then
+    setup_psi_probe
+else
+  printf "WARN: PSI_PROBE_PASSWORD not set, skipping PSI Probe setup.\n\n"
 fi
 
 catalina.sh run &
