@@ -45,7 +45,7 @@ services:
       - ${GEOSERVERHOME}/s3.properties:/var/geoserver/datadir/s3.properties
       - ${GEOSERVERHOME}/data_dir_master/:/var/geoserver/datadir
     healthcheck:
-      test: ["CMD-SHELL", "curl -f 'http://geoserver-ui:8080/geoserver_ui/ows?service=WMS&request=GetCapabilities&version=1.3.0' | grep '<Name>WMS</Name>'"]
+      test: ["CMD-SHELL", "curl -f -I 'http://geoserver-ui:8080/geoserver_ui/monitoring/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image%2Fpng8&TRANSPARENT=true&STYLES&LAYERS=monitoring%3Atiger_roads&EXCEPTIONS=application%2Fvnd.ogc.se_inimage&SRS=EPSG%3A4326&WIDTH=100&HEIGHT=100&BBOX=-74.03942871139526%2C40.71276855422973%2C-73.90246581985474%2C40.84973144577027'"]
       interval: 30s
       timeout: 20s
       retries: 5
@@ -87,7 +87,7 @@ services:
       - ${GEOSERVERHOME}/server.xml:/usr/local/tomcat/conf/server.xml
       - ${GEOSERVERHOME}/s3.properties:/var/geoserver/datadir/s3.properties
     healthcheck:
-      test: ["CMD-SHELL", "curl -f 'http://geoserver:8080/geoserver/ows?service=WMS&request=GetCapabilities&version=1.3.0' | grep '<Name>WMS</Name>'"]
+      test: ["CMD-SHELL", "curl -f -I 'http://geoserver:8080/geoserver/monitoring/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image%2Fpng8&TRANSPARENT=true&STYLES&LAYERS=monitoring%3Atiger_roads&EXCEPTIONS=application%2Fvnd.ogc.se_inimage&SRS=EPSG%3A4326&WIDTH=100&HEIGHT=100&BBOX=-74.03942871139526%2C40.71276855422973%2C-73.90246581985474%2C40.84973144577027'"]
       interval: 30s
       timeout: 20s
       retries: 5
