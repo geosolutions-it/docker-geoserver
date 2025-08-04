@@ -23,6 +23,8 @@ services:
       CORS_ALLOWED_METHODS: "HEAD,POST,GET,OPTIONS,PUT"
       CORS_ALLOWED_HEADERS: "origin,x-requested-with,access-control-request-headers,content-type,access-control-request-method,accept"
       CORS_ALLOW_CREDENTIALS: false
+      S3_GWC_ENDPOINT: "${S3_GWC_ENDPOINT}"
+      S3_GWC_BUCKET: "${S3_GWC_BUCKET}"
       AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
       AWS_SECRET_KEY: "${AWS_SECRET_KEY}"
       POSTGRES_NHP_DATA_SIM_HOST: "${POSTGRES_NHP_DATA_SIM_HOST}"
@@ -66,6 +68,8 @@ services:
       CORS_ALLOWED_METHODS: "HEAD,POST,GET,OPTIONS,PUT"
       CORS_ALLOWED_HEADERS: "origin,x-requested-with,access-control-request-headers,content-type,access-control-request-method,accept"
       CORS_ALLOW_CREDENTIALS: false
+      S3_GWC_ENDPOINT: "${S3_GWC_ENDPOINT}"
+      S3_GWC_BUCKET: "${S3_GWC_BUCKET}"
       AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
       AWS_SECRET_KEY: "${AWS_SECRET_KEY}"
       POSTGRES_NHP_DATA_SIM_HOST: "${POSTGRES_NHP_DATA_SIM_HOST}"
