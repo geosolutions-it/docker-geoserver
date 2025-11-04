@@ -2,6 +2,16 @@
 
 [![dockerhub pulls](https://img.shields.io/docker/pulls/geosolutionsit/geoserver)](https://hub.docker.com/r/geosolutionsit/geoserver/)
 
+>**🔔 Images Retention Policy**
+>
+>Starting **November 2025**, all pre-built GeoServer Docker images published to [Docker Hub](https://hub.docker.com/r/geosolutionsit/geoserver) are governed by the following policy:
+>
+>Only images based on **actively developed or maintained GeoServer versions** (from the [main, stable, and maintenance branches](https://geoserver.org/) are retained in the [active repository](https://hub.docker.com/r/geosolutionsit/geoserver).
+>
+>As new GeoServer versions are released, older images are **moved to a dedicated [archive repository](https://hub.docker.com/r/geosolutionsit/geoserver-archive)**, which serves as a **read-only archive** for legacy use and backward compatibility.
+>
+>We **strongly encourage all users** running older GeoServer images to **upgrade to the latest supported versions** to ensure ongoing security, stability, and compliance.
+
 Run geoserver within docker.
 
 Based on the official tomcat docker image, specifically:
