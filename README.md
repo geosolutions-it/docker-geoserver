@@ -12,7 +12,9 @@
 >
 >We **strongly encourage all users** running older GeoServer images to **upgrade to the latest supported versions** to ensure ongoing security, stability, and compliance.
 
-Run geoserver within docker.
+---
+
+## Run geoserver within docker.
 
 Based on the official tomcat docker image, specifically:
 - Tomcat 9
