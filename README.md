@@ -12,7 +12,6 @@
 >
 >We **strongly encourage all users** running older GeoServer images to **upgrade to the latest supported versions** to ensure ongoing security, stability, and compliance.
 
----
 
 ## Run geoserver within docker.
 
