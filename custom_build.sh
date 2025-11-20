@@ -121,6 +121,22 @@ function download_geoserver() {
     unzip -p /tmp/geoserver.war.zip geoserver.war > ${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war
 }
 
+function apply_webapp_patch() {
+    local URL=${1}
+
+    local TMP_DIR=$(mktemp -d)
+    curl -L "${URL}" --output "$TMP_DIR"/patch.zip
+    unzip "$TMP_DIR"/patch.zip -d "$TMP_DIR"
+    rm -f "$TMP_DIR"/patch.zip
+
+    # GEOSERVER_ARTIFACT_DIRECTORY is a relative path. readlink makes it absolute.
+    local WAR=$(readlink -f "${GEOSERVER_ARTIFACT_DIRECTORY}"/geoserver.war)
+    pushd "$TMP_DIR"
+    zip -r "$WAR" .
+    popd
+
+    rm -rf "$TMP_DIR"
+}
 
 function build_with_data_dir() {
 
@@ -166,6 +182,17 @@ function main {
     download_plugin ext control-flow
 
     download_from_url_to_a_filepath 'https://www.dropbox.com/scl/fi/tz9v5ux714twu4edf0uai/2.25.3.zip?rlkey=sgi7fm4924jg54lxrvmfimjda&st=ip901r7u&dl=0' "${PLUGIN_ARTIFACT_DIRECTORY}/ZZZ_patch1.zip"
+
+    patches="\
+    https://www.dropbox.com/scl/fi/tq5gnnflhoinvlxbuy4zd/2025-58360.zip?rlkey=ycp479s45526f6j8vbj4ke0tr&st=nrq6c3q7&dl=0
+    "
+    while read -r patch; do
+        if [ -z "$patch" ]; then continue; fi
+        printf "Applying patch %s\n" "$patch"
+        apply_webapp_patch "$patch"
+    done <<EOF
+$patches
+EOF
 
 	if  [[ ${GEOSERVER_DATA_DIR_RELEASE} = "nodatadir" ]]; then
    	    build_without_data_dir "${TAG}" "${PULL}"
