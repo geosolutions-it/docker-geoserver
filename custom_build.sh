@@ -169,7 +169,7 @@ function build_with_data_dir() {
     --build-arg GEOSERVER_DATA_DIR_SRC=${DATADIR_ARTIFACT_DIRECTORY} \
     --build-arg UID=${USERID} --build-arg GID=${GROUPID} --build-arg UNAME=${UNAME} \
     --build-arg GIT_HASH=${GIT_HASH_COMMAND} \
-		-t geosolutionsit/geoserver:"${TAG}-${GEOSERVER_VERSION}" \
+		-t geosolutionsit/geoserver:"${GEOSERVER_VERSION}-${TAG}" \
 		 .
 }
 
@@ -209,7 +209,7 @@ function build_without_data_dir() {
     --build-arg PLUG_IN_PATHS=$PLUGIN_ARTIFACT_DIRECTORY \
     --build-arg UID=${USERID} --build-arg GID=${GROUPID} --build-arg UNAME=${UNAME} \
     --build-arg GIT_HASH=${GIT_HASH_COMMAND} \
-		-t geosolutionsit/geoserver:"${TAG}-${GEOSERVER_VERSION}" \
+		-t geosolutionsit/geoserver:"${GEOSERVER_VERSION}-${TAG}" \
 		 .
 }
 
