@@ -1,4 +1,4 @@
-FROM tomcat:9-jdk17-temurin as mother
+FROM tomcat:9-jdk17-temurin-jammy as mother
 LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
 
 RUN apt-get update && apt-get install -y unzip wget vim
@@ -43,7 +43,7 @@ RUN \
     fi
 
 
-FROM tomcat:9-jdk17-temurin
+FROM tomcat:9-jdk17-temurin-jammy
 
 ARG UID=1000
 ARG GID=1000
