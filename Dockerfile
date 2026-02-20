@@ -1,4 +1,4 @@
-FROM tomcat:9-jdk17-openjdk as mother
+FROM tomcat:9-jdk17-temurin-jammy as mother
 LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
 
 RUN apt-get update && apt-get install -y unzip wget vim
@@ -43,7 +43,7 @@ RUN \
     fi
 
 
-FROM tomcat:9-jdk17-openjdk
+FROM tomcat:9-jdk17-temurin-jammy
 
 ARG UID=1000
 ARG GID=1000
@@ -122,8 +122,14 @@ COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserve
 COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"
 COPY geoserver-rest-config.sh /usr/local/bin/geoserver-rest-config.sh
 COPY entrypoint.sh /entrypoint.sh
-RUN groupadd -g $GID $UNAME
-RUN useradd -m -u $UID -g $GID --system $UNAME
+RUN groupadd -f -g $GID $UNAME || true \
+    && if ! id -u $UID >/dev/null 2>&1; then \
+        useradd -m -u $UID -g $GID --system -s /bin/bash $UNAME; \
+    else \
+        existing_user=$(id -nu $UID); \
+        echo "UID $UID already exists as user '$existing_user', renaming to '$UNAME'"; \
+        usermod -l $UNAME -g $GID -s /bin/bash "$existing_user" || true; \
+    fi
 RUN chown -R $UID:$GID $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR $GEOWEBCACHE_CONFIG_DIR $NETCDF_DATA_DIR $GRIB_CACHE_DIR $GEOSERVER_DATA_DIR
 
 RUN if [ ! -f "${GEOSERVER_DATA_DIR}/logging.xml" ]; then cp -a ${CATALINA_BASE}/webapps/geoserver/data/* ${GEOSERVER_DATA_DIR};fi

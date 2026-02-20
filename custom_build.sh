@@ -8,8 +8,8 @@ readonly GEOSERVER_DATA_DIR_RELEASE=${4}
 readonly PULL=${5}
 readonly ALL_PARAMETERS=$*
 readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver"
-readonly BASE_BUILD_URL_STABLE="https://netcologne.dl.sourceforge.net/project/geoserver/GeoServer"
-#readonly BASE_BUILD_URL_STABLE="https://build.geoserver.org/geoserver"
+# readonly BASE_BUILD_URL_STABLE="https://netcologne.dl.sourceforge.net/project/geoserver/GeoServer"
+readonly BASE_BUILD_URL_STABLE="https://build.geoserver.org/geoserver"
 readonly EXTRA_FONTS_URL="https://www.dropbox.com/s/hs5743lwf1rktws/fonts.tar.gz?dl=1"
 readonly MARLIN_VERSION=0.9.2
 readonly ARTIFACT_DIRECTORY=./resources
@@ -73,15 +73,18 @@ function download_plugin()  {
 		;;
 
 		*)
-		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION}-${PLUGIN_NAME}-plugin.zip
-		if [ "${TYPE}" == "ext" ]; then
-			NEWTYPE=extensions
-			PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL_STABLE}/${GEOSERVER_VERSION}/${NEWTYPE}/${PLUGIN_FULL_NAME}
-		else
-			VERSION="${GEOSERVER_VERSION}-SNAPSHOT"
-			PLUGIN_FULL_NAME=geoserver-${VERSION}-${PLUGIN_NAME}-plugin.zip
-			PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION%.*}.x/${TYPE}-latest/${PLUGIN_FULL_NAME}
-		fi
+		# PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION}-${PLUGIN_NAME}-plugin.zip
+		# if [ "${TYPE}" == "ext" ]; then
+		# 	NEWTYPE=extensions
+		# 	PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL_STABLE}/${GEOSERVER_VERSION}/${NEWTYPE}/${PLUGIN_FULL_NAME}
+		# else
+		# 	VERSION="${GEOSERVER_VERSION}-SNAPSHOT"
+		# 	PLUGIN_FULL_NAME=geoserver-${VERSION}-${PLUGIN_NAME}-plugin.zip
+		# 	PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION%.*}.x/${TYPE}-latest/${PLUGIN_FULL_NAME}
+		# fi
+    VERSION="${GEOSERVER_VERSION}-SNAPSHOT"
+    PLUGIN_FULL_NAME=geoserver-${VERSION}-${PLUGIN_NAME}-plugin.zip
+    PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION%.*}.x/${TYPE}-latest/${PLUGIN_FULL_NAME}
 		;;
 
 	esac
