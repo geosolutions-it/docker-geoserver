@@ -176,7 +176,7 @@ function build_with_data_dir() {
     --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY \
     --build-arg GEOSERVER_DATA_DIR_SRC=${DATADIR_ARTIFACT_DIRECTORY} \
     --build-arg UID=${USERID} --build-arg GID=${GROUPID} --build-arg UNAME=${UNAME} \
-		-t geosolutionsit/geoserver:"${TAG}-${GEOSERVER_VERSION}" \
+		-t geosolutionsit/geoserver-demos:"${TAG}-${GEOSERVER_VERSION}" \
 		 .
 }
 
