@@ -213,7 +213,7 @@ function build_without_data_dir() {
 	${DOCKER_BUILD_COMMAND} --build-arg GEOSERVER_WEBAPP_SRC=${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war \
     --build-arg PLUG_IN_URLS=$PLUGIN_ARTIFACT_DIRECTORY \
     --build-arg UID=${USERID} --build-arg GID=${GROUPID} --build-arg UNAME=${UNAME} \
-		-t geosolutionsit/geoserver:"${TAG}-${GEOSERVER_VERSION}" \
+		-t geosolutionsit/geoserver-demos:"${TAG}-${GEOSERVER_VERSION}" \
 		 .
 }
 
