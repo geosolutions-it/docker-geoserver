@@ -186,7 +186,7 @@ function build_without_data_dir() {
 	local PULL_ENABLED=${2}
   DOCKER_VERSION="$(docker --version | grep "Docker version"| awk '{print $3}' | sed 's/,//')"
   case $DOCKER_VERSION in
-    2[0-9].*)
+    *"20"*)
       docker builder prune --all -f
       if [[ "${PULL_ENABLED}" == "pull" ]]; then
         DOCKER_BUILD_COMMAND="docker buildx build --pull"
