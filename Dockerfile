@@ -49,10 +49,10 @@ ADD .placeholder ${PLUG_IN_PATHS} /output/plugins/
 COPY geoserver-plugin-download.sh /usr/local/bin/geoserver-plugin-download.sh
 RUN /usr/local/bin/geoserver-plugin-download.sh /output/plugins/ ${PLUG_IN_URLS}
 RUN \
-    if ls *.zip >/dev/null 2>&1; then \
-       unzip -o "./*.zip"; \
-       rm ./*zip; \
-    fi
+    # We want ZIPs  to be extracted in alphabetical order, so we don't use `unzip -o "./*.zip"`. \
+    # Useful when applying patches.
+    find . -type f -name '*.zip' | sort | xargs -I {} unzip -o {}; \
+    rm -f ./*.zip
 
 WORKDIR /output/webapp
 RUN \
