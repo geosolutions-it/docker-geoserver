@@ -21,7 +21,7 @@ ENV PSI_PROBE_ENABLED=$PSI_PROBE_ENABLED
 
 ARG APP_LOCATION="geoserver"
 
-RUN apt-get update && apt-get install -y unzip curl
+RUN apt-get update && apt-get install -y unzip curl zip
 
 # accepts local files and URLs. Tar(s) are automatically extracted
 WORKDIR /output/datadir
@@ -68,6 +68,7 @@ RUN \
 # Download and prepare PSI Probe if enabled
 WORKDIR /output/probe
 RUN \
+    set -eu; \
     echo "PSI_PROBE_ENABLED=${PSI_PROBE_ENABLED}"; \
     if [ "${PSI_PROBE_ENABLED}" = "true" ]; then \
         echo "Downloading PSI Probe ${PSI_PROBE_VERSION}..."; \
@@ -88,6 +89,12 @@ RUN \
                 exit 1; \
             fi; \
         fi; \
+
+        # HACK: copy the Oracle driver from the GeoServer JARs
+        mkdir -p WEB-INF/lib; \
+        cp -f /output/plugins/ojdbc7.jar WEB-INF/lib/ojdbc7.jar; \
+        zip probe.war WEB-INF/lib/ojdbc7.jar; \
+        rm -rf WEB-INF; \
     else \
         echo "PSI Probe disabled, skipping download"; \
         touch .placeholder; \
