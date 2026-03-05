@@ -216,7 +216,7 @@ setup_psi_probe() {
 <?xml version="1.0" encoding="UTF-8"?>
 <Context privileged="true">
   <Valve className="org.apache.catalina.valves.RemoteAddrValve"
-         allow="127\.0\.0\.1|::1|0:0:0:0:0:0:0:1|172\.1[6-9]\..*|172\.2[0-9]\..*|172\.3[0-1]\..*|10\..*|192\.168\..*"/>
+         allow="${PSI_PROBE_ALLOW_LIST}"/>
 </Context>
 EOF
 

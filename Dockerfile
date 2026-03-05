@@ -150,6 +150,8 @@ ENV CATALINA_OPTS="-Xms${INITIAL_MEMORY} -Xmx${MAXIMUM_MEMORY} \
 
 ENV ENTITY_RESOLUTION_ALLOWLIST="www.w3.org|schemas.opengis.net|www.opengis.net|inspire.ec.europa.eu/schemas"
 
+ENV PSI_PROBE_ALLOW_LIST="127\.0\.0\.1|::1|0:0:0:0:0:0:0:1|172\.1[6-9]\..*|172\.2[0-9]\..*|172\.3[0-1]\..*|10\..*|192\.168\..*"
+
 # added for git hash
 ARG GIT_HASH=""
 ENV GIT_HASH "$GIT_HASH"
