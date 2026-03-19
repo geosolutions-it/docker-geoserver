@@ -1,4 +1,4 @@
-FROM tomcat:9-jdk11-temurin-jammy as mother
+FROM tomcat:9-jdk17-temurin-jammy as mother
 LABEL maintainer="Alessandro Parma <alessandro.parma@geosolutionsgroup.com>"
 SHELL ["/bin/bash", "-c"]
 
@@ -100,7 +100,7 @@ RUN \
         touch .placeholder; \
     fi
 
-FROM tomcat:9-jdk11-temurin-jammy
+FROM tomcat:9-jdk17-temurin-jammy
 
 ARG UID=1000
 ARG GID=1000
