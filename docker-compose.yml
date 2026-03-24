@@ -29,7 +29,7 @@ services:
       args:
         GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/main/geoserver-main-latest-war.zip"
         PSI_PROBE_ENABLED: "true"
-        PSI_PROBE_VERSION: "3.5.1"
+        PSI_PROBE_VERSION: "5.3.0"
     container_name: geoserver
     depends_on:
       postgres:
@@ -37,8 +37,8 @@ services:
     ports:
       - 8080
     environment:
-      PSI_PROBE_ENABLED: "true"
-      PSI_PROBE_PASSWORD: "geoserver"
+      PSI_PROBE_ENABLED: "false"
+      PSI_PROBE_PASSWORD: ""
     networks:
       - geoserver-network
 

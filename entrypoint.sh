@@ -186,32 +186,30 @@ setup_psi_probe() {
     
     if [ -n "${PSI_PROBE_PASSWORD}" ]; then
       printf "INFO: Configuring PSI Probe security...\n"
-      
+
       TOMCAT_USERS_XML="$CATALINA_HOME/conf/tomcat-users.xml"
       
       if [ ! -f "${TOMCAT_USERS_XML}.backup" ]; then
         cp "$TOMCAT_USERS_XML" "${TOMCAT_USERS_XML}.backup"
       fi
-      
-      cat > "$TOMCAT_USERS_XML" << EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<tomcat-users xmlns="http://tomcat.apache.org/xml"
-              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-              xsi:schemaLocation="http://tomcat.apache.org/xml tomcat-users.xsd"
-              version="1.0">
-  <role rolename="manager-gui"/>
-  <role rolename="manager-script"/>
-  <role rolename="manager-status"/>
-  <role rolename="poweruser"/>
-  <role rolename="poweruserplus"/>
-  <role rolename="probeuser"/>
-  <user username="probe" password="${PSI_PROBE_PASSWORD}" roles="manager-gui,manager-script,manager-status,poweruser,poweruserplus,probeuser"/>
-</tomcat-users>
-EOF
-      
+
+      if ! grep -q 'rolename="probeuser"' "$TOMCAT_USERS_XML"; then
+        printf "INFO: Patching tomcat-users.xml for PSI Probe\n"
+        sed -i "\:</tomcat-users>:i\\
+            <role rolename=\"probeuser\" />\n\
+            <role rolename=\"poweruser\" />\n\
+            <role rolename=\"poweruserplus\" />\n\
+            <role rolename=\"manager-gui\" />\n\
+          \n\
+            <user username=\"probe\" password=\"${PSI_PROBE_PASSWORD}\" roles=\"manager-gui\" />\n\
+          " "$TOMCAT_USERS_XML"
+      else
+        printf "INFO: tomcat-users.xml already has probeuser role, skipping\n"
+      fi
+
       printf "INFO: PSI Probe user configured with provided password\n"
     else
-      printf "WARNING: PSI_PROBE_PASSWORD not set, PSI Probe will be accessible without authentication\n"
+      printf "INFO: PSI_PROBE_PASSWORD not set, configuring PSI Probe for anonymous access\n"
     fi
     
     # Force proper WAR extraction (fix Tomcat auto-deployment issues)
@@ -230,13 +228,43 @@ EOF
     cat > "$CONTEXT_XML" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <Context privileged="true">
-  <Valve className="org.apache.catalina.valves.RemoteAddrValve"
-         allow="127\.0\.0\.1|::1|0:0:0:0:0:0:0:1|172\.1[6-9]\..*|172\.2[0-9]\..*|172\.3[0-1]\..*|10\..*|192\.168\..*"/>
 </Context>
 EOF
-    
-    printf "INFO: PSI Probe configured for Docker-compatible access\n"
-    
+
+    PROBE_WEB_XML="$CATALINA_HOME/webapps/probe/WEB-INF/web.xml"
+
+    # When no password is set, replace ProbeSecurityConfig with no-auth version
+    # and strip web.xml security constraints to allow anonymous access
+    if [ -z "${PSI_PROBE_PASSWORD}" ] && [ -f "$PROBE_WEB_XML" ]; then
+      if [ -f "/tmp/probe-src/ProbeSecurityConfig.java" ]; then
+        printf "INFO: Compiling no-auth ProbeSecurityConfig...\n"
+        mkdir -p "$CATALINA_HOME/webapps/probe/WEB-INF/classes"
+        javac -cp "$CATALINA_HOME/webapps/probe/WEB-INF/lib/*:$CATALINA_HOME/lib/*" \
+          -d "$CATALINA_HOME/webapps/probe/WEB-INF/classes" \
+          /tmp/probe-src/ProbeSecurityConfig.java
+        printf "INFO: Replaced ProbeSecurityConfig with no-auth version\n"
+      else
+        printf "WARNING: No-auth ProbeSecurityConfig.java not found at /tmp/probe-src/, probe may require auth\n"
+      fi
+
+      # Strip security-constraint and login-config from web.xml
+      TEMP_PROBE_WEB_XML=$(mktemp)
+      awk '
+        /<security-constraint>/ { in_security_constraint=1; next }
+        /<\/security-constraint>/ { in_security_constraint=0; next }
+        /<login-config>/ { in_login_config=1; next }
+        /<\/login-config>/ { in_login_config=0; next }
+        !in_security_constraint && !in_login_config { print }
+      ' "$PROBE_WEB_XML" > "$TEMP_PROBE_WEB_XML" && mv "$TEMP_PROBE_WEB_XML" "$PROBE_WEB_XML"
+      printf "INFO: PSI Probe security constraints removed for anonymous access\n"
+    fi
+
+    # Disable HTTPS redirect - allow plain HTTP access
+    if [ -f "$PROBE_WEB_XML" ] && grep -q "CONFIDENTIAL" "$PROBE_WEB_XML" 2>/dev/null; then
+      sed -i 's|<transport-guarantee>CONFIDENTIAL</transport-guarantee>|<transport-guarantee>NONE</transport-guarantee>|g' "$PROBE_WEB_XML"
+      printf "INFO: PSI Probe HTTPS redirect disabled\n"
+    fi
+
     printf "INFO: PSI Probe setup completed\n"
   else
     printf "INFO: PSI Probe disabled, skipping setup\n"

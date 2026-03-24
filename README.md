@@ -115,7 +115,7 @@ PSI Probe can be enabled at both build time and runtime with the following confi
 
 **Build-time arguments:**
 - `PSI_PROBE_ENABLED` - Enable/disable PSI Probe (default: `false`)
-- `PSI_PROBE_VERSION` - PSI Probe version to download (default: `3.5.1`)
+- `PSI_PROBE_VERSION` - PSI Probe version to download
 
 **Runtime environment variables:**
 - `PSI_PROBE_ENABLED` - Enable/disable PSI Probe at runtime (default: `false`)
@@ -134,7 +134,7 @@ services:
       args:
                  GEOSERVER_WEBAPP_SRC: "https://build.geoserver.org/geoserver/main/geoserver-main-latest-war.zip"
          PSI_PROBE_ENABLED: "true"
-         PSI_PROBE_VERSION: "3.5.5"
+         PSI_PROBE_VERSION: "5.3.0"
     environment:
       PSI_PROBE_ENABLED: "true"
       PSI_PROBE_PASSWORD: "your-secure-password"

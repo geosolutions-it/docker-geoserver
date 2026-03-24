@@ -1,4 +1,4 @@
-FROM tomcat:9-jdk11-temurin-jammy as mother
+FROM tomcat:10-jdk17-temurin-jammy as mother
 LABEL maintainer="Alessandro Parma <alessandro.parma@geosolutionsgroup.com>"
 SHELL ["/bin/bash", "-c"]
 
@@ -10,7 +10,7 @@ ARG CORS_ALLOW_CREDENTIALS=false
 
 # PSI Probe configuration
 ARG PSI_PROBE_ENABLED=false
-ARG PSI_PROBE_VERSION=3.5.1
+ARG PSI_PROBE_VERSION=5.3.0
 
 ENV CORS_ENABLED=$CORS_ENABLED
 ENV CORS_ALLOWED_ORIGINS=$CORS_ALLOWED_ORIGINS
@@ -93,7 +93,7 @@ RUN \
         touch .placeholder; \
     fi
 
-FROM tomcat:9-jdk11-temurin-jammy
+FROM tomcat:10-jdk17-temurin-jammy
 
 ARG UID=1000
 ARG GID=1000
@@ -179,6 +179,7 @@ COPY geoserver-plugin-download.sh /usr/local/bin/geoserver-plugin-download.sh
 COPY geoserver-rest-config.sh /usr/local/bin/geoserver-rest-config.sh
 COPY geoserver-rest-reload.sh /usr/local/bin/geoserver-rest-reload.sh
 COPY entrypoint.sh /entrypoint.sh
+COPY probe-src /tmp/probe-src
 COPY ${CUSTOM_FONTS} $GEOSERVER_DATA_DIR/styles/
 RUN groupadd -g $GID $UNAME
 RUN useradd -m -u $UID -g $GID --system $UNAME
