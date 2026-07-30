@@ -16,9 +16,9 @@
 ## Run geoserver within docker.
 
 Based on the official tomcat docker image, specifically:
-- Tomcat 9
-- JDK 11 (eclipse temurin)
-- Ubuntu Jammy (22.04 LTS)
+- Tomcat 10
+- JDK 17 (Eclipse Temurin)
+- Ubuntu Noble (24.04 LTS)
 
 ![Current build diagram](/docker_hub_deployment.png)
 
@@ -33,10 +33,11 @@ Based on the official tomcat docker image, specifically:
 - Helper [script to test plugins](#test-plugins-on-running-container) during runtime.
 - [CORS](#cors-variables) support.
 - Specify [custom fonts](#custom-fonts) during build time.
+- GeoServer 3.x release builds, for example `3.0.0`.
 
 ## Important note
 
-Most of the paths if mounted from the host to locations on the container such as `$GEOSERVER_LOG_DIR` `$CATALINA_BASE` `$GEOWEBCACHE_CACHE_DIR` `$GEOWEBCACHE_CONFIG_DIR` `$NETCDF_DATA_DIR` `$GRIB_CACHE_DIR` `$GEOSERVER_DATA_DIR` should be owned by the UID of user that geoserver is running on, which at the moment is UID 1000. The paths should be recursively chown-ed with this UID. More info [here](#adjusting-permissions-for-the-bind-mounts)
+Most of the paths if mounted from the host to locations on the container such as `$GEOSERVER_LOG_DIR` `$CATALINA_BASE` `$GEOWEBCACHE_CACHE_DIR` `$GEOWEBCACHE_CONFIG_DIR` `$NETCDF_DATA_DIR` `$GRIB_CACHE_DIR` `$GEOSERVER_DATA_DIR` should be owned by the UID of the user that GeoServer runs as. By default this image uses UID `20000` and GID `20000`. The paths should be recursively chown-ed with this UID/GID. More info [here](#adjusting-permissions-for-the-bind-mounts)
 
 ## How to run it
 
@@ -115,14 +116,14 @@ CORS headers can be configured with env variables (they are also build arguments
 Example of how to build a docker image with just geoserver war and then add plugins at runtime.
 
 ```bash
-docker build -t geoserver:test-2.19.1 \
+docker build -t geoserver:test-3.0.0 \
 --build-arg GIT_HASH=`git show -s --format=%H` \
---build-arg GEOSERVER_WEBAPP_SRC=https://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/geoserver-2.19.1-war.zip/download  .
+--build-arg GEOSERVER_WEBAPP_SRC=https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.0/geoserver-3.0.0-war.zip/download  .
 
 docker run \
---env PLUGIN_DYNAMIC_URLS="http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-control-flow-plugin.zip \
-http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-libjpeg-turbo-plugin.zip" \
---rm --name gs -p 8080:8080 geoserver:test-2.19.1
+--env PLUGIN_DYNAMIC_URLS="http://sourceforge.net/projects/geoserver/files/GeoServer/3.0.0/extensions/geoserver-3.0.0-control-flow-plugin.zip \
+http://sourceforge.net/projects/geoserver/files/GeoServer/3.0.0/extensions/geoserver-3.0.0-monitor-plugin.zip" \
+--rm --name gs -p 8080:8080 geoserver:test-3.0.0
 ```
 
 ### Using GeoServer with docker compose
@@ -285,7 +286,7 @@ For more details, check the ADD documentation: [Docker - ADD](https://docs.docke
 ```yml
 ...
 geoserver:
-  image: geosolutionsit/geoserver:2.23.0 ## Initially, include an image to avoid Docker complaints.
+  image: geosolutionsit/geoserver:3.0.0 ## Initially, include an image to avoid Docker complaints.
   volumes:
     - /path/custom-war:/usr/local/tomcat/webapps/geoserver ## Define a volume pointing to your custom .war, ensuring it's unzipped.
   environment:
@@ -308,9 +309,9 @@ geoserver:
 
 -Adjust Permissions: On the host system, use chown to set the owner of the directory containing Geoserver files to match the user ID. Then, use chmod to set appropriate permissions.
 
--Assuming user ID is 1000 and directory is /path/custom-war
+-Assuming user ID is 20000 and directory is /path/custom-war
 ```
-sudo chown -R 1000:1000 /path/custom-war
+sudo chown -R 20000:20000 /path/custom-war
 sudo chmod -R 755 /path/custom-war
 ```
 
@@ -454,8 +455,8 @@ docker build -t geoserver:test . --build-arg GEOSERVER_WEBAPP_SRC="./resources/g
 
 docker build -t geoserver:test . --build-arg GEOSERVER_WEBAPP_SRC="./resources/geoserver/geoserver.war" --build-arg GEOSERVER_DATA_DIR_SRC="./resources/geoserver-datadir/"
 
-# Example on how to download and build a geoserver version with stable plugins controlflow and libjpegturbo plugins burned in the image
-docker build -t geoserver:luca-test-2.19.1 --build-arg GEOSERVER_WEBAPP_SRC="https://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/geoserver-2.19.1-war.zip/download" --build-arg PLUG_IN_URLS="http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-control-flow-plugin.zip http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-libjpeg-turbo-plugin.zip" .
+# Example on how to download and build a GeoServer version with stable plugins burned in the image
+docker build -t geoserver:test-3.0.0 --build-arg GEOSERVER_WEBAPP_SRC="https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.0/geoserver-3.0.0-war.zip/download" --build-arg PLUG_IN_URLS="http://sourceforge.net/projects/geoserver/files/GeoServer/3.0.0/extensions/geoserver-3.0.0-control-flow-plugin.zip http://sourceforge.net/projects/geoserver/files/GeoServer/3.0.0/extensions/geoserver-3.0.0-monitor-plugin.zip" .
 
 ```
 
@@ -478,15 +479,16 @@ docker exec -it <your-container-name> bash -c 'geoserver-plugin-download.sh $CAT
 
 Scripts provided that are for docker hub are under `hooks` directory.
 
-Basically the `hooks/build` script takes these environment variables with current version numbers offered for geoserver:
+Basically the `hooks/build` script takes these environment variables with current version numbers offered for geoserver.
+For released GeoServer 3.x builds, prefer [`custom_build.sh`](#how-to-use-custom_buildsh-script), which downloads release WAR and extension artifacts from SourceForge. The hook script still contains legacy 2.x nightly plugin-version calculation logic.
 
 ```bash
-export MAINT_VERSION="2.17.3 2.17.2 2.17.1"
-export MIDDLE_STABLE="18"
-export NIGHTLY_MAINT_VERSION="2.17.x"
-export NIGHTLY_MASTER_VERSION="master foobar"
-export NIGHTLY_STABLE_VERSION="2.18.x"
-export STABLE_VERSION="2.18.1 2.18.0"
+export MAINT_VERSION="2.27.2 2.27.1"
+export MIDDLE_STABLE="27"
+export NIGHTLY_MAINT_VERSION="2.27.x"
+export NIGHTLY_MASTER_VERSION="main foobar"
+export NIGHTLY_STABLE_VERSION="2.28.x"
+export STABLE_VERSION="3.0.0"
 ```
 
 Notes:
@@ -503,14 +505,14 @@ the script can be run with no parameters to show the needed parameters:
 
 ```bash
 ./custom_build.sh
-Usage: ./custom_build.sh [docker image tag] [geoserver version] [geoserver master version] [datadir| nodatadir] [pull|no pull];
+Usage: ./custom_build.sh [docker image tag] [geoserver version] [geoserver main version] [datadir|nodatadir] [pull|no_pull];
 
-[docker image tag] :          the tag to be used for the docker iamge
-[geoserver version] :         the release version of geoserver to be used; you can set it to master if you want the last release
-[geoserver master version] :  if you use the master version for geoserver you need to set it to the numerical value for the next release;
+[docker image tag] :          the tag to be used for the docker image
+[geoserver version] :         the release version of geoserver to be used; you can set it to main if you want the last release
+[geoserver main version] :    if you use main for geoserver you need to set it to the numerical value for the next release;
                               if you use a released version you need to put it to the release number
-[datadir| nodatadir]:         if this parameter is equal to nodatadir the datadir is not burned in the docker images
-[pull|no pull]:               docker build use always a remote image or a local image
+[datadir|nodatadir]:          datadir copies the datadir into the image, nodatadir skips any custom datadir
+[pull|no_pull]:               docker build uses a remote base image or a local base image
 ```
 
 This script is meant to be used by automated build, variety of tests with highly customized versions of geoserver.
@@ -518,7 +520,7 @@ This script is meant to be used by automated build, variety of tests with highly
 ### Example
 
 ```bash
-./custom_build.sh my-docker-tag 2.18.x 2.18.x nodatadir no_pull
+./custom_build.sh my-docker-tag 3.0.0 3.0.0 nodatadir no_pull
 ```
 
 ### GIT HASH INFORMATION
