@@ -51,7 +51,8 @@ RUN /usr/local/bin/geoserver-plugin-download.sh /output/plugins/ ${PLUG_IN_URLS}
 RUN \
     # We want ZIPs  to be extracted in alphabetical order, so we don't use `unzip -o "./*.zip"`. \
     # Useful when applying patches.
-    find . -type f -name '*.zip' | sort | xargs -I {} unzip -o {}; \
+    set -euo pipefail; \
+    find . -type f -name '*.zip' -print0 | sort -z | xargs -0 -r -n 1 unzip -o; \
     rm -f ./*.zip
 
 WORKDIR /output/webapp
