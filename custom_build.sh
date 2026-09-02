@@ -9,8 +9,7 @@ readonly GEOSERVER_DATA_DIR_RELEASE=${4}
 readonly PULL=${5}
 readonly ALL_PARAMETERS=$*
 readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver"
-readonly BASE_BUILD_URL_STABLE="https://netcologne.dl.sourceforge.net/project/geoserver/GeoServer"
-#readonly BASE_BUILD_URL_STABLE="https://build.geoserver.org/geoserver"
+readonly BASE_BUILD_URL_STABLE="https://sourceforge.net/projects/geoserver/files/GeoServer"
 readonly EXTRA_FONTS_URL="https://www.dropbox.com/s/hs5743lwf1rktws/fonts.tar.gz?dl=1"
 readonly MARLIN_VERSION=0.9.2
 readonly ARTIFACT_DIRECTORY=./resources
@@ -19,9 +18,9 @@ readonly DATADIR_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-datadir/
 readonly PLUGIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-plugins
 readonly FONTS_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/fonts/
 readonly MARLIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/marlin/
-readonly USERID=1000
-readonly GROUPID=1000
-readonly UNAME=tomcat
+readonly USERID=20000
+readonly GROUPID=20000
+readonly UNAME=geoserver
 
 function help() {
 	if [ "$#" -ne 5 ] ; then
@@ -39,7 +38,7 @@ function help() {
 
 function clean_up_directory() {
   # we shall never clean datadir
-	echo "rm -rf ./resources/geoserver-plugins/* ./resources/geoserver/*"
+	echo "rm -rf ${PLUGIN_ARTIFACT_DIRECTORY}/* ${GEOSERVER_ARTIFACT_DIRECTORY}/*"
 }
 function create_plugins_folder() {
   mkdir -p ./resources/geoserver-plugins
@@ -50,7 +49,26 @@ function download_from_url_to_a_filepath {
 	FILE_PATH=${2}
 	FILE_DOWNLOADED=$(basename "${FILE_PATH}" )
 	if [ ! -f "${FILE_PATH}" ]; then
-		curl -L "${URL}" --output "${FILE_PATH}"
+		mkdir -p "$(dirname "${FILE_PATH}")"
+		rm -f "${FILE_PATH}.tmp"
+		if ! curl -fL --retry 3 --retry-all-errors --retry-delay 2 "${URL}" --output "${FILE_PATH}.tmp"; then
+			rm -f "${FILE_PATH}.tmp"
+			echo "* ${FILE_DOWNLOADED} artefact download failed from ${URL} *"
+			return 1
+		fi
+		if [ ! -s "${FILE_PATH}.tmp" ]; then
+			rm -f "${FILE_PATH}.tmp"
+			echo "* ${FILE_DOWNLOADED} artefact download produced no file from ${URL} *"
+			return 1
+		fi
+		if [[ "${FILE_PATH}" == *.zip ]]; then
+			if ! unzip -tq "${FILE_PATH}.tmp" >/dev/null; then
+				rm -f "${FILE_PATH}.tmp"
+				echo "* ${FILE_DOWNLOADED} artefact is not a valid zip from ${URL} *"
+				return 1
+			fi
+		fi
+		mv "${FILE_PATH}.tmp" "${FILE_PATH}"
 		echo "* ${FILE_DOWNLOADED} artefact downloaded *"
 	else
 		echo "* ${FILE_DOWNLOADED} artefact already downloaded *"
@@ -75,7 +93,7 @@ function download_plugin()  {
 		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION}-${PLUGIN_NAME}-plugin.zip
 		if [ "${TYPE}" == "ext" ]; then
 			NEWTYPE=extensions
-			PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL_STABLE}/${GEOSERVER_VERSION}/${NEWTYPE}/${PLUGIN_FULL_NAME}
+			PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL_STABLE}/${GEOSERVER_VERSION}/${NEWTYPE}/${PLUGIN_FULL_NAME}/download
 		else
 			VERSION="${GEOSERVER_VERSION%.*}-SNAPSHOT"
 			PLUGIN_FULL_NAME=geoserver-${VERSION}-${PLUGIN_NAME}-plugin.zip
@@ -120,7 +138,7 @@ function download_geoserver() {
 		if [[ ( "${VERSION}" =~ "x" ) || ( "${VERSION}" == "main" ) ]]; then
 			local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL}/${VERSION}/${GEOSERVER_FILE_NAME_NIGHTLY}
 		else
-			local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL_STABLE}/${VERSION}/${GEOSERVER_FILE_NAME_STABLE}
+			local GEOSERVER_ARTIFACT_URL=${BASE_BUILD_URL_STABLE}/${VERSION}/${GEOSERVER_FILE_NAME_STABLE}/download
 		fi
 
     if [ -f /tmp/geoserver.war.zip ]; then
