@@ -171,6 +171,108 @@ case "$GS_CORE_JAR" in
   ;;
 esac
 
+# Configure PSI Probe if enabled
+setup_psi_probe() {
+  if [ "${PSI_PROBE_ENABLED}" = "true" ]; then
+    printf "INFO: Setting up PSI Probe...\n"
+    
+    if [ -f "/tmp/probe/probe.war" ]; then
+      cp "/tmp/probe/probe.war" "$CATALINA_HOME/webapps/"
+      printf "INFO: PSI Probe WAR deployed\n"
+    else
+      printf "WARNING: PSI Probe WAR not found, skipping deployment\n"
+      return
+    fi
+    
+    if [ -n "${PSI_PROBE_PASSWORD}" ]; then
+      printf "INFO: Configuring PSI Probe security...\n"
+
+      TOMCAT_USERS_XML="$CATALINA_HOME/conf/tomcat-users.xml"
+      
+      if [ ! -f "${TOMCAT_USERS_XML}.backup" ]; then
+        cp "$TOMCAT_USERS_XML" "${TOMCAT_USERS_XML}.backup"
+      fi
+
+      if ! grep -q 'rolename="probeuser"' "$TOMCAT_USERS_XML"; then
+        printf "INFO: Patching tomcat-users.xml for PSI Probe\n"
+        sed -i "\:</tomcat-users>:i\\
+            <role rolename=\"probeuser\" />\n\
+            <role rolename=\"poweruser\" />\n\
+            <role rolename=\"poweruserplus\" />\n\
+            <role rolename=\"manager-gui\" />\n\
+          \n\
+            <user username=\"probe\" password=\"${PSI_PROBE_PASSWORD}\" roles=\"manager-gui\" />\n\
+          " "$TOMCAT_USERS_XML"
+      else
+        printf "INFO: tomcat-users.xml already has probeuser role, skipping\n"
+      fi
+
+      printf "INFO: PSI Probe user configured with provided password\n"
+    else
+      printf "INFO: PSI_PROBE_PASSWORD not set, configuring PSI Probe for anonymous access\n"
+    fi
+    
+    # Force proper WAR extraction (fix Tomcat auto-deployment issues)
+    if [ -f "$CATALINA_HOME/webapps/probe.war" ]; then
+      printf "INFO: Ensuring PSI Probe WAR is properly extracted...\n"
+      cd "$CATALINA_HOME/webapps"
+      rm -rf probe
+      unzip -q probe.war -d probe
+      printf "INFO: PSI Probe WAR manually extracted\n"
+    fi
+    
+    # Configure access restrictions
+    printf "INFO: Configuring PSI Probe for Docker-compatible local access...\n"
+    CONTEXT_XML="$CATALINA_HOME/webapps/probe/META-INF/context.xml"
+    mkdir -p "$CATALINA_HOME/webapps/probe/META-INF"
+    cat > "$CONTEXT_XML" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<Context privileged="true">
+</Context>
+EOF
+
+    PROBE_WEB_XML="$CATALINA_HOME/webapps/probe/WEB-INF/web.xml"
+
+    # When no password is set, replace ProbeSecurityConfig with no-auth version
+    # and strip web.xml security constraints to allow anonymous access
+    if [ -z "${PSI_PROBE_PASSWORD}" ] && [ -f "$PROBE_WEB_XML" ]; then
+      if [ -f "/tmp/probe-src/ProbeSecurityConfig.java" ]; then
+        printf "INFO: Compiling no-auth ProbeSecurityConfig...\n"
+        mkdir -p "$CATALINA_HOME/webapps/probe/WEB-INF/classes"
+        javac -cp "$CATALINA_HOME/webapps/probe/WEB-INF/lib/*:$CATALINA_HOME/lib/*" \
+          -d "$CATALINA_HOME/webapps/probe/WEB-INF/classes" \
+          /tmp/probe-src/ProbeSecurityConfig.java
+        printf "INFO: Replaced ProbeSecurityConfig with no-auth version\n"
+      else
+        printf "WARNING: No-auth ProbeSecurityConfig.java not found at /tmp/probe-src/, probe may require auth\n"
+      fi
+
+      # Strip security-constraint and login-config from web.xml
+      TEMP_PROBE_WEB_XML=$(mktemp)
+      awk '
+        /<security-constraint>/ { in_security_constraint=1; next }
+        /<\/security-constraint>/ { in_security_constraint=0; next }
+        /<login-config>/ { in_login_config=1; next }
+        /<\/login-config>/ { in_login_config=0; next }
+        !in_security_constraint && !in_login_config { print }
+      ' "$PROBE_WEB_XML" > "$TEMP_PROBE_WEB_XML" && mv "$TEMP_PROBE_WEB_XML" "$PROBE_WEB_XML"
+      printf "INFO: PSI Probe security constraints removed for anonymous access\n"
+    fi
+
+    # Disable HTTPS redirect - allow plain HTTP access
+    if [ -f "$PROBE_WEB_XML" ] && grep -q "CONFIDENTIAL" "$PROBE_WEB_XML" 2>/dev/null; then
+      sed -i 's|<transport-guarantee>CONFIDENTIAL</transport-guarantee>|<transport-guarantee>NONE</transport-guarantee>|g' "$PROBE_WEB_XML"
+      printf "INFO: PSI Probe HTTPS redirect disabled\n"
+    fi
+
+    printf "INFO: PSI Probe setup completed\n"
+  else
+    printf "INFO: PSI Probe disabled, skipping setup\n"
+  fi
+}
+
+setup_psi_probe
+
 catalina.sh run &
 /usr/local/bin/geoserver-rest-config.sh
 fg %1

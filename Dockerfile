@@ -1,4 +1,4 @@
-FROM tomcat:9-jdk11-temurin-jammy as mother
+FROM tomcat:10-jdk17-temurin-jammy as mother
 LABEL maintainer="Alessandro Parma <alessandro.parma@geosolutionsgroup.com>"
 SHELL ["/bin/bash", "-c"]
 
@@ -8,15 +8,20 @@ ARG CORS_ALLOWED_METHODS=GET,POST,PUT,DELETE,HEAD,OPTIONS
 ARG CORS_ALLOWED_HEADERS=Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers
 ARG CORS_ALLOW_CREDENTIALS=false
 
+# PSI Probe configuration
+ARG PSI_PROBE_ENABLED=false
+ARG PSI_PROBE_VERSION=5.3.0
+
 ENV CORS_ENABLED=$CORS_ENABLED
 ENV CORS_ALLOWED_ORIGINS=$CORS_ALLOWED_ORIGINS
 ENV CORS_ALLOWED_METHODS=$CORS_ALLOWED_METHODS
 ENV CORS_ALLOWED_HEADERS=$CORS_ALLOWED_HEADERS
 ENV CORS_ALLOW_CREDENTIALS=$CORS_ALLOW_CREDENTIALS
+ENV PSI_PROBE_ENABLED=$PSI_PROBE_ENABLED
 
 ARG APP_LOCATION="geoserver"
 
-RUN apt-get update && apt-get install -y unzip
+RUN apt-get update && apt-get install -y unzip curl
 
 # accepts local files and URLs. Tar(s) are automatically extracted
 WORKDIR /output/datadir
@@ -60,7 +65,35 @@ RUN \
       mv /output/webapp/geoserver /output/webapp/${APP_LOCATION}; \
     fi
 
-FROM tomcat:9-jdk11-temurin-jammy
+# Download and prepare PSI Probe if enabled
+WORKDIR /output/probe
+RUN \
+    echo "PSI_PROBE_ENABLED=${PSI_PROBE_ENABLED}"; \
+    if [ "${PSI_PROBE_ENABLED}" = "true" ]; then \
+        echo "Downloading PSI Probe ${PSI_PROBE_VERSION}..."; \
+        # Try GitHub releases first
+        GITHUB_URL="https://github.com/psi-probe/psi-probe/releases/download/psi-probe-${PSI_PROBE_VERSION}/probe.war"; \
+        echo "Trying GitHub URL: ${GITHUB_URL}"; \
+        if curl -fSL "${GITHUB_URL}" -o probe.war; then \
+            echo "PSI Probe downloaded from GitHub ($(ls -lh probe.war))"; \
+        else \
+            echo "GitHub download failed, trying Maven Central..."; \
+            # Fallback to Maven Central
+            MAVEN_URL="https://repo1.maven.org/maven2/com/github/psi-probe/psi-probe-web/${PSI_PROBE_VERSION}/psi-probe-web-${PSI_PROBE_VERSION}.war"; \
+            echo "Trying Maven URL: ${MAVEN_URL}"; \
+            if curl -fSL "${MAVEN_URL}" -o probe.war; then \
+                echo "PSI Probe downloaded from Maven Central ($(ls -lh probe.war))"; \
+            else \
+                echo "ERROR: PSI Probe download failed from both sources!"; \
+                exit 1; \
+            fi; \
+        fi; \
+    else \
+        echo "PSI Probe disabled, skipping download"; \
+        touch .placeholder; \
+    fi
+
+FROM tomcat:10-jdk17-temurin-jammy
 
 ARG UID=1000
 ARG GID=1000
@@ -68,6 +101,10 @@ ARG UNAME=tomcat
 ARG CUSTOM_FONTS="./.placeholder"
 ENV ADMIN_PASSWORD=""
 ENV APP_LOCATION="geoserver"
+
+# PSI Probe configuration
+ENV PSI_PROBE_ENABLED="false"
+ENV PSI_PROBE_PASSWORD=""
 
 ENV CATALINA_BASE "$CATALINA_HOME"
 # set externalizations
@@ -135,10 +172,14 @@ COPY --from=mother "/output/datadir" "${GEOSERVER_DATA_DIR}"
 COPY --from=mother "/output/webapp/geoserver" "${CATALINA_BASE}/webapps/geoserver"
 COPY --from=mother "/output/plugins" "${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib"
 
+# copy PSI Probe if enabled
+COPY --from=mother "/output/probe" "/tmp/probe"
+
 COPY geoserver-plugin-download.sh /usr/local/bin/geoserver-plugin-download.sh
 COPY geoserver-rest-config.sh /usr/local/bin/geoserver-rest-config.sh
 COPY geoserver-rest-reload.sh /usr/local/bin/geoserver-rest-reload.sh
 COPY entrypoint.sh /entrypoint.sh
+COPY probe-src /tmp/probe-src
 COPY ${CUSTOM_FONTS} $GEOSERVER_DATA_DIR/styles/
 RUN groupadd -g $GID $UNAME
 RUN useradd -m -u $UID -g $GID --system $UNAME
