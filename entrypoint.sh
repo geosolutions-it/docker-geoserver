@@ -3,6 +3,42 @@ geoserver-plugin-download.sh ${CATALINA_BASE}/webapps/geoserver/WEB-INF/lib $PLU
 set -m
 export CATALINA_OPTS="$CATALINA_OPTS $EXTRA_GEOSERVER_OPTS"
 
+# Remove probe based on env var
+if [ $ACTIVATE_PROBE = 'NO' ];then
+  if [ -d "${CATALINA_HOME}"/webapps/"${PROBE_CONTEXT_ROOT}" ];then
+    rm -rf "${CATALINA_HOME}"/webapps/"${PROBE_CONTEXT_ROOT}"
+  fi
+else
+  if [ -z "${TOMCAT_USER}" ]; then
+    TOMCAT_USER="tomcat"
+  fi
+
+  if [ -z "${TOMCAT_PASSWORD}" ]; then
+    PASSWORD=$(tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 15 | head -n 1)
+    # We need a way to report this password for a user in logs or we assume he needs to view tomcat_users.xml
+    TOMCAT_PASSWORD=${PASSWORD}
+  fi
+
+  # Use Sed to set the tomcat users.xml
+
+  sed -i '$d' "${CATALINA_HOME}"/conf/tomcat-users.xml
+  cat >> "${CATALINA_HOME}"/conf/tomcat-users.xml <<EOF
+    <role rolename="admin-gui"/>
+    <role rolename="admin-script"/>
+    <role rolename="manager-gui"/>
+    <role rolename="manager-status"/>
+    <role rolename="manager-script"/>
+    <role rolename="manager-jmx"/>
+    <role rolename="probeuser" />
+    <role rolename="poweruser" />
+    <role rolename="poweruserplus" />
+    <user username="${TOMCAT_USER}" password="${TOMCAT_PASSWORD}" roles="admin-gui,admin-script,manager-gui,manager-status,manager-script,manager-jmx"/>
+  </tomcat-users>
+EOF
+fi
+
+
+
 # Enable CORS (inspired by https://github.com/oscarfonts/docker-geoserver)
 # if enabled, this will add the filter definitions
 # to the end of the web.xml
