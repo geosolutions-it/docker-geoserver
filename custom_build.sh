@@ -22,6 +22,7 @@ readonly MARLIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/marlin/
 readonly USERID=1000
 readonly GROUPID=1000
 readonly UNAME=tomcat
+GEOSERVER_PLUGIN_VERSION=""
 
 function help() {
 	if [ "$#" -ne 5 ] ; then
@@ -39,18 +40,25 @@ function help() {
 
 function clean_up_directory() {
   # we shall never clean datadir
-	echo "rm -rf ./resources/geoserver-plugins/* ./resources/geoserver/*"
+	rm -rf "${PLUGIN_ARTIFACT_DIRECTORY}"/* "${GEOSERVER_ARTIFACT_DIRECTORY}"/*
 }
 function create_plugins_folder() {
   mkdir -p ./resources/geoserver-plugins
 }
 
 function download_from_url_to_a_filepath {
-	URL=${1}
-	FILE_PATH=${2}
+	local URL=${1}
+	local FILE_PATH=${2}
+	local FILE_DOWNLOADED
+	local TEMP_FILE_PATH="${FILE_PATH}.tmp"
 	FILE_DOWNLOADED=$(basename "${FILE_PATH}" )
 	if [ ! -f "${FILE_PATH}" ]; then
-		curl -L "${URL}" --output "${FILE_PATH}"
+		rm -f "${TEMP_FILE_PATH}"
+		curl --fail --location --retry 3 --retry-delay 2 "${URL}" --output "${TEMP_FILE_PATH}"
+		if [[ "${FILE_PATH}" == *.zip ]]; then
+			unzip -tq "${TEMP_FILE_PATH}" >/dev/null
+		fi
+		mv "${TEMP_FILE_PATH}" "${FILE_PATH}"
 		echo "* ${FILE_DOWNLOADED} artefact downloaded *"
 	else
 		echo "* ${FILE_DOWNLOADED} artefact already downloaded *"
@@ -62,12 +70,8 @@ function download_plugin()  {
 	PLUGIN_NAME=${2}
 
 	case ${GEOSERVER_VERSION} in
-		"${GEOSERVER_MASTER_VERSION%.*}")
-		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_VERSION%.*}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
-		PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
-		;;
-		"main")
-		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_MASTER_VERSION%.*}-SNAPSHOT-${PLUGIN_NAME}-plugin.zip
+		"main"|*.x)
+		PLUGIN_FULL_NAME=geoserver-${GEOSERVER_PLUGIN_VERSION}-${PLUGIN_NAME}-plugin.zip
 		PLUGIN_ARTIFACT_URL=${BASE_BUILD_URL}/${GEOSERVER_VERSION}/${TYPE}-latest/${PLUGIN_FULL_NAME}
 		;;
 
@@ -134,6 +138,12 @@ function download_geoserver() {
     fi      
     download_from_url_to_a_filepath  "${GEOSERVER_ARTIFACT_URL}" "${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.${GEOSERVER_VERSION}.war.zip"
     unzip "${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.${GEOSERVER_VERSION}.war.zip" geoserver.war -d "${GEOSERVER_ARTIFACT_DIRECTORY}"
+    GEOSERVER_PLUGIN_VERSION=$(unzip -p "${GEOSERVER_ARTIFACT_DIRECTORY}/geoserver.war" META-INF/maven/org.geoserver.web/gs-web-app/pom.properties | awk -F= '$1 == "version" { print $2 }')
+    if [ -z "${GEOSERVER_PLUGIN_VERSION}" ]; then
+      echo "Could not determine the GeoServer version from the downloaded WAR."
+      exit 1
+    fi
+    echo "* GeoServer plugin version: ${GEOSERVER_PLUGIN_VERSION} *"
 }
 
 
@@ -222,12 +232,20 @@ function main {
     clean_up_directory 
     download_geoserver "${GEOSERVER_VERSION}"
     create_plugins_folder
-    # download_plugin ext monitor
-    # download_plugin ext control-flow
-    # download_plugin ext geofence-plugin
-    # download_plugin ext geofence-server-plugin
-    # download_plugin community sec-oauth2-geonode
-    #download_marlin
+    download_plugin community ogcapi-tiles
+    download_plugin community ogcapi-coverages
+    download_plugin community ogcapi-maps
+    download_plugin community ogcapi-processes
+    download_plugin community ogcapi-styles
+    download_plugin community wps-longitudinal-profile
+    download_plugin community gwc-mbtiles
+    download_plugin ext feature-pregeneralized
+    download_plugin ext wps
+    download_plugin ext css
+    download_plugin ext monitor
+    download_plugin ext control-flow
+    download_plugin ext mapml
+    download_plugin ext ogcapi-features
 
 	if  [ "${GEOSERVER_DATA_DIR_RELEASE}" = "nodatadir" ]; then
     build_without_data_dir "${TAG}" "${PULL}"

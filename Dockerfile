@@ -1,4 +1,4 @@
-FROM tomcat:9-jdk11-temurin-jammy as mother
+FROM tomcat:11-jdk17-temurin-jammy AS mother
 LABEL maintainer="Alessandro Parma <alessandro.parma@geosolutionsgroup.com>"
 SHELL ["/bin/bash", "-c"]
 
@@ -48,11 +48,17 @@ ARG PLUG_IN_PATHS=".placeholder"
 ADD .placeholder ${PLUG_IN_PATHS} /output/plugins/
 COPY geoserver-plugin-download.sh /usr/local/bin/geoserver-plugin-download.sh
 RUN /usr/local/bin/geoserver-plugin-download.sh /output/plugins/ ${PLUG_IN_URLS}
-RUN \
-    # We want ZIPs  to be extracted in alphabetical order, so we don't use `unzip -o "./*.zip"`. \
-    # Useful when applying patches.
-    find . -type f -name '*.zip' | sort | xargs -I {} unzip -o {}; \
-    rm -f ./*.zip
+RUN set -eu; \
+    # Apply ZIPs in a deterministic order, and fail instead of silently omitting
+    # extensions when a download is an error page rather than a ZIP archive.
+    mapfile -t archives < <(find . -type f -name '*.zip' | sort); \
+    if ((${#archives[@]})); then \
+      for archive in "${archives[@]}"; do \
+        unzip -tq "$archive" >/dev/null; \
+        unzip -o "$archive"; \
+      done; \
+      rm -f -- "${archives[@]}"; \
+    fi
 
 WORKDIR /output/webapp
 RUN \
@@ -60,7 +66,7 @@ RUN \
       mv /output/webapp/geoserver /output/webapp/${APP_LOCATION}; \
     fi
 
-FROM tomcat:9-jdk11-temurin-jammy
+FROM tomcat:11-jdk17-temurin-jammy
 
 ARG UID=1000
 ARG GID=1000
