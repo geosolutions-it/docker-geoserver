@@ -1,7 +1,7 @@
-FROM tomcat:9-jdk17-temurin-jammy as mother
+FROM geosolutionsit/tomcat:9-jdk21-temurin-noble as mother
 LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
 
-RUN apt-get update && apt-get install -y unzip wget vim
+RUN apt-get update && apt-get install -y libnss3 unzip wget vim
 
 # accepts local files and URLs. Tar(s) are automatically extracted
 WORKDIR /output/datadir
@@ -43,7 +43,7 @@ RUN \
     fi
 
 
-FROM tomcat:9-jdk17-temurin-jammy
+FROM geosolutionsit/tomcat:9-jdk21-temurin-noble
 
 ARG UID=1000
 ARG GID=1000
@@ -91,6 +91,7 @@ ADD run_tests.sh /docker/tests/run_tests.sh
 # create externalized dirs
 RUN apt-get update \
     && apt-get install --yes \
+    libnss3 \
     fontconfig \
     fonts-dejavu \
     fonts-hanazono \
