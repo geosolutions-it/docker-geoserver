@@ -1,4 +1,4 @@
-FROM tomcat:10-jdk17-temurin-jammy as mother
+FROM geosolutionsit/tomcat:11-jdk21-temurin-noble as mother
 LABEL maintainer="Alessandro Parma <alessandro.parma@geosolutionsgroup.com>"
 SHELL ["/bin/bash", "-c"]
 
@@ -16,7 +16,7 @@ ENV CORS_ALLOW_CREDENTIALS=$CORS_ALLOW_CREDENTIALS
 
 ARG APP_LOCATION="geoserver"
 
-RUN apt-get update && apt-get install -y unzip
+RUN apt-get update && apt-get install -y libnss3 unzip
 
 # accepts local files and URLs. Tar(s) are automatically extracted
 WORKDIR /output/datadir
@@ -60,11 +60,11 @@ RUN \
       mv /output/webapp/geoserver /output/webapp/${APP_LOCATION}; \
     fi
 
-FROM tomcat:10-jdk17-temurin-jammy
+FROM geosolutionsit/tomcat:11-jdk21-temurin-noble
 
-ARG UID=1000
-ARG GID=1000
-ARG UNAME=tomcat
+ARG UID=20000
+ARG GID=20000
+ARG UNAME=geoserver
 ARG CUSTOM_FONTS="./.placeholder"
 ENV ADMIN_PASSWORD=""
 ENV APP_LOCATION="geoserver"
@@ -115,7 +115,7 @@ COPY run_tests.sh /docker/tests/run_tests.sh
 # install needed packages and create externalized dirs
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-    && apt-get install --yes git vim gdal-bin postgresql-client fontconfig libfreetype6 jq unzip \
+    && apt-get install --yes libnss3 git vim gdal-bin postgresql-client fontconfig libfreetype6 jq unzip \
     && apt-get clean \
     && apt-get -y autoclean \
     && apt-get -y autoremove \
