@@ -1,4 +1,4 @@
-FROM tomcat:9-jdk21-temurin-jammy as mother
+FROM geosolutionsit/tomcat:11-jdk21-temurin-noble as mother
 LABEL maintainer="Alessandro Parma <alessandro.parma@geosolutionsgroup.com>"
 SHELL ["/bin/bash", "-c"]
 
@@ -16,7 +16,7 @@ ENV CORS_ALLOW_CREDENTIALS=$CORS_ALLOW_CREDENTIALS
 
 ARG APP_LOCATION="geoserver"
 
-RUN apt-get update && apt-get install -y unzip
+RUN apt-get update && apt-get install -y unzip wget dos2unix
 
 # accepts local files and URLs. Tar(s) are automatically extracted
 WORKDIR /output/datadir
@@ -46,13 +46,20 @@ WORKDIR /output/plugins
 ARG PLUG_IN_URLS=""
 ARG PLUG_IN_PATHS=".placeholder"
 ADD .placeholder ${PLUG_IN_PATHS} /output/plugins/
-COPY geoserver-plugin-download.sh /usr/local/bin/geoserver-plugin-download.sh
+# Normalize line endings and set correct permissions
+COPY *.sh /tmp/scripts/
+RUN find /tmp/scripts -type f -name "*.sh" -exec dos2unix {} \; \
+    && chmod +x /tmp/scripts/*.sh \
+    && cp /tmp/scripts/geoserver-plugin-download.sh /usr/local/bin/geoserver-plugin-download.sh \
+    && chmod 755 /usr/local/bin/geoserver-plugin-download.sh
+
+# Download plugins with improved error handling
 RUN /usr/local/bin/geoserver-plugin-download.sh /output/plugins/ ${PLUG_IN_URLS}
 RUN \
-    # We want ZIPs  to be extracted in alphabetical order, so we don't use `unzip -o "./*.zip"`. \
-    # Useful when applying patches.
-    find . -type f -name '*.zip' | sort | xargs -I {} unzip -o {}; \
-    rm -f ./*.zip
+    if ls *.zip >/dev/null 2>&1; then \
+       unzip -o "./*.zip"; \
+       rm ./*zip; \
+    fi
 
 WORKDIR /output/webapp
 RUN \
@@ -60,11 +67,11 @@ RUN \
       mv /output/webapp/geoserver /output/webapp/${APP_LOCATION}; \
     fi
 
-FROM tomcat:9-jdk21-temurin-jammy
+FROM geosolutionsit/tomcat:11-jdk21-temurin-noble
 
-ARG UID=1000
-ARG GID=1000
-ARG UNAME=tomcat
+ARG UID=20000
+ARG GID=20000
+ARG UNAME=geoserver
 ARG CUSTOM_FONTS="./.placeholder"
 ENV ADMIN_PASSWORD=""
 ENV APP_LOCATION="geoserver"
@@ -139,10 +146,38 @@ COPY geoserver-plugin-download.sh /usr/local/bin/geoserver-plugin-download.sh
 COPY geoserver-rest-config.sh /usr/local/bin/geoserver-rest-config.sh
 COPY geoserver-rest-reload.sh /usr/local/bin/geoserver-rest-reload.sh
 COPY entrypoint.sh /entrypoint.sh
+RUN chmod 755 \
+        /entrypoint.sh \
+        /usr/local/bin/geoserver-plugin-download.sh \
+        /usr/local/bin/geoserver-rest-config.sh \
+        /usr/local/bin/geoserver-rest-reload.sh
 COPY ${CUSTOM_FONTS} $GEOSERVER_DATA_DIR/styles/
-RUN groupadd -g $GID $UNAME
-RUN useradd -m -u $UID -g $GID --system $UNAME
-RUN chown -R $UID:$GID $GEOSERVER_LOG_DIR $CATALINA_BASE $GEOWEBCACHE_CACHE_DIR $GEOWEBCACHE_CONFIG_DIR $NETCDF_DATA_DIR $GRIB_CACHE_DIR $GEOSERVER_DATA_DIR
+RUN groupadd -f -g $GID $UNAME \
+    && useradd -m -u $UID -g $GID --system -s /bin/bash $UNAME \
+    && mkdir -p \
+        $GEOSERVER_LOG_DIR \
+        $CATALINA_BASE \
+        $GEOWEBCACHE_CACHE_DIR \
+        $GEOWEBCACHE_CONFIG_DIR \
+        $NETCDF_DATA_DIR \
+        $GRIB_CACHE_DIR \
+        $GEOSERVER_DATA_DIR \
+    && chown -R $UID:$GID \
+        $GEOSERVER_LOG_DIR \
+        $CATALINA_BASE \
+        $GEOWEBCACHE_CACHE_DIR \
+        $GEOWEBCACHE_CONFIG_DIR \
+        $NETCDF_DATA_DIR \
+        $GRIB_CACHE_DIR \
+        $GEOSERVER_DATA_DIR \
+    && chmod -R 755 \
+        $GEOSERVER_LOG_DIR \
+        $CATALINA_BASE \
+        $GEOWEBCACHE_CACHE_DIR \
+        $GEOWEBCACHE_CONFIG_DIR \
+        $NETCDF_DATA_DIR \
+        $GRIB_CACHE_DIR \
+        $GEOSERVER_DATA_DIR
 
 RUN if [ ! -f "${GEOSERVER_DATA_DIR}/logging.xml" ]; then cp -a ${CATALINA_BASE}/webapps/geoserver/data/* ${GEOSERVER_DATA_DIR};fi
 
