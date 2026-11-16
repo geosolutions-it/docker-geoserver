@@ -120,8 +120,8 @@ docker build -t geoserver:test-3.0.2 \
 --build-arg GEOSERVER_WEBAPP_SRC=https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/geoserver-3.0.2-war.zip/download  .
 
 docker run \
---env PLUGIN_DYNAMIC_URLS="http://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/extensions/geoserver-3.0.2-control-flow-plugin.zip \
-http://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/extensions/geoserver-3.0.2-libjpeg-turbo-plugin.zip" \
+--env PLUGIN_DYNAMIC_URLS="https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/extensions/geoserver-3.0.2-control-flow-plugin.zip \
+https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/extensions/geoserver-3.0.2-libjpeg-turbo-plugin.zip" \
 --rm --name gs -p 8080:8080 geoserver:test-3.0.2
 ```
 
@@ -455,7 +455,7 @@ docker build -t geoserver:test . --build-arg GEOSERVER_WEBAPP_SRC="./resources/g
 docker build -t geoserver:test . --build-arg GEOSERVER_WEBAPP_SRC="./resources/geoserver/geoserver.war" --build-arg GEOSERVER_DATA_DIR_SRC="./resources/geoserver-datadir/"
 
 # Example on how to download and build a geoserver version with stable plugins controlflow and libjpegturbo plugins burned in the image
-docker build -t geoserver:luca-test-3.0.2 --build-arg GEOSERVER_WEBAPP_SRC="https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/geoserver-3.0.2-war.zip/download" --build-arg PLUG_IN_URLS="http://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/extensions/geoserver-3.0.2-control-flow-plugin.zip http://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/extensions/geoserver-3.0.2-libjpeg-turbo-plugin.zip" .
+docker build -t geoserver:luca-test-3.0.2 --build-arg GEOSERVER_WEBAPP_SRC="https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/geoserver-3.0.2-war.zip/download" --build-arg PLUG_IN_URLS="https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/extensions/geoserver-3.0.2-control-flow-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/extensions/geoserver-3.0.2-libjpeg-turbo-plugin.zip" .
 
 ```
 
