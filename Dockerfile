@@ -1,4 +1,4 @@
-FROM tomcat:9-jdk17-temurin-jammy as mother
+FROM geosolutionsit/tomcat:9-jdk21-temurin-noble as mother
 LABEL maintainer="Alessandro Parma <alessandro.parma@geosolutionsgroup.com>"
 SHELL ["/bin/bash", "-c"]
 
@@ -6,7 +6,7 @@ SHELL ["/bin/bash", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 ARG CMAKE_BUILD_PARALLEL_LEVEL=8
 ARG APP_LOCATION="geoserver"
-RUN apt-get update && apt-get install -y unzip wget cmake nasm\
+RUN apt-get update && apt-get install -y libnss3 unzip wget cmake nasm\
     && wget https://sourceforge.net/projects/libjpeg-turbo/files/2.0.6/libjpeg-turbo-2.0.6.tar.gz \
     && tar -zxf ./libjpeg-turbo-2.0.6.tar.gz \
     && cd libjpeg-turbo-2.0.6 && cmake -G"Unix Makefiles" && make deb \
@@ -60,7 +60,7 @@ RUN \
       mv /output/webapp/geoserver /output/webapp/${APP_LOCATION}; \
     fi
 
-FROM tomcat:9-jdk17-temurin-jammy
+FROM geosolutionsit/tomcat:9-jdk21-temurin-noble
 
 ARG UID=1000
 ARG GID=1000
@@ -109,7 +109,7 @@ COPY run_tests.sh /docker/tests/run_tests.sh
 # install needed packages and create externalized dirs
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-    && apt-get install --yes git vim gdal-bin postgresql-client fontconfig libfreetype6 jq \
+    && apt-get install --yes libnss3 git vim gdal-bin postgresql-client fontconfig libfreetype6 jq \
     && apt-get clean \
     && apt-get -y autoclean \
     && apt-get -y autoremove \
