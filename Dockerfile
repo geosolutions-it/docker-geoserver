@@ -89,13 +89,6 @@ RUN \
                 exit 1; \
             fi; \
         fi; \
-
-        # HACK: copy the Oracle driver from the GeoServer JARs
-        mkdir -p WEB-INF/lib; \
-        zip -d probe.war 'WEB-INF/lib/ojdbc8-*.jar' || true; \
-        cp -f /output/plugins/ojdbc8-*.jar WEB-INF/lib/; \
-        zip probe.war WEB-INF/lib/ojdbc8-*.jar; \
-        rm -rf WEB-INF; \
     else \
         echo "PSI Probe disabled, skipping download"; \
         touch .placeholder; \
