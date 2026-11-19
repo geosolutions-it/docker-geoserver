@@ -1,4 +1,4 @@
-FROM geosolutionsit/tomcat:11-jdk21-temurin-noble as mother
+FROM tomcat:11-jdk21-temurin-noble as mother
 LABEL maintainer="Alessandro Parma <alessandro.parma@geosolutionsgroup.com>"
 SHELL ["/bin/bash", "-c"]
 
@@ -60,7 +60,7 @@ RUN \
       mv /output/webapp/geoserver /output/webapp/${APP_LOCATION}; \
     fi
 
-FROM geosolutionsit/tomcat:11-jdk21-temurin-noble
+FROM tomcat:11-jdk21-temurin-noble
 
 ARG UID=20000
 ARG GID=20000
