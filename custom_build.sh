@@ -9,7 +9,7 @@ readonly GEOSERVER_DATA_DIR_RELEASE=${4}
 readonly PULL=${5}
 readonly ALL_PARAMETERS=$*
 readonly BASE_BUILD_URL="https://build.geoserver.org/geoserver"
-readonly BASE_BUILD_URL_STABLE="https://netcologne.dl.sourceforge.net/project/geoserver/GeoServer"
+readonly BASE_BUILD_URL_STABLE="https://sourceforge.net/projects/geoserver/files/GeoServer"
 #readonly BASE_BUILD_URL_STABLE="https://build.geoserver.org/geoserver"
 readonly EXTRA_FONTS_URL="https://www.dropbox.com/s/hs5743lwf1rktws/fonts.tar.gz?dl=1"
 readonly MARLIN_VERSION=0.9.2
@@ -19,9 +19,9 @@ readonly DATADIR_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-datadir/
 readonly PLUGIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/geoserver-plugins
 readonly FONTS_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/fonts/
 readonly MARLIN_ARTIFACT_DIRECTORY=${ARTIFACT_DIRECTORY}/marlin/
-readonly USERID=1000
-readonly GROUPID=1000
-readonly UNAME=tomcat
+readonly USERID=20000
+readonly GROUPID=20000
+readonly UNAME=geoserver
 
 function help() {
 	if [ "$#" -ne 5 ] ; then
@@ -222,8 +222,8 @@ function main {
     clean_up_directory 
     download_geoserver "${GEOSERVER_VERSION}"
     create_plugins_folder
-    # download_plugin ext monitor
-    # download_plugin ext control-flow
+    download_plugin ext monitor
+    download_plugin ext control-flow
     # download_plugin ext geofence-plugin
     # download_plugin ext geofence-server-plugin
     # download_plugin community sec-oauth2-geonode

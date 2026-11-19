@@ -16,9 +16,9 @@
 ## Run geoserver within docker.
 
 Based on the official tomcat docker image, specifically:
-- Tomcat 9
-- JDK 11 (eclipse temurin)
-- Ubuntu Jammy (22.04 LTS)
+- Tomcat 11
+- JDK 21 (eclipse temurin)
+- Eclipse Temurin (24.04 LTS)
 
 ![Current build diagram](/docker_hub_deployment.png)
 
@@ -36,7 +36,7 @@ Based on the official tomcat docker image, specifically:
 
 ## Important note
 
-Most of the paths if mounted from the host to locations on the container such as `$GEOSERVER_LOG_DIR` `$CATALINA_BASE` `$GEOWEBCACHE_CACHE_DIR` `$GEOWEBCACHE_CONFIG_DIR` `$NETCDF_DATA_DIR` `$GRIB_CACHE_DIR` `$GEOSERVER_DATA_DIR` should be owned by the UID of user that geoserver is running on, which at the moment is UID 1000. The paths should be recursively chown-ed with this UID. More info [here](#adjusting-permissions-for-the-bind-mounts)
+Most of the paths if mounted from the host to locations on the container such as `$GEOSERVER_LOG_DIR` `$CATALINA_BASE` `$GEOWEBCACHE_CACHE_DIR` `$GEOWEBCACHE_CONFIG_DIR` `$NETCDF_DATA_DIR` `$GRIB_CACHE_DIR` `$GEOSERVER_DATA_DIR` should be owned by the UID of user that geoserver is running on, which at the moment is UID 20000. The paths should be recursively chown-ed with this UID. More info [here](#adjusting-permissions-for-the-bind-mounts)
 
 ## How to run it
 
@@ -115,14 +115,14 @@ CORS headers can be configured with env variables (they are also build arguments
 Example of how to build a docker image with just geoserver war and then add plugins at runtime.
 
 ```bash
-docker build -t geoserver:test-2.19.1 \
+docker build -t geoserver:test-3.0.2 \
 --build-arg GIT_HASH=`git show -s --format=%H` \
---build-arg GEOSERVER_WEBAPP_SRC=https://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/geoserver-2.19.1-war.zip/download  .
+--build-arg GEOSERVER_WEBAPP_SRC=https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/geoserver-3.0.2-war.zip/download  .
 
 docker run \
---env PLUGIN_DYNAMIC_URLS="http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-control-flow-plugin.zip \
-http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-libjpeg-turbo-plugin.zip" \
---rm --name gs -p 8080:8080 geoserver:test-2.19.1
+--env PLUGIN_DYNAMIC_URLS="https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/extensions/geoserver-3.0.2-control-flow-plugin.zip \
+https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/extensions/geoserver-3.0.2-libjpeg-turbo-plugin.zip" \
+--rm --name gs -p 8080:8080 geoserver:test-3.0.2
 ```
 
 ### Using GeoServer with docker compose
@@ -285,7 +285,7 @@ For more details, check the ADD documentation: [Docker - ADD](https://docs.docke
 ```yml
 ...
 geoserver:
-  image: geosolutionsit/geoserver:2.23.0 ## Initially, include an image to avoid Docker complaints.
+  image: geosolutionsit/geoserver:3.0.2 ## Initially, include an image to avoid Docker complaints.
   volumes:
     - /path/custom-war:/usr/local/tomcat/webapps/geoserver ## Define a volume pointing to your custom .war, ensuring it's unzipped.
   environment:
@@ -304,13 +304,13 @@ geoserver:
 
 ### Adjusting Permissions for the bind mounts
 
--Identify User ID: Determine the user ID running Geoserver inside the container. Use docker exec to access the container and run the id command.
+- Identify User ID: Determine the user ID running Geoserver inside the container. Use docker exec to access the container and run the id command.
 
--Adjust Permissions: On the host system, use chown to set the owner of the directory containing Geoserver files to match the user ID. Then, use chmod to set appropriate permissions.
+- Adjust Permissions: On the host system, use chown to set the owner of the directory containing Geoserver files to match the user ID. Then, use chmod to set appropriate permissions.
 
--Assuming user ID is 1000 and directory is /path/custom-war
+- Assuming user ID is 20000 and directory is /path/custom-war
 ```
-sudo chown -R 1000:1000 /path/custom-war
+sudo chown -R 20000:20000 /path/custom-war
 sudo chmod -R 755 /path/custom-war
 ```
 
@@ -455,7 +455,7 @@ docker build -t geoserver:test . --build-arg GEOSERVER_WEBAPP_SRC="./resources/g
 docker build -t geoserver:test . --build-arg GEOSERVER_WEBAPP_SRC="./resources/geoserver/geoserver.war" --build-arg GEOSERVER_DATA_DIR_SRC="./resources/geoserver-datadir/"
 
 # Example on how to download and build a geoserver version with stable plugins controlflow and libjpegturbo plugins burned in the image
-docker build -t geoserver:luca-test-2.19.1 --build-arg GEOSERVER_WEBAPP_SRC="https://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/geoserver-2.19.1-war.zip/download" --build-arg PLUG_IN_URLS="http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-control-flow-plugin.zip http://sourceforge.net/projects/geoserver/files/GeoServer/2.19.1/extensions/geoserver-2.19.1-libjpeg-turbo-plugin.zip" .
+docker build -t geoserver:luca-test-3.0.2 --build-arg GEOSERVER_WEBAPP_SRC="https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/geoserver-3.0.2-war.zip/download" --build-arg PLUG_IN_URLS="https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/extensions/geoserver-3.0.2-control-flow-plugin.zip https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/extensions/geoserver-3.0.2-libjpeg-turbo-plugin.zip" .
 
 ```
 
@@ -518,7 +518,7 @@ This script is meant to be used by automated build, variety of tests with highly
 ### Example
 
 ```bash
-./custom_build.sh my-docker-tag 2.18.x 2.18.x nodatadir no_pull
+./custom_build.sh my-docker-tag 3.0.2 3.0.2 nodatadir no_pull
 ```
 
 ### GIT HASH INFORMATION
