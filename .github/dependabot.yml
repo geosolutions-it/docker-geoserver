@@ -1,0 +1,20 @@
+# Dependabot version updates for the Docker base image.
+# The dependency graph does not parse Dockerfiles, so without this file
+# Dependabot never sees the base image (tomcat:9-jdk21-temurin-jammy).
+# Build branches gs-main and gs-stable are covered via target-branch.
+version: 2
+updates:
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: "/"
+    target-branch: gs-stable
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: "/"
+    target-branch: gs-main
+    schedule:
+      interval: weekly
