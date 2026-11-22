@@ -1,5 +1,7 @@
 FROM tomcat:11-jdk21-temurin-noble as mother
 LABEL maintainer="Alessandro Parma <alessandro.parma@geosolutionsgroup.com>"
+LABEL org.opencontainers.image.version="${GEOSERVER_VERSION}"
+
 SHELL ["/bin/bash", "-c"]
 
 ARG CORS_ENABLED=false
