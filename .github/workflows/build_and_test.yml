@@ -1,0 +1,25 @@
+name: Run docker compose to test
+
+on:
+  push:
+    branches:
+      - '[0-9]*\.[0-9]*\.[0-9]*' # Automatically run for commits on release branches (semver)
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+            - name: Build and run the compose file
+              run: |
+                # Get the list of defined services in composefile
+                services_count=$(docker compose config --services | wc -l)
+                # Start compose file
+                docker compose up -d --build
+                # Check if 
+                if [ $(docker compose ps | sed 1d | wc -l) -ne $services_count ]; then
+                    echo "All of the services did not start"
+                    exit 1
+                fi
+                docker compose down
