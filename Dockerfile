@@ -1,4 +1,4 @@
-FROM tomcat:9-jdk21-temurin-noble as mother
+FROM tomcat:11-jdk21-temurin-noble as mother
 LABEL maintainer="Alessandro Parma<alessandro.parma@geo-solutions.it>"
 
 RUN apt-get update && apt-get install -y libnss3 unzip wget vim
@@ -43,7 +43,7 @@ RUN \
     fi
 
 
-FROM tomcat:9-jdk21-temurin-noble
+FROM tomcat:11-jdk21-temurin-noble
 
 ARG UID=1000
 ARG GID=1000
